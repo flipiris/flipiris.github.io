@@ -1,19 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>flipiris的博客</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Noto+Serif+SC&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
-    <style>
-        body {
-    transition: opacity ease-in 0.2s;
-    margin: auto;
-    text-align: center;
-    font-family: 'Noto serif sc';
-    background-color: #ededed;
-}
-        </style>
 <body>
-    <h1>少话</h1>
-    <p>严肃学习前端语言中……</p>
+
+    <div class="site-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>我的空间</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="#">🏠 首页</a></li>
+                    <li><a href="#">📚 文章归档</a></li>
+                    <li><a href="#">🏷️ 标签分类</a></li>
+                    <li><a href="#">👤 关于我</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <div class="main-content-wrapper">
+            <header>
+                <button id="sidebar-toggle">☰</button>
+                <h1>欢迎来到我的博客</h1>
+                <p>在这里，我将分享我的思考与创作。</p>
+            </header>
+
+            <main class="paper-content">
+                <article>
+                    <h2>第一篇博客文章</h2>
+                    <p class="meta">发布于：2025年8月15日</p>
+                    <p>这是我第一篇博客文章的内容。在数字化的浪潮中，我们时常怀念纸质阅读带来的那份静谧与专注。本博客的设计初衷，便是希望在屏幕上重现那种经典的阅读体验。我们采用了衬线字体，调整了行间距与段落缩进，希望能为您带来舒适的沉浸式阅读。</p>
+                    <p>通过精心设计的版式，文字仿佛跃然“纸”上，带着墨香，静候您的品读。希望您在这里的每一次点击，都能成为一次愉悦的探索之旅。</p>
+                    <a href="#">阅读更多 &raquo;</a>
+                </article>
+
+                <article>
+                    <h2>第二篇博客文章</h2>
+                    <p class="meta">发布于：2025年8月16日</p>
+                    <p>这是第二篇博客的摘要内容。我们将探讨如何利用现代Web技术，构建一个既美观又实用的个人网站。从HTML的语义化标签，到CSS的灵活布局，再到JavaScript的动态交互，每一步都蕴含着设计的巧思。</p>
+                    <a href="#">阅读更多 &raquo;</a>
+                </article>
+            </main>
+
+            <footer>
+                <p>&copy; 2025 我的个人博客</p>
+            </footer>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
