@@ -1,17 +1,13 @@
-/* 全局样式与字体设定 */
-body {
-    font-family: 'Lora', 'Noto Serif SC', serif; /* 优先使用Lora英文字体，中文使用Noto Serif SC */
-    line-height: 1.8;
-    color: #333;
-    background-color: #fdfdfa; /* 柔和的米白色背景 */
-    margin: 0;
-    font-size: 18px;
-    display: flex;
-}
+/*全局属性*/
 
-h1, h2, h3, h4, h5, h6 {
-    font-family: 'Lora', 'Noto Serif SC', serif;
-    font-weight: bold;
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700;900');
+@import url("https://fastly.jsdelivr.net/gh/Crimone/typefaces@main/fandol-kaiti/FandolKai-Regular.css");
+
+:root {
+    --interface-font: 'Times New Roman', 'Noto Serif SC', serif; 
+    --paper-title-font: 'FandolKai-Regular', serif;
+
+    --paper-color: #F8F6F0;
 }
 
 a {
@@ -22,27 +18,117 @@ a {
 
 a:hover {
     color: #0056b3;
-    text-decoration: underline;
+    text-decoration: none;
 }
 
-/* 整体布局容器 */
+/*主体样式*/
+
+body {
+    font-family: var(--interface-font);
+    line-height: 1.5;
+    color: #333;
+    background-color: #fdfdfa;
+    margin: 0;
+    font-size: 0.9875em;
+    display: flex;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Times New Roman', 'Noto Serif SC', serif;
+    font-weight: bold;
+}
+
 .site-container {
     display: flex;
     width: 100%;
-    transition: margin-left 0.3s; /* 为侧边栏的滑入滑出添加动画效果 */
+    transition: margin-left 0.3s; 
 }
 
-/* 侧边栏样式 */
+.main-content-wrapper {
+    flex-grow: 1;
+    padding: 30px 40px;
+    margin-left: 250px;
+    transition: margin-left 0.3s ease-in-out;
+}
+
+header {
+    border-bottom: 2px solid #eee;
+    padding-bottom: 20px;
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+header h1 {
+    font-size: 2.5em;
+    color: #542429;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    letter-spacing: 1px;
+    margin-bottom: 0.2em;
+    text-align: center;
+    font-weight: 900 !important;
+}
+
+.paper-content {
+    background: var(--paper-color) url('https://scp-wiki.wikidot.com/local--files/theme:magazine/IMG_noise.png') repeat;
+    background-size: 100px;
+
+    padding: 40px 50px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    border-radius: 15px;
+    max-width: 700px;
+    margin: auto;
+}
+
+article {
+    font-family: var(--paper-font);
+    margin-bottom: 50px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 30px;
+}
+
+article:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+article h2 {
+    font-size: 1.5em;
+    font-family: var(--paper-title-font);
+    margin-top: 0;
+}
+
+.meta {
+    color: #888;
+    font-size: 0.85em;
+    margin-bottom: 20px;
+}
+
+article p {
+    text-indent: 2em;
+}
+
+footer {
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 20px;
+    color: #888;
+    border-top: 1px solid #eee;
+}
+
+/*侧边栏样式*/
+
 .sidebar {
-    width: 250px;
+    width: 200px;
     background-color: #f8f9fa;
     border-right: 1px solid #dee2e6;
     padding: 20px;
-    position: fixed; /* 固定定位，使其不随页面滚动 */
+    border-radius: 15px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    position: fixed;
     height: 100%;
-    overflow-y: auto; /* 内容过多时可滚动 */
+    overflow-y: auto;
     transition: transform 0.3s ease-in-out;
-    transform: translateX(0); /* 默认显示 */
+    transform: translateX(0);
 }
 
 .sidebar-header h2 {
@@ -67,72 +153,9 @@ a:hover {
     text-decoration: none;
 }
 
-/* 主内容区域 */
-.main-content-wrapper {
-    flex-grow: 1;
-    padding: 30px 40px;
-    margin-left: 250px; /* 留出侧边栏的空间 */
-    transition: margin-left 0.3s ease-in-out;
-}
-
-header {
-    border-bottom: 2px solid #eee;
-    padding-bottom: 20px;
-    margin-bottom: 40px;
-    text-align: center;
-}
-
-header h1 {
-    font-size: 2.8em;
-    margin-bottom: 0.2em;
-}
-
-/* 模拟纸张效果 */
-.paper-content {
-    background: #fff;
-    padding: 40px 50px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.05); /* 添加细微阴影，营造纸张立体感 */
-    border-radius: 3px;
-}
-
-article {
-    margin-bottom: 50px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 30px;
-}
-
-article:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-}
-
-article h2 {
-    font-size: 2em;
-    margin-top: 0;
-}
-
-.meta {
-    color: #888;
-    font-size: 0.9em;
-    margin-bottom: 20px;
-}
-
-article p {
-    text-indent: 2em; /* 段落首行缩进 */
-}
-
-/* 页脚 */
-footer {
-    text-align: center;
-    margin-top: 40px;
-    padding-top: 20px;
-    color: #888;
-    border-top: 1px solid #eee;
-}
-
-/* 侧边栏切换按钮 */
 #sidebar-toggle {
-    display: none; /* 默认在桌面端隐藏 */
+    display: none;
+    z-index: 5;
     font-size: 24px;
     background: none;
     border: none;
@@ -142,32 +165,51 @@ footer {
     left: 20px;
 }
 
-/* 响应式设计：适应小屏幕设备 */
-@media (max-width: 768px) {
+/*移动端适配*/
+
+@media (max-width: 834px) {
+
     .sidebar {
-        transform: translateX(-100%); /* 在小屏幕上默认隐藏侧边栏 */
-        z-index: 1000; /* 确保侧边栏在最上层 */
+        transform: translateX(-100%);
+        z-index: 1000;
     }
 
     .sidebar.active {
-        transform: translateX(0); /* 点击按钮后显示侧边栏 */
+        transform: translateX(0);
     }
 
     .main-content-wrapper {
-        margin-left: 0; /* 主内容区域占据全部宽度 */
+        margin-left: 0;
         padding: 20px;
     }
 
     #sidebar-toggle {
-        display: block; /* 在小屏幕上显示切换按钮 */
+        display: block;
+        position: fixed;
+        top: 1em;
+        left: 1em;
+    
+        font-size: 25px;
+        width: 30px;
+        height: 30px;
+        line-height: 0.9em;
+        text-align: center;
+        pointer-events: auto;
+        padding: 0.15rem;
+
+        background-color: #dee2e6;
+        border-radius: 0.35rem;
+        box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
     }
 
     header {
         text-align: left;
-        padding-left: 50px; /* 为按钮留出空间 */
+        padding-left: 50px;
     }
 
     .paper-content {
-        padding: 20px;
+        padding: 25px;
+        margin: 25px;
     }
+
 }
