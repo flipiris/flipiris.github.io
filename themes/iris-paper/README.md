@@ -12,7 +12,7 @@
 
 CSS 每条声明单独一行，各文件内按区域分节。窄屏以 860px 为界，位置变量在 `base.css` 的媒体查询内调整；显示方式在 `navigation.css` 内调整。更改断点时也需同步 `source/js/navigation.js` 中的 861px。
 
-宽屏的标识与侧栏共享左侧轴线，正文从侧栏右侧开始。`--nav-width` 控制侧栏宽度，`--content-gap` 控制栏间距，`--layout-width` 控制超宽屏整体布局的居中范围。普通文章仍以 `--reading-width` 限制为 760px，不随屏幕无限拉宽。861–1100px 使用较窄侧栏与栏间距。
+宽屏的标识与侧栏共享左侧轴线，正文从侧栏右侧开始。`--nav-width` 控制侧栏宽度，`--content-gap` 控制栏间距，`--layout-width` 控制超宽屏整体布局的居中范围。普通文章由 `--reading-width` 限制版心，不随屏幕无限拉宽。861–1100px 使用较窄侧栏与栏间距。
 
 ## HTML 结构
 
