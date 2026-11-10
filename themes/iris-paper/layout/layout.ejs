@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="<%= config.language || 'zh-CN' %>">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title><%= page.title ? page.title + ' · ' : (is_archive() ? '归档 · ' : '') %><%= config.title %></title>
+  <% if (config.description) { %>
+    <meta name="description" content="<%= config.description %>">
+  <% } %>
+  <link rel="stylesheet" href="<%- url_for('/css/main.css') %>">
+  <% (page.styles ? [].concat(page.styles) : []).forEach(function(style) { %>
+    <link rel="stylesheet" href="<%- url_for(style) %>">
+  <% }); %>
+  <script src="<%- url_for('/js/navigation.js') %>" defer></script>
+</head>
+
+
+<body>
+  <a class="skip-link" href="#main-content">跳转到正文</a>
+
+  <!-- 窄屏合为固定顶栏：左侧菜单，右侧站点标识。 -->
+  <header class="site-header">
+    <button
+      id="mobile-nav"
+      class="mobile-nav"
+      type="button"
+      aria-label="打开目录"
+      aria-controls="mobile-menu"
+      aria-expanded="false"
+    >
+      <%- partial('_partial/icon', {name: 'menu'}) %>
+    </button>
+
+    <nav id="top-nav" class="top-nav" aria-label="站点标识">
+      <a class="home-link" href="<%- url_for('/') %>"><%= config.title %></a>
+    </nav>
+  </header>
+
+  <!-- 宽屏：站点层级与当前页面的标题目录。 -->
+  <nav id="side-nav" class="side-nav" aria-label="网站目录">
+    <%- partial('_partial/navigation') %>
+  </nav>
+
+  <dialog id="mobile-menu" class="mobile-menu" aria-labelledby="mobile-menu-title">
+    <header class="mobile-menu-header">
+      <h2 id="mobile-menu-title">目录</h2>
+      <button class="close-menu" type="button" aria-label="关闭目录">
+        <%- partial('_partial/icon', {name: 'close'}) %>
+      </button>
+    </header>
+    <nav aria-label="网站目录">
+      <%- partial('_partial/navigation') %>
+    </nav>
+  </dialog>
+
+  <!-- main 不设版心；首页、阅读页自行选择 .page-frame。 -->
+  <main id="main-content" tabindex="-1">
+    <%- body %>
+  </main>
+
+  <footer class="site-footer page-frame">
+    <small>© <%= date(new Date(), 'YYYY') %> <%= config.title %></small>
+  </footer>
+
+  <% (page.scripts ? [].concat(page.scripts) : []).forEach(function(script) { %>
+    <script src="<%- url_for(script) %>" defer></script>
+  <% }); %>
+</body>
+</html>

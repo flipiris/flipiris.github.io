@@ -1,0 +1,12 @@
+<% if (page.posts.length) { %>
+  <ul class="post-list">
+    <% page.posts.each(function(post) { %>
+      <li class="post-item">
+        <time datetime="<%= date_xml(post.date) %>"><%= date(post.date, 'YYYY.MM.DD') %></time>
+        <a href="<%- url_for(post.path) %>"><%= post.title %></a>
+      </li>
+    <% }); %>
+  </ul>
+<% } else { %>
+  <p class="empty-state">暂无作品。</p>
+<% } %>

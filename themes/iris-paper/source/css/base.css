@@ -1,0 +1,128 @@
+/* 1. 全站变量：配色、字体、导航位置与版心尺寸。 */
+:root {
+  --bg: #f7f6f2;
+  --paper: #fffefa;
+  --ink: #34383e;
+  --muted: #70727a;
+  --accent: #506f8a;
+  --line: #e2dfdc;
+  --nav-active: #e6edf3;
+
+  --UI-font: "寒蝉锦书宋Pro", sans-serif;
+  --serif: "Times New Roman", "GenRyuMin2TW", "Noto Serif CJK SC", Georgia, serif;
+
+  /* 宽屏整体居中：超出布局宽度的空间留在两侧。 */
+  --layout-width: 1248px;
+  --nav-left: max(32px, calc((100vw - var(--layout-width)) / 2));
+  --nav-top: 32px;
+  --nav-width: 224px;
+  --top-nav-height: 36px;
+  --nav-gap: 12px;
+  --nav-radius: 16px;
+
+  /* 正文只给选择版心的页面让位，不约束自由作品。 */
+  --content-gap: 64px;
+  --content-left: calc(var(--nav-left) + var(--nav-width) + var(--content-gap));
+  --content-width: 1000px;
+  --reading-width: 750px;
+  --page-gutter: var(--nav-left);
+  --page-top: 75px;
+}
+
+/* 2. 基础样式，不替作品设置标题、段落和媒体尺寸。 */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-padding-top: 24px;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--UI-font);
+  font-size: 16px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:hover {
+  background: var(--nav-active);
+}
+
+button {
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+::selection {
+  background: var(--nav-active);
+}
+
+#main-content {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+}
+
+#main-content:focus {
+  outline: none;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 10;
+  top: -100px;
+  left: 16px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.skip-link:focus {
+  top: 8px;
+}
+
+/* 3. 较小宽屏：缩短侧栏与正文间距，优先保留阅读空间。 */
+@media (min-width: 861px) and (max-width: 1100px) {
+  :root {
+    --nav-width: 200px;
+    --content-gap: 40px;
+  }
+}
+
+/* 4. 窄屏：菜单和站点标识合为顶栏，正文从顶栏下方开始。 */
+@media (max-width: 860px) {
+  :root {
+    --nav-left: 16px;
+    --nav-top: 16px;
+    --nav-width: 168px;
+    --top-nav-height: 36px;
+    --nav-gap: 8px;
+    --content-left: 24px;
+    --page-gutter: 24px;
+    --page-top: 96px;
+  }
+
+  html {
+    scroll-padding-top: var(--page-top);
+  }
+}

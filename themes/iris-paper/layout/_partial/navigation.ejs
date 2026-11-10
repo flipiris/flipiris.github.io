@@ -1,0 +1,12 @@
+<%- partial('_partial/navigation-tree', {items: theme.menu}) %>
+
+<% if (is_post() || (page.layout && !is_home() && !is_archive())) {
+  const headings = toc(page.content || '', {list_number: false});
+%>
+  <% if (headings) { %>
+    <section class="page-directory" aria-label="本页目录">
+      <h2>本页目录</h2>
+      <%- headings %>
+    </section>
+  <% } %>
+<% } %>

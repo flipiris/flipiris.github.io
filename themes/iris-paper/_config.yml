@@ -1,0 +1,13 @@
+# 原首页文案保留在这里；精简后的首页不再输出此区块。
+intro:
+  eyebrow: 这个世界会好吗？
+  title: 有一天<br>我会长出眼睛。
+  description: 
+
+# 导航链接；可用 children 添加子目录。
+# 网站名称和作者继续使用根目录的 _config.yml。
+menu:
+  - label: 首页
+    path: /
+  - label: 文章归档
+    path: /archives/

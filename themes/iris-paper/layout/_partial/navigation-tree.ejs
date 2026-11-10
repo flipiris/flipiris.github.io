@@ -1,0 +1,19 @@
+<ul class="nav-tree">
+  <% items.forEach(function(item) {
+    const currentPath = url_for(page.path || '').replace(/index\.html$/, '');
+    const itemPath = url_for(item.path).replace(/index\.html$/, '');
+    const active = item.path === '/' ? is_home() : currentPath === itemPath;
+    const ancestor = !active && item.path !== '/' && currentPath.startsWith(itemPath);
+  %>
+    <li>
+      <a
+        href="<%- url_for(item.path) %>"
+        <% if (active) { %>aria-current="page"<% } %>
+        <% if (ancestor) { %>class="nav-ancestor"<% } %>
+      ><%= item.label %></a>
+      <% if (item.children && item.children.length) { %>
+        <%- partial('_partial/navigation-tree', {items: item.children}) %>
+      <% } %>
+    </li>
+  <% }); %>
+</ul>

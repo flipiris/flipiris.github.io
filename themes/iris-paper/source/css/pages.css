@@ -1,0 +1,98 @@
+/* 1. 可选版心：首页、归档和普通阅读页使用。 */
+.page-frame {
+  width: calc(100% - var(--content-left) - var(--page-gutter));
+  max-width: var(--content-width);
+  margin-left: var(--content-left);
+}
+
+.home-page,
+.archive-page,
+.article-page {
+  padding-top: var(--page-top);
+  padding-bottom: 64px;
+}
+
+.page-header {
+  margin-bottom: 36px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+/* 2. 内容索引：只显示日期与标题。 */
+.post-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.post-item {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 24px;
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+}
+
+.post-item:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+.post-item time {
+  color: var(--muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.post-item a {
+  width: fit-content;
+  font-family: var(--serif);
+  font-size: 20px;
+  overflow-wrap: anywhere;
+}
+
+.empty-state {
+  color: var(--muted);
+}
+
+/* 3. 分页与页脚。 */
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 28px;
+}
+
+.pagination > * {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.pagination .current {
+  background: var(--nav-active);
+}
+
+.site-footer {
+  padding-top: 20px;
+  padding-bottom: 24px;
+  color: var(--muted);
+}
+
+.site-footer small {
+  font-size: 13px;
+}
+
+@media (max-width: 860px) {
+  .post-item {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+}

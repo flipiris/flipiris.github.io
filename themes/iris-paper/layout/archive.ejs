@@ -1,0 +1,8 @@
+<section class="archive-page page-frame" aria-labelledby="archive-title">
+  <header class="page-header">
+    <h1 id="archive-title"><%= is_category() ? page.category : (is_tag() ? page.tag : '归档') %></h1>
+  </header>
+
+  <%- partial('_partial/post-list') %>
+  <%- partial('_partial/pagination') %>
+</section>
