@@ -13,13 +13,16 @@
     <link rel="stylesheet" href="<%- url_for(style) %>">
   <% }); %>
   <script src="<%- url_for('/js/navigation.js') %>" defer></script>
+  <% if (page.layout === 'post') { %>
+    <script src="<%- url_for('/js/reading.js') %>" defer></script>
+  <% } %>
 </head>
 
 
 <body>
   <a class="skip-link" href="#main-content">跳转到正文</a>
 
-  <!-- 窄屏合为固定顶栏：左侧菜单，右侧站点标识。 -->
+  <!-- 宽屏按 Grid 排列标识与侧栏；窄屏合为固定顶栏。 -->
   <header class="site-header">
     <button
       id="mobile-nav"
@@ -34,13 +37,14 @@
 
     <nav id="top-nav" class="top-nav" aria-label="站点标识">
       <a class="home-link" href="<%- url_for('/') %>"><%= config.title %></a>
+      <span class="subtitle"><%= config.subtitle %></span>
+    </nav>
+    <nav id="side-nav" class="side-nav" aria-label="网站目录">
+      <div class="side-nav-content">
+        <%- partial('_partial/navigation') %>
+      </div>
     </nav>
   </header>
-
-  <!-- 宽屏：站点层级与当前页面的标题目录。 -->
-  <nav id="side-nav" class="side-nav" aria-label="网站目录">
-    <%- partial('_partial/navigation') %>
-  </nav>
 
   <dialog id="mobile-menu" class="mobile-menu" aria-labelledby="mobile-menu-title">
     <header class="mobile-menu-header">

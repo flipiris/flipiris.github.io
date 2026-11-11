@@ -1,0 +1,42 @@
+<% const headings = toc(page.content || '', {list_number: false}); %>
+<details class="post-info" open>
+  <summary>
+    <span>信息与大纲</span>
+    <span class="post-info-chevron"><%- partial('_partial/icon', {name: 'chevron'}) %></span>
+  </summary>
+  <div class="post-info-body">
+    <section aria-label="文章信息">
+      <dl class="post-meta">
+        <div>
+          <dt>作者</dt>
+          <dd><%= page.author || config.author %></dd>
+        </div>
+        <div>
+          <dt>发布</dt>
+          <dd><time datetime="<%= date_xml(page.date) %>"><%= date(page.date, 'YYYY.MM.DD') %></time></dd>
+        </div>
+        <% if (page.updated && date(page.updated, 'YYYY-MM-DD') !== date(page.date, 'YYYY-MM-DD')) { %>
+          <div>
+            <dt>更新</dt>
+            <dd><time datetime="<%= date_xml(page.updated) %>"><%= date(page.updated, 'YYYY.MM.DD') %></time></dd>
+          </div>
+        <% } %>
+      </dl>
+      <% if (page.tags && page.tags.length) { %>
+        <ul class="post-tags" aria-label="标签">
+          <% page.tags.forEach(function(tag) { %>
+            <li><a href="<%- url_for(tag.path) %>"><%= tag.name %></a></li>
+          <% }); %>
+        </ul>
+      <% } %>
+    </section>
+    <nav class="post-outline" aria-label="文章大纲">
+      <h2>大纲</h2>
+      <% if (headings) { %>
+        <%- headings %>
+      <% } else { %>
+        <p class="outline-empty">本文暂无章节标题</p>
+      <% } %>
+    </nav>
+  </div>
+</details>

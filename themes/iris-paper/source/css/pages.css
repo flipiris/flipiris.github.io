@@ -1,8 +1,8 @@
 /* 1. 可选版心：首页、归档和普通阅读页使用。 */
 .page-frame {
-  width: calc(100% - var(--content-left) - var(--page-gutter));
+  width: calc(100% - 2 * var(--content-left));
   max-width: var(--content-width);
-  margin-left: var(--content-left);
+  margin-inline: auto;
 }
 
 .home-page,
@@ -81,6 +81,7 @@
 }
 
 .site-footer {
+  text-align: center;
   padding-top: 20px;
   padding-bottom: 24px;
   color: var(--muted);
@@ -95,4 +96,22 @@
     grid-template-columns: minmax(0, 1fr);
     gap: 4px;
   }
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.home-page > *,
+.archive-page > *,
+.article-page > .page-header,
+.article-page > .article-content {
+  animation: page-enter var(--motion-base) var(--ease-out);
 }

@@ -4,6 +4,8 @@
     <time class="article-date" datetime="<%= date_xml(page.date) %>"><%= date(page.date, 'YYYY.MM.DD') %></time>
   </header>
 
+  <%- partial('_partial/post-info') %>
+
   <div class="article-content">
     <%- page.content %>
   </div>

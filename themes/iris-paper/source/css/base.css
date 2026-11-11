@@ -12,21 +12,27 @@
   --serif: "Times New Roman", "GenRyuMin2TW", "Noto Serif CJK SC", Georgia, serif;
 
   /* 宽屏整体居中：超出布局宽度的空间留在两侧。 */
-  --layout-width: 1248px;
+  --layout-width: 1360px;
   --nav-left: max(32px, calc((100vw - var(--layout-width)) / 2));
-  --nav-top: 32px;
-  --nav-width: 224px;
-  --top-nav-height: 36px;
+  --nav-top: 24px;
+  --nav-width: clamp(176px, 16vw, 224px);
+  --top-nav-height: 52px;
   --nav-gap: 12px;
   --nav-radius: 16px;
 
-  /* 正文只给选择版心的页面让位，不约束自由作品。 */
-  --content-gap: 64px;
+  /* 两侧预留等宽栏位；自由作品仍可使用整个画布。 */
+  --content-gap: clamp(24px, 3vw, 40px);
   --content-left: calc(var(--nav-left) + var(--nav-width) + var(--content-gap));
   --content-width: 1000px;
   --reading-width: 750px;
   --page-gutter: var(--nav-left);
-  --page-top: 75px;
+  --rail-top: calc(var(--nav-top) + var(--top-nav-height) + var(--nav-gap));
+  --rail-height: 80vh;
+  --page-top: var(--rail-top);
+
+  --motion-fast: 160ms;
+  --motion-base: 240ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* 2. 基础样式，不替作品设置标题、段落和媒体尺寸。 */
@@ -35,7 +41,8 @@
 }
 
 html {
-  scroll-padding-top: 24px;
+  scroll-padding-top: 32px;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -54,6 +61,7 @@ body {
 a {
   color: inherit;
   text-decoration: none;
+  transition: color var(--motion-fast) ease, background-color var(--motion-fast) ease;
 }
 
 a:hover {
@@ -101,15 +109,7 @@ button:focus-visible {
   top: 8px;
 }
 
-/* 3. 较小宽屏：缩短侧栏与正文间距，优先保留阅读空间。 */
-@media (min-width: 861px) and (max-width: 1100px) {
-  :root {
-    --nav-width: 200px;
-    --content-gap: 40px;
-  }
-}
-
-/* 4. 窄屏：菜单和站点标识合为顶栏，正文从顶栏下方开始。 */
+/* 3. 窄屏：菜单和站点标识合为顶栏，正文从顶栏下方开始。 */
 @media (max-width: 860px) {
   :root {
     --nav-left: 16px;
@@ -124,5 +124,20 @@ button:focus-visible {
 
   html {
     scroll-padding-top: var(--page-top);
+  }
+}
+
+/* 4. 尊重系统减少动态效果设置，包括目录定位。 */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after,
+  *::details-content {
+    animation: none !important;
+    transition: none !important;
   }
 }
