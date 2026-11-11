@@ -2,12 +2,14 @@
 
 const {parseDocument, DomUtils} = require('htmlparser2');
 
-// 中日韩文字逐字计数，其余语言按单词计数；不计代码、标签、样式和脚本。
+// 中日韩文字逐字计数，其余语言按单词计数；不计代码、注释块、标签、样式和脚本。
 function countWords(content) {
   const document = parseDocument(content);
   const excluded = DomUtils.findAll(node =>
     ['pre', 'code', 'script', 'style'].includes(node.name)
-    || (node.name === 'figure' && /(?:^|\s)highlight(?:\s|$)/.test(node.attribs.class || '')),
+    || (node.name === 'figure' && /(?:^|\s)highlight(?:\s|$)/.test(node.attribs.class || ''))
+    // 注释块不属于正文，与信息窗第二页的口径一致。
+    || (node.name === 'div' && /(?:^|\s)note(?:\s|$)/.test(node.attribs.class || '')),
   document.children);
   for (const node of excluded) DomUtils.removeElement(node);
   // 块级元素之间添加分隔，内联强调不拆开单词；实体由 HTML 解析器解码。

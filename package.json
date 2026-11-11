@@ -5,7 +5,7 @@
   "scripts": {
     "new": "hexo new post",
     "page": "hexo new page",
-    "work": "hexo new work",
+    "canvas": "hexo new canvas",
     "draft": "hexo new draft",
     "build": "hexo generate",
     "clean": "hexo clean",

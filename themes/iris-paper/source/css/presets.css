@@ -1,0 +1,106 @@
+/* 由页面 front-matter 调用的版式与配色预设：
+     typography: literary | poem | essay
+     palette:    rose（默认） | mist | bamboo | sepia | ink
+   layout.ejs 把它们写成 <body data-typography data-palette>。
+   配色只覆盖色卡变量（RGB 通道），所以全站组件自动跟随。 */
+
+/* 1. 版式 */
+
+/* 默认：段落之间留白，两端对齐，无缩进。 */
+
+/* 文学创作：首行缩进两字，段间不留空行，符合中文小说的排版惯例。 */
+[data-typography="literary"] .article-content {
+  text-indent: 2em;
+}
+
+[data-typography="literary"] .article-content :is(h2, h3, h4, blockquote, pre, .highlight, figure, .poem, li, td, th) {
+  text-indent: 0;
+}
+
+[data-typography="literary"] .article-content hr {
+  margin-block: 1.75rem;
+}
+
+/* 诗歌：整篇作为一个整体位于页面中间，诗行左对齐；不靠 padding 凑位置，
+   宽度取最长诗行（fit-content），再由 auto 外边距居中。诗节之间用空行分隔。 */
+[data-typography="poem"] .article-content {
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+  font-size: 16px;
+  line-height: 2;
+  letter-spacing: 0.05em;
+  text-align: left;
+  text-indent: 0;
+  overflow-wrap: break-word;
+}
+
+[data-typography="poem"] .article-content p {
+  margin: 0 0 1.5em;
+}
+
+[data-typography="poem"] .article-content > :last-child {
+  margin-bottom: 0;
+}
+
+[data-typography="poem"] .page-header {
+  text-align: center;
+}
+
+[data-typography="poem"] .article-footer {
+  justify-content: center;
+}
+
+/* 2. 配色 */
+body[data-palette="mist"] {
+  --bg: 241 244 247;
+  --paper: 252 253 254;
+  --ink: 40 50 62;
+  --muted: 100 112 126;
+  --accent: 62 104 140;
+  --line: 218 224 230;
+  --nav-active: 226 236 245;
+  --header-bg: 190 214 235;
+  --code-bg: 232 237 241;
+  --shadow: 30 45 62;
+}
+
+body[data-palette="bamboo"] {
+  --bg: 242 245 238;
+  --paper: 252 253 249;
+  --ink: 44 56 48;
+  --muted: 104 116 106;
+  --accent: 74 118 88;
+  --line: 220 226 216;
+  --nav-active: 228 240 229;
+  --header-bg: 196 222 200;
+  --code-bg: 234 238 231;
+  --shadow: 30 50 38;
+}
+
+body[data-palette="sepia"] {
+  --bg: 244 238 226;
+  --paper: 252 248 238;
+  --ink: 62 50 40;
+  --muted: 128 112 98;
+  --accent: 156 96 58;
+  --line: 228 218 200;
+  --nav-active: 240 228 208;
+  --header-bg: 238 212 176;
+  --code-bg: 238 230 214;
+  --shadow: 70 50 30;
+}
+
+body[data-palette="ink"] {
+  --bg: 24 25 29;
+  --paper: 33 35 40;
+  --ink: 222 222 218;
+  --muted: 150 152 158;
+  --accent: 224 150 172;
+  --line: 56 58 64;
+  --nav-active: 52 56 66;
+  --header-bg: 120 70 90;
+  --code-bg: 42 44 50;
+  --shadow: 0 0 0;
+  --edge-light: rgb(255 255 255 / 9%);
+}

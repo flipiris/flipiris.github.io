@@ -1,4 +1,4 @@
-/* 1. 首页不铺纸张；归档与阅读页的纸张总宽度上限为 750px。 */
+/* 1. 版心：首页与页面模板不铺纸张；文章与归档的纸张总宽度上限为 700px。 */
 .page-frame {
   width: var(--frame-width);
   max-width: var(--content-width);
@@ -7,7 +7,8 @@
 
 .home-page,
 .archive-page,
-.article-page {
+.article-page,
+.plain-page {
   position: relative;
   min-height: calc(100dvh - var(--page-top) - var(--footer-height));
   margin-top: var(--page-top);
@@ -22,7 +23,10 @@
   box-shadow: var(--paper-shadow);
 }
 
-.home-page {
+/* 页面模板：与首页相同的极简框架，无纸张、无阴影。 */
+.home-page,
+.plain-page {
+  max-width: var(--paper-width);
   padding: var(--paper-padding);
 }
 
@@ -143,27 +147,21 @@
   font-size: 13px;
 }
 
-@media (max-width: 860px) {
-  .post-item {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space);
-  }
-}
-
+/* 4. 进场动画只用 opacity / transform，不触发布局。 */
 @keyframes page-enter {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translate3d(0, 6px, 0);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
 }
 
 .home-page > *,
 .archive-page > *,
-.article-page > .page-header,
-.article-page > .article-content {
-  animation: page-enter var(--motion-base) var(--ease-out);
+.plain-page > *,
+.article-page > .page-header {
+  animation: page-enter var(--motion-base) var(--ease-out) backwards;
 }

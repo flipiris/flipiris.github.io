@@ -29,9 +29,9 @@
   --control-size: calc(var(--space) * 11);
   --info-summary-height: calc(var(--space) * 13);
 
-  /* 左右栏等宽，正文居中；纸张内边距不挤占正文的阅读宽度。 */
+  /* 左右栏等宽，正文居中；纸张宽度（含内边距）上限 700px。 */
   --content-width: 1000px;
-  --reading-width: 750px;
+  --reading-width: 700px;
   --paper-width: var(--reading-width);
   --paper-padding: clamp(24px, 2.5vw, 36px);
   --paper-radius: 3px;
@@ -48,9 +48,12 @@
   --hover-inset: var(--space);
   --footer-height: calc(var(--space) * 20);
 
-  --motion-fast: 160ms;
-  --motion-base: 240ms;
+  --motion-fast: 140ms;
+  --motion-base: 220ms;
+  --motion-reveal: 560ms;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --edge-light: rgb(255 255 255 / 55%);
+  --glass-tint: rgb(var(--header-bg) / 14%);
 }
 
 /* 2. 全站基础，不替自由作品设置版心与媒体尺寸。 */
@@ -61,6 +64,16 @@
 html {
   scroll-padding-top: calc(var(--space) * 8);
   scroll-behavior: smooth;
+  text-size-adjust: 100%;
+}
+
+/* 文章页隐藏滚动条，改由阅读进度条指示位置；滚动本身不受影响。 */
+html.kind-post {
+  scrollbar-width: none;
+}
+
+html.kind-post::-webkit-scrollbar {
+  display: none;
 }
 
 body {
@@ -81,13 +94,21 @@ body {
   font-family: var(--UI-font);
   font-size: 16px;
   line-height: 1.7;
+  text-rendering: optimizeSpeed;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 阅读区域才需要字距与连字等精细排版，其余界面保持快速渲染。 */
+.article-content,
+.page-header h1 {
+  text-rendering: optimizeLegibility;
 }
 
 a {
   color: inherit;
   text-decoration: none;
-  transition: color var(--motion-fast) ease, background-color var(--motion-fast) ease;
+  transition: color var(--motion-fast) ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -142,30 +163,7 @@ body.content-layout {
   top: calc(var(--space) * 2);
 }
 
-/* 3. 窄屏只替换布局变量，导航直接成为顶栏。 */
-@media (max-width: 860px) {
-  :root {
-    --nav-top: 0px;
-    --top-nav-height: calc(var(--control-size) + var(--space) * 5);
-    --nav-gap: calc(var(--space) * 2);
-    --page-gutter: clamp(12px, 3vw, 24px);
-    --paper-padding: clamp(20px, 5vw, 40px);
-    --header-height: calc(var(--top-nav-height) + var(--space) * 12);
-    --page-top: calc(var(--header-height) - var(--space) * 8);
-  }
-
-  body {
-    --nav-left: calc(var(--space) * 4);
-    --frame-width: min(var(--frame-max-width), calc(100vw - 2 * var(--page-gutter)));
-    --content-left: var(--page-gutter);
-  }
-
-  html {
-    scroll-padding-top: calc(var(--top-nav-height) + var(--space) * 4);
-  }
-}
-
-/* 4. 减少动态效果，包括目录定位。 */
+/* 3. 减少动态效果，包括目录定位。 */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -178,4 +176,32 @@ body.content-layout {
     animation: none !important;
     transition: none !important;
   }
+}
+
+/* 4. Material Symbols：连字图标，图标名即内容。 */
+.icon {
+  display: inline-block;
+  flex: none;
+  width: 1em;
+  height: 1em;
+  overflow: hidden;
+  font-family: "Material Symbols Outlined";
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 300;
+  font-variation-settings: "FILL" 0;
+  line-height: 1;
+  letter-spacing: normal;
+  white-space: nowrap;
+  text-transform: none;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: "liga";
+  -webkit-font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+.icon-fill {
+  font-variation-settings: "FILL" 1;
 }

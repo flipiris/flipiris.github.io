@@ -1,43 +1,65 @@
-<% const headings = toc(page.content || '', {list_number: false});
-const stats = page_stats(page.content); %>
+<%
+const parts = split_note(page.content);
+const headings = toc(parts.body, {list_number: false});
+const stats = page_stats(parts.body);
+const hasNote = !!parts.note;
+%>
 <details class="post-info hover-panel" data-panel-mode="narrow" open>
   <summary aria-label="信息与大纲">
     <span class="post-info-icon"><%- partial('_partial/icon', {name: 'info'}) %></span>
   </summary>
+  <div class="read-progress read-progress-rail" aria-hidden="true"><span></span></div>
   <div class="post-info-body panel-body">
-    <section aria-label="文章信息">
-      <dl class="post-meta">
-        <div>
-          <dt>正文</dt>
-          <dd><%= stats.words.toLocaleString('zh-CN') %> 字</dd>
-        </div>
-        <div>
-          <dt>预计阅读</dt>
-          <dd>约 <%= stats.minutes %> 分钟</dd>
-        </div>
-        <div>
-          <dt>作者</dt>
-          <dd><%= page.author || config.author %></dd>
-        </div>
-        <div>
-          <dt>发布</dt>
-          <dd><time datetime="<%= date_xml(page.date) %>"><%= date(page.date, 'YYYY.MM.DD') %></time></dd>
-        </div>
-        <% if (page.updated && date(page.updated, 'YYYY-MM-DD') !== date(page.date, 'YYYY-MM-DD')) { %>
+    <% if (hasNote) { %>
+      <div class="info-tabs" role="tablist" aria-label="信息页">
+        <button type="button" role="tab" id="info-tab-1" aria-controls="info-page-1" aria-selected="true"><%- partial('_partial/icon', {name: 'info'}) %><span>信息</span></button>
+        <button type="button" role="tab" id="info-tab-2" aria-controls="info-page-2" aria-selected="false" tabindex="-1"><%- partial('_partial/icon', {name: 'sticky_note_2'}) %><span>注释</span></button>
+      </div>
+    <% } %>
+
+    <div class="info-pages" data-page="1">
+      <section class="info-page" id="info-page-1" aria-label="文章信息"<% if (hasNote) { %> role="tabpanel" aria-labelledby="info-tab-1"<% } %>>
+        <dl class="post-stats">
           <div>
-            <dt>更新</dt>
-            <dd><time datetime="<%= date_xml(page.updated) %>"><%= date(page.updated, 'YYYY.MM.DD') %></time></dd>
+            <dt>正文</dt>
+            <dd><span class="stat-number"><%= stats.words.toLocaleString('zh-CN') %></span> 字</dd>
           </div>
+          <div>
+            <dt>阅读时间</dt>
+            <dd>约 <span class="stat-number"><%= stats.minutes %></span> 分钟</dd>
+          </div>
+        </dl>
+        <dl class="post-meta">
+          <div>
+            <dt>作者</dt>
+            <dd><%= page.author || config.author %></dd>
+          </div>
+          <div>
+            <dt>发布</dt>
+            <dd><time datetime="<%= date_xml(page.date) %>"><%= date(page.date, 'YYYY.MM.DD') %></time></dd>
+          </div>
+          <% if (page.updated && date(page.updated, 'YYYY-MM-DD') !== date(page.date, 'YYYY-MM-DD')) { %>
+            <div>
+              <dt>更新</dt>
+              <dd><time datetime="<%= date_xml(page.updated) %>"><%= date(page.updated, 'YYYY.MM.DD') %></time></dd>
+            </div>
+          <% } %>
+        </dl>
+        <% if (page.tags && page.tags.length) { %>
+          <ul class="post-tags" aria-label="标签">
+            <% page.tags.forEach(function(tag) { %>
+              <li><a href="<%- url_for(tag.path) %>"><%= tag.name %></a></li>
+            <% }); %>
+          </ul>
         <% } %>
-      </dl>
-      <% if (page.tags && page.tags.length) { %>
-        <ul class="post-tags" aria-label="标签">
-          <% page.tags.forEach(function(tag) { %>
-            <li><a href="<%- url_for(tag.path) %>"><%= tag.name %></a></li>
-          <% }); %>
-        </ul>
+      </section>
+      <% if (hasNote) { %>
+        <section class="info-page info-note" id="info-page-2" role="tabpanel" aria-labelledby="info-tab-2">
+          <%- parts.note %>
+        </section>
       <% } %>
-    </section>
+    </div>
+
     <nav class="post-outline" aria-label="文章大纲">
       <h2>大纲</h2>
       <% if (headings) { %>

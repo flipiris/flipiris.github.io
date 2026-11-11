@@ -1,0 +1,174 @@
+/* 窄屏样式。普通页面通过 <link media="(max-width: 860px)"> 按需启用；
+   画布模板无论屏幕宽度都启用本文件，因此这里不再包裹 @media。
+   修改断点时，需同步 layout.ejs 的 media 属性与 js/navigation.js 中的 860px。 */
+
+/* 1. 变量：导航成为顶栏，页面按窄屏留白。 */
+:root {
+  --nav-top: 0px;
+  --control-size: calc(var(--space) * 10);
+  --top-nav-height: calc(var(--control-size) + var(--space) * 2);
+  --nav-gap: calc(var(--space) * 2);
+  --page-gutter: clamp(12px, 3vw, 24px);
+  --paper-padding: clamp(20px, 5vw, 40px);
+  --header-height: calc(var(--top-nav-height) + var(--space) * 10);
+  --page-top: calc(var(--header-height) - var(--space) * 8);
+  --top-nav-blur: 28px;
+}
+
+body {
+  --nav-left: calc(var(--space) * 3);
+  --frame-width: min(var(--frame-max-width), calc(100vw - 2 * var(--page-gutter)));
+  --content-left: var(--page-gutter);
+}
+
+html {
+  scroll-padding-top: calc(var(--top-nav-height) + var(--space) * 4);
+}
+
+/* 2. 顶栏：紧凑，半透明毛玻璃（高模糊、提饱和、顶部高光），下缘留给阅读进度。 */
+.top-nav {
+  grid-template-columns: var(--control-size) minmax(0, 1fr) auto;
+  align-items: center;
+  align-content: normal;
+  justify-items: start;
+  gap: var(--nav-gap);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--top-nav-height);
+  padding: 0 var(--nav-left);
+  border: 0;
+  background: linear-gradient(var(--glass-tint), var(--glass-tint)), rgb(var(--paper) / 38%);
+  box-shadow:
+    inset 0 1px 0 var(--edge-light),
+    inset 0 -1px 0 rgb(var(--accent) / 16%),
+    0 calc(var(--space) * 2) calc(var(--space) * 6) calc(var(--space) * -2) rgb(var(--shadow) / 10%);
+  -webkit-backdrop-filter: blur(var(--top-nav-blur)) saturate(180%);
+  backdrop-filter: blur(var(--top-nav-blur)) saturate(180%);
+}
+
+.top-nav.has-post-info {
+  grid-template-columns: var(--control-size) minmax(0, 1fr) auto var(--control-size);
+}
+
+.top-nav:has(.hover-panel[open]) {
+  box-shadow: inset 0 1px 0 var(--edge-light), inset 0 -1px 0 rgb(var(--accent) / 16%);
+}
+
+.site-identity {
+  display: contents;
+}
+
+.home-link {
+  font-size: clamp(18px, 4.5vw, 21px);
+}
+
+.subtitle {
+  justify-self: end;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* 3. 侧栏收起，目录从左侧滑出。 */
+.side-nav {
+  display: none;
+}
+
+.mobile-menu {
+  display: block;
+  width: var(--control-size);
+  border-radius: var(--nav-radius);
+}
+
+.mobile-menu-body {
+  position: absolute;
+  top: calc(100% + 1px);
+  left: 0;
+  width: min(320px, 100%);
+  height: calc(100dvh - var(--top-nav-height));
+  max-height: calc(100dvh - var(--top-nav-height));
+  padding: var(--nav-padding);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 0;
+  border-radius: 0 var(--drawer-radius) var(--drawer-radius) 0;
+  background: rgb(var(--paper));
+  box-shadow: var(--drawer-shadow);
+}
+
+.menu-backdrop:not([hidden]) {
+  display: block;
+  position: fixed;
+  z-index: 2;
+  inset: var(--top-nav-height) 0 0;
+  width: 100%;
+  height: calc(100dvh - var(--top-nav-height));
+  padding: 0;
+  border: 0;
+  background: rgb(var(--ink) / 8%);
+  -webkit-backdrop-filter: blur(calc(var(--space) * 2)) saturate(110%);
+  backdrop-filter: blur(calc(var(--space) * 2)) saturate(110%);
+}
+
+body.nav-open {
+  overflow: hidden;
+}
+
+/* 4. 信息窗收进顶栏，由右端图标向下展开。 */
+.post-info {
+  position: static;
+  width: var(--control-size);
+  border: 0;
+  border-radius: calc(var(--space) * 2);
+  background: transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.post-info summary {
+  display: grid;
+  grid-template-columns: 1fr;
+  place-items: center;
+  gap: 0;
+  width: var(--control-size);
+  min-height: var(--control-size);
+  padding: 0;
+  border-radius: calc(var(--space) * 2);
+}
+
+.post-info-icon {
+  display: grid;
+  place-items: center;
+}
+
+.post-info-body {
+  position: absolute;
+  top: calc(100% + 1px);
+  right: 0;
+  left: 0;
+  width: 100%;
+  margin: 0;
+  max-height: max(0px, calc(var(--dropdown-limit) - var(--top-nav-height)));
+  padding: var(--nav-padding);
+  border: 0;
+  border-radius: 0 0 var(--drawer-radius) var(--drawer-radius);
+  background: rgb(var(--paper));
+  box-shadow: var(--drawer-shadow);
+  transform-origin: calc(100% - var(--nav-left) - var(--control-size) / 2) 0;
+}
+
+/* 5. 阅读进度条：贴在顶栏下缘；宽屏用的那条（信息窗上缘）隐藏。 */
+.read-progress-header {
+  display: block;
+}
+
+.read-progress-rail {
+  display: none;
+}
+
+/* 6. 列表。 */
+.post-item {
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space);
+}

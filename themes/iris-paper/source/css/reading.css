@@ -1,4 +1,4 @@
-/* 仅影响普通文章；work 模板不会使用这些类。 */
+/* 仅影响文章模板；页面与画布模板不会使用这些类。 */
 .article-page {
   max-width: var(--paper-width);
 }
@@ -20,18 +20,18 @@
   color: rgb(var(--accent));
 }
 
+/* 1. 正文。段落缩进、对齐由 data-typography 预设决定，见 presets.css。 */
 .article-content {
   font-family: var(--serif);
   font-size: 16px;
   line-height: 1.8;
   text-align: justify;
-  text-indent: 2em;
   letter-spacing: 0.05em;
   overflow-wrap: anywhere;
 }
 
 .article-content p {
-  margin: 0.75rem;
+  margin: 0.75em;
 }
 
 .article-content h2,
@@ -75,6 +75,7 @@ hr {
   font-family: monospace;
   font-size: 14px;
   line-height: 1.6;
+  text-indent: 0;
 }
 
 .article-content .highlight pre {
@@ -94,13 +95,89 @@ hr {
   border-left: 2px solid rgb(var(--accent) / 60%);
   background: rgb(var(--accent) / 4%);
   color: rgb(var(--muted));
+  text-indent: 0;
 }
 
 .article-content table {
   max-width: 100%;
 }
 
-/* 宽屏信息窗常驻右栏；仅窄屏才有抽屉开关。 */
+/* 内嵌诗歌：整体居中，诗行左对齐。宽度取最长诗行，auto 外边距负责居中。 */
+.article-content .poem {
+  width: fit-content;
+  max-width: 100%;
+  margin: 2rem auto;
+  padding: 1.25rem clamp(1rem, 3vw, 2rem);
+  border: 1px solid rgb(var(--accent) / 28%);
+  border-radius: 10px;
+  background: rgb(var(--accent) / 4%);
+  font-size: 1.05em;
+  line-height: 1.95;
+  text-align: left;
+  text-indent: 0;
+}
+
+.article-content .poem p {
+  margin: 0 0 1.15em;
+  text-indent: 0;
+}
+
+.article-content .poem > :last-child,
+.article-content .poem > :last-child p:last-child {
+  margin-bottom: 0;
+}
+
+/* 2. 逐段浮现：仅在 JS 可用且允许动效时隐藏，未执行脚本的页面完整可见。 */
+@media (prefers-reduced-motion: no-preference) {
+  .js .article-content > .reveal {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+    transition: opacity var(--motion-reveal) var(--ease-out), transform var(--motion-reveal) var(--ease-out);
+    transition-delay: var(--reveal-delay, 0ms);
+    will-change: opacity, transform;
+  }
+
+  .js .article-content > .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  .js .article-content > .reveal.is-done {
+    will-change: auto;
+    transition-delay: 0ms;
+  }
+}
+
+/* 3. 阅读进度条：1.5px 横向细条，transform 缩放，不触发布局。 */
+.read-progress {
+  position: absolute;
+  height: 2px;
+  overflow: hidden;
+  border-radius: 1px;
+  pointer-events: none;
+}
+
+.read-progress > span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: rgb(var(--accent) / 75%);
+  transform: scaleX(var(--progress, 0));
+  transform-origin: 0 50%;
+}
+
+/* 宽屏：位于信息窗上缘；窄屏位于顶栏下缘（见 narrow.css）。 */
+.read-progress-header {
+  display: none;
+  inset: auto 0 0;
+}
+
+.read-progress-rail {
+  inset: 0 var(--nav-radius) auto;
+  z-index: 1;
+}
+
+/* 4. 宽屏信息窗常驻右栏；仅窄屏才有抽屉开关。 */
 .post-info {
   position: fixed;
   z-index: 2;
@@ -111,8 +188,8 @@ hr {
   border-radius: var(--nav-radius);
   background: rgb(var(--paper) / 80%);
   box-shadow: var(--float-shadow);
-  -webkit-backdrop-filter: blur(var(--nav-blur)) saturate(120%);
-  backdrop-filter: blur(var(--nav-blur)) saturate(120%);
+  -webkit-backdrop-filter: blur(var(--nav-blur)) saturate(140%);
+  backdrop-filter: blur(var(--nav-blur)) saturate(140%);
   font-family: var(--UI-font);
 }
 
@@ -134,7 +211,6 @@ hr {
   font-size: 14px;
   cursor: pointer;
   list-style: none;
-  transition: background-color var(--motion-fast) ease;
 }
 
 .post-info summary::-webkit-details-marker {
@@ -154,17 +230,51 @@ hr {
 
 .post-info-body {
   max-height: min(var(--rail-height), calc(100dvh - var(--rail-top) - var(--space) * 4));
-  padding: 12px 12px 16px;
+  padding: 14px 12px 16px;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
+}
+
+/* 第一页：正文与阅读时间并为同一行的两列；作者、日期、标签保持原样。 */
+.post-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 4px 12px;
+  padding: 0 0 12px;
+  border-bottom: 1px solid rgb(var(--line));
+}
+
+.post-stats > div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.post-stats dt {
+  color: rgb(var(--muted));
+  font-size: 12px;
+}
+
+.post-stats dd {
+  margin: 0;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.post-stats .stat-number {
+  color: rgb(var(--accent));
+  font-size: 18px;
+  font-weight: 700;
 }
 
 .post-meta {
   display: grid;
   gap: 8px;
   margin: 0;
-  padding: 12px 4px 16px;
+  padding: 4px 4px 16px;
   border: 0;
   font-size: 12px;
 }
@@ -205,6 +315,80 @@ hr {
   color: rgb(var(--accent));
 }
 
+/* 可选的第二页：注释块。无注释块的文章不输出页签与第二页。 */
+.info-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  margin: 0 4px 10px;
+  padding: 3px;
+  border-radius: calc(var(--space) * 2);
+  background: rgb(var(--accent) / 7%);
+}
+
+html:not(.js) .info-tabs {
+  display: none;
+}
+
+.info-tabs button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 3px 6px;
+  border: 0;
+  border-radius: calc(var(--space) * 1.5);
+  background: transparent;
+  color: rgb(var(--muted));
+  font-size: 12px;
+  transition: color var(--motion-fast) ease, background-color var(--motion-fast) ease;
+}
+
+.info-tabs button .icon {
+  font-size: 15px;
+}
+
+.info-tabs button[aria-selected="true"] {
+  background: rgb(var(--paper));
+  color: rgb(var(--accent));
+  box-shadow: 0 1px 2px rgb(var(--shadow) / 8%);
+}
+
+.js .info-pages[data-page="2"] #info-page-1,
+.js .info-pages:not([data-page="2"]) .info-note {
+  display: none;
+}
+
+.info-page {
+  animation: page-enter var(--motion-base) var(--ease-out) backwards;
+}
+
+.info-note {
+  margin: 0 4px 16px;
+  font-family: var(--serif);
+  font-size: 13px;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+
+.info-note > :first-child {
+  margin-top: 0;
+}
+
+.info-note > :last-child {
+  margin-bottom: 0;
+}
+
+.info-note p {
+  margin: 0 0 0.75em;
+}
+
+.info-note a {
+  color: rgb(var(--accent));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .post-outline {
   padding-top: 16px;
   border-top: 1px solid rgb(var(--line));
@@ -225,55 +409,4 @@ hr {
   margin: 0 10px;
   color: rgb(var(--muted));
   font-size: 13px;
-}
-
-/* 信息窗在窄屏直接成为 top-nav 的下拉抽屉，不挤占正文。 */
-@media (max-width: 860px) {
-  .post-info {
-    position: static;
-    width: var(--control-size);
-    border: 0;
-    border-radius: calc(var(--space) * 2);
-    background: transparent;
-    box-shadow: none;
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-
-  .post-info summary {
-    display: grid;
-    grid-template-columns: 1fr;
-    place-items: center;
-    gap: 0;
-    width: var(--control-size);
-    min-height: var(--control-size);
-    padding: 0;
-    border-radius: calc(var(--space) * 2);
-  }
-
-  .post-info-icon {
-    display: grid;
-    place-items: center;
-  }
-
-  .post-info-body .post-meta {
-    padding-top: calc(var(--space) * 2);
-    border-top: 0;
-  }
-
-  .post-info-body {
-    position: absolute;
-    top: calc(100% + 1px);
-    right: 0;
-    left: 0;
-    width: 100%;
-    margin: 0;
-    max-height: max(0px, calc(var(--dropdown-limit) - var(--top-nav-height)));
-    padding: var(--nav-padding);
-    border: 0;
-    border-radius: 0 0 var(--drawer-radius) var(--drawer-radius);
-    background: rgb(var(--paper));
-    box-shadow: var(--drawer-shadow);
-    transform-origin: calc(100% - var(--nav-left) - var(--control-size) / 2) 0;
-  }
 }

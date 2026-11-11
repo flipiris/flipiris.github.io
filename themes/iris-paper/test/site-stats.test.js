@@ -71,3 +71,8 @@ test('从所有内容中选取最新日期', () => {
   const result = stats([{date}, {published: false, updated: draftDate}], [{date, updated}]);
   assert.equal(result.updated, updated);
 });
+
+test('注释块不计入正文字数', () => {
+  const result = stats([{content: '<p>正文</p><div class="note"><p>这是很长的作者注释</p></div>', date: new Date(2026, 0, 1)}]);
+  assert.equal(result.words, 2);
+});

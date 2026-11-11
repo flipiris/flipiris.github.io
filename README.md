@@ -31,13 +31,13 @@ npm run page -- about
 
 先创建实际页面，再添加链接。修改主题配置后，重启本地预览服务。
 
-## 新建自由排版的多媒体作品
+## 新建自由排版的多媒体作品（画布）
 
 ```bash
-npm run work -- --slug night-journey "夜行"
+npm run canvas -- --slug night-journey "夜行"
 ```
 
-编辑 `source/_posts/night-journey.md`。它会进入首页和归档，但使用 `layout: work`，不套普通文章的标题、版心和阅读样式。
+编辑 `source/_posts/night-journey.md`。它会进入首页和归档，但使用 `layout: canvas`，不套标题、版心和阅读样式；无论屏幕宽窄，菜单都收进顶栏。旧的 `layout: work` 仍可使用，等同于 `canvas`。
 
 作品可写 HTML，专属素材放在 `source/works/night-journey/`。在 front-matter 中按需添加：
 
@@ -49,6 +49,35 @@ scripts:
 ```
 
 只填写已经创建的资源路径。主题结构和样式文件的分工见 `themes/iris-paper/README.md`。
+
+## 三种模板、版式与配色
+
+| `layout` | 用途 | 特点 |
+| --- | --- | --- |
+| `post`（默认） | 文章 | 纸张容器、阅读进度条、信息窗、逐段浮现 |
+| `page` | 独立页面 | 极简框架：无纸张、无进度条、无信息窗 |
+| `canvas` | 自由作品 | 正文原样输出；无论屏幕宽窄，菜单都收进顶栏 |
+
+在 front-matter 中调用版式与配色（均可省略）：
+
+```yaml
+typography: literary   # literary 文学创作（首行缩进、段间不留空）| poem 诗歌（整体居中、诗行左对齐）| essay 随笔
+palette: mist          # rose（默认）| mist | bamboo | sepia | ink
+```
+
+文章分类写 `categories: [文章]`；侧栏的分类为 文章、评论、作品，可在 `themes/iris-paper/_config.yml` 的 `nav_categories` 中增改。
+
+信息窗第二页：在正文中写一个 `note` 块，内容就会出现在信息窗的「注释」页，而不会显示在正文里；没有这个块则不显示第二页。块内的 Markdown 需要与 HTML 标签之间各空一行：
+
+```html
+<div class="note">
+
+**作者注**：这里的 Markdown 会被渲染。
+
+</div>
+```
+
+诗歌也可以嵌在普通文章里：`<div class="poem">` 包起来的诗行会整体居中、行内左对齐。
 
 ## 本地预览
 
@@ -74,7 +103,7 @@ npm run build
 
 ```bash
 git status --short
-git add source themes scaffolds package.json package-lock.json _config.yml .github .gitignore README.md
+git add source themes scaffolds tools fonts-src package.json package-lock.json _config.yml .github .gitignore README.md
 git commit -m "发布新文章"
 git push
 ```

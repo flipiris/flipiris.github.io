@@ -1,15 +1,34 @@
-<%- partial('_partial/navigation-tree', {items: theme.menu}) %>
+<%
+const sections = nav_sections();
+const here = url_for(page.path || '').replace(/index\.html$/, '');
+const belongs = label => !!(page.categories && page.categories.toArray && page.categories.toArray().some(item => item.name === label));
+%>
+<ul class="nav-tree nav-primary">
+  <% sections.primary.forEach(function(item) {
+    const target = url_for(item.path).replace(/index\.html$/, '');
+    const active = here === target || (item.path === '/tags/' && is_tag());
+  %>
+    <li><a href="<%- url_for(item.path) %>"<% if (active) { %> aria-current="page"<% } %>><span class="nav-label"><%= item.label %></span></a></li>
+  <% }); %>
+</ul>
 
-<% const recent = recent_pages(); %>
-<% if (recent.length) { %>
-  <section class="recent-pages" aria-label="最近新增">
-    <h2>最近新增</h2>
-    <%- partial('_partial/navigation-tree', {items: recent}) %>
-  </section>
-<% } %>
+<ul class="nav-tree nav-categories" aria-label="分类">
+  <% sections.categories.forEach(function(item) {
+    const active = is_category() && page.category === item.category;
+    const ancestor = !active && belongs(item.category);
+  %>
+    <li>
+      <a href="<%- url_for(item.path) %>"<% if (active) { %> aria-current="page"<% } else if (ancestor) { %> class="nav-ancestor"<% } %>>
+        <%- partial('_partial/icon', {name: item.icon}) %>
+        <span class="nav-label"><%= item.label %></span>
+        <span class="nav-count"><%= item.count %></span>
+      </a>
+    </li>
+  <% }); %>
+</ul>
 
-<% if (page.layout !== 'post' && (is_post() || (page.layout && !is_home() && !is_archive()))) {
-  const headings = toc(page.content || '', {list_number: false});
+<% if (page.layout === 'page') {
+  const headings = toc(split_note(page.content || '').body, {list_number: false});
 %>
   <% if (headings) { %>
     <section class="page-directory" aria-label="本页目录">
@@ -17,4 +36,12 @@
       <%- headings %>
     </section>
   <% } %>
+<% } %>
+
+<% const recent = recent_pages(); %>
+<% if (recent.length) { %>
+  <section class="recent-pages" aria-label="最近新增">
+    <h2>最近新增</h2>
+    <%- partial('_partial/navigation-tree', {items: recent}) %>
+  </section>
 <% } %>

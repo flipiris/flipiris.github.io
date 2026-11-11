@@ -4,12 +4,20 @@ intro:
   title: 有一天<br>我会长出眼睛。
   description: 
 
-# 导航链接；可用 children 添加子目录。
-# 网站名称和作者继续使用根目录的 _config.yml。
-menu:
-  - label: 首页
-    path: /
-  - label: 文章归档
+# 侧栏第一组：不带图标的固定入口。
+nav_primary:
+  - label: 页面一览
     path: /archives/
-  - label: 分类
-    path: /categories/
+  - label: 标签索引
+    path: /tags/
+
+# 侧栏第二组：带图标的分类。label 必须与文章 front-matter 里的 categories 一致；
+# icon 是 Material Symbols 的图标名，需包含在 source/fonts/MaterialSymbolsOutlined.woff2 中。
+# 分类还没有文章时，仍会生成一个空的分类页面。
+nav_categories:
+  - label: 文章
+    icon: article
+  - label: 评论
+    icon: forum
+  - label: 作品
+    icon: palette

@@ -1,33 +1,50 @@
+<%
+// 模板种类：post（文章）、page（页面）、canvas（画布）；其余生成页（首页、归档、分类、标签）为 index。
+const layoutName = page.layout === 'work' ? 'canvas' : (page.layout || '');
+const kind = layoutName === 'canvas' ? 'canvas' : layoutName === 'post' ? 'post' : layoutName === 'page' ? 'page' : 'index';
+const style = page_style(page);
+const cssFiles = ['base', 'fonts', 'navigation', 'pages', 'reading', 'presets'];
+const bodyClass = ['layout-' + kind].concat(kind === 'canvas' ? [] : ['content-layout']).join(' ');
+%>
 <!DOCTYPE html>
-<html lang="<%= config.language || 'zh-CN' %>">
+<html lang="<%= config.language || 'zh-CN' %>" class="kind-<%= kind %>">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light">
-  <title><%= page.title ? page.title + ' · ' : (is_archive() ? '归档 · ' : '') %><%= config.author %></title>
+  <meta name="color-scheme" content="<%= style.palette === 'ink' ? 'dark' : 'light' %>">
+  <title><%= page.title ? page.title + ' · ' : (is_archive() ? '页面一览 · ' : '') %><%= config.author %></title>
   <% if (config.description) { %>
     <meta name="description" content="<%= config.description %>">
   <% } %>
-  <link rel="stylesheet" href="<%- url_for('/css/main.css') %>">
-  <% (page.styles ? [].concat(page.styles) : []).forEach(function(style) { %>
-    <link rel="stylesheet" href="<%- url_for(style) %>">
+  <script>document.documentElement.classList.add('js')</script>
+  <link rel="preload" href="<%- url_for('/fonts/MaterialSymbolsOutlined.woff2') %>" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="<%- url_for('/fonts/ChillJinshuSongPro_Regular-core.woff2') %>" as="font" type="font/woff2" crossorigin>
+  <% if (kind !== 'canvas') { %>
+    <link rel="preload" href="<%- url_for('/fonts/GenRyuMin2TW-M-core.woff2') %>" as="font" type="font/woff2" crossorigin>
+  <% } %>
+  <% cssFiles.forEach(function(name) { %>
+    <link rel="stylesheet" href="<%- url_for('/css/' + name + '.css') %>">
+  <% }); %>
+  <%# 窄屏样式单独成文件：普通页面按视口宽度启用，画布页面无论宽窄都启用。 %>
+  <link rel="stylesheet" href="<%- url_for('/css/narrow.css') %>"<% if (kind !== 'canvas') { %> media="(max-width: 860px)"<% } %>>
+  <% (page.styles ? [].concat(page.styles) : []).forEach(function(href) { %>
+    <link rel="stylesheet" href="<%- url_for(href) %>">
   <% }); %>
   <script src="<%- url_for('/js/navigation.js') %>" defer></script>
-  <% if (page.layout === 'post') { %>
+  <% if (kind === 'post') { %>
     <script src="<%- url_for('/js/reading.js') %>" defer></script>
   <% } %>
 </head>
 
-
-<body<% if (is_home() || page.layout === 'post' || page.layout === 'page' || is_archive() || is_category() || is_tag() || page.layout === 'categories') { %> class="content-layout"<% } %>>
+<body class="<%= bodyClass %>"<% if (style.palette) { %> data-palette="<%= style.palette %>"<% } %><% if (style.typography) { %> data-typography="<%= style.typography %>"<% } %>>
   <a class="skip-link" href="#main-content">跳转到正文</a>
 
-  <!-- 通栏页眉暂作占位；导航浮在上方，窄屏由 top-nav 承载整个顶栏。 -->
+  <!-- 通栏页眉暂作占位；导航浮在上方，窄屏（及画布）由 top-nav 承载整个顶栏。 -->
   <header class="site-header">
-    <nav id="top-nav" class="top-nav<%= page.layout === 'post' ? ' has-post-info' : '' %>" aria-label="站点导航">
+    <nav id="top-nav" class="top-nav<%= kind === 'post' ? ' has-post-info' : '' %>" aria-label="站点导航">
       <details id="mobile-menu" class="mobile-menu hover-panel" data-panel-mode="narrow">
         <summary id="mobile-nav" class="mobile-nav" aria-label="网站目录" aria-controls="mobile-menu-content">
-          <%- partial('_partial/icon', {name: 'menu'}) %>
+          <%- partial('_partial/icon', {name: 'side_navigation'}) %>
         </summary>
         <div id="mobile-menu-content" class="mobile-menu-body panel-body">
           <nav aria-label="网站目录">
@@ -40,8 +57,9 @@
         <a class="home-link" href="<%- url_for('/') %>"><%= config.title %></a>
         <span class="subtitle"><%= config.subtitle %></span>
       </div>
-      <% if (page.layout === 'post') { %>
+      <% if (kind === 'post') { %>
         <%- partial('_partial/post-info') %>
+        <div class="read-progress read-progress-header" aria-hidden="true"><span></span></div>
       <% } %>
     </nav>
     <nav id="side-nav" class="side-nav" aria-label="网站目录">
@@ -56,14 +74,16 @@
 
   <button class="menu-backdrop" type="button" aria-label="关闭目录" tabindex="-1" hidden></button>
 
-  <!-- main 不设版心；首页、阅读页自行选择 .page-frame。 -->
+  <!-- main 不设版心；各模板自行选择 .page-frame。 -->
   <main id="main-content" tabindex="-1">
     <%- body %>
   </main>
 
-  <footer class="site-footer page-frame">
-    <small>© <%= date(new Date(), 'YYYY') %> <%= config.title %></small>
-  </footer>
+  <% if (kind !== 'canvas') { %>
+    <footer class="site-footer page-frame">
+      <small>© <%= date(new Date(), 'YYYY') %> <%= config.title %></small>
+    </footer>
+  <% } %>
 
   <% (page.scripts ? [].concat(page.scripts) : []).forEach(function(script) { %>
     <script src="<%- url_for(script) %>" defer></script>
