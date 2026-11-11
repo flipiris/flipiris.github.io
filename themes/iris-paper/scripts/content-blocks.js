@@ -4,7 +4,7 @@ const {parseDocument, DomUtils} = require('htmlparser2');
 
 // 页面元数据可调用的预设；名称对应 source/css/presets.css。
 const PALETTES = ['rose', 'mist', 'bamboo', 'sepia', 'ink'];
-const TYPOGRAPHIES = ['literary', 'poem', 'essay'];
+const TYPOGRAPHIES = ['literary', 'poem'];
 
 const NOTE_CLASS = /(?:^|\s)note(?:\s|$)/;
 

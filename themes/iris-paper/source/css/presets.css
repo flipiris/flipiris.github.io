@@ -1,6 +1,7 @@
 /* 由页面 front-matter 调用的版式与配色预设：
-     typography: literary | poem | essay
-     palette:    rose（默认） | mist | bamboo | sepia | ink
+     typography: literary | poem
+     palette:    rose（默认，酒红标识） | mist | bamboo | sepia | ink
+   每套配色同时给出 --brand（站点标识色），默认 rose 为酒红。
    layout.ejs 把它们写成 <body data-typography data-palette>。
    配色只覆盖色卡变量（RGB 通道），所以全站组件自动跟随。 */
 
@@ -21,18 +22,13 @@
   margin-block: 1.75rem;
 }
 
-/* 诗歌：整篇作为一个整体位于页面中间，诗行左对齐；不靠 padding 凑位置，
-   宽度取最长诗行（fit-content），再由 auto 外边距居中。诗节之间用空行分隔。 */
 [data-typography="poem"] .article-content {
   width: fit-content;
   max-width: 100%;
   margin-inline: auto;
-  font-size: 16px;
   line-height: 2;
-  letter-spacing: 0.05em;
   text-align: left;
   text-indent: 0;
-  overflow-wrap: break-word;
 }
 
 [data-typography="poem"] .article-content p {
@@ -47,12 +43,9 @@
   text-align: center;
 }
 
-[data-typography="poem"] .article-footer {
-  justify-content: center;
-}
-
 /* 2. 配色 */
 body[data-palette="mist"] {
+  --brand: 30 62 98;
   --bg: 241 244 247;
   --paper: 252 253 254;
   --ink: 40 50 62;
@@ -66,6 +59,7 @@ body[data-palette="mist"] {
 }
 
 body[data-palette="bamboo"] {
+  --brand: 36 78 52;
   --bg: 242 245 238;
   --paper: 252 253 249;
   --ink: 44 56 48;
@@ -79,6 +73,7 @@ body[data-palette="bamboo"] {
 }
 
 body[data-palette="sepia"] {
+  --brand: 112 56 30;
   --bg: 244 238 226;
   --paper: 252 248 238;
   --ink: 62 50 40;
@@ -92,6 +87,7 @@ body[data-palette="sepia"] {
 }
 
 body[data-palette="ink"] {
+  --brand: 236 168 188;
   --bg: 24 25 29;
   --paper: 33 35 40;
   --ink: 222 222 218;

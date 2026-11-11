@@ -7,7 +7,10 @@ const {join} = require('node:path');
 const {JSDOM} = require('jsdom');
 const source = readFileSync(join(__dirname, '../source/js/reading.js'), 'utf8');
 
-function fixture({reduced = false, withNote = true} = {}) {
+let scrollHeight = 4000;
+
+function fixture({reduced = false, withNote = true, height = 4000} = {}) {
+  scrollHeight = height;
   const dom = new JSDOM(`<!doctype html><html><body>
     <div class="read-progress read-progress-header"><span></span></div>
     <details class="post-info" open>
@@ -32,6 +35,7 @@ function fixture({reduced = false, withNote = true} = {}) {
   };
   // 第一段在首屏内，其余在首屏下方。
   window.innerHeight = 800;
+  Object.defineProperty(window.document.documentElement, 'scrollHeight', {configurable: true, get: () => scrollHeight});
   const tops = {a: 100, b: 1200, c: 2000};
   for (const [id, top] of Object.entries(tops)) {
     window.document.getElementById(id).getBoundingClientRect = () => ({top, bottom: top + 20});
@@ -93,5 +97,35 @@ test('阅读进度同时写入顶栏和信息窗两条进度条', () => {
   const values = Array.from(bars, bar => bar.style.getPropertyValue('--progress'));
   assert.equal(values.length, 2);
   assert.ok(values.every(value => value !== '' && value === values[0]));
+  f.window.close();
+});
+
+test('进度按真实可滚动距离计算：中途为比例，滚到底（含吸附范围）恒为 1', () => {
+  const f = fixture({height: 4000});
+  const bar = f.document.querySelector('.read-progress');
+  const frame = () => new Promise(resolve => f.window.requestAnimationFrame(() => setTimeout(resolve, 0)));
+  const scrollTo = async y => {
+    Object.defineProperty(f.window, 'scrollY', {configurable: true, value: y});
+    f.window.dispatchEvent(new f.window.Event('scroll'));
+    await frame();
+  };
+  return (async () => {
+    await scrollTo(1600);                       // 可滚动距离 3200，一半
+    assert.equal(bar.style.getPropertyValue('--progress'), '0.5000');
+    assert.ok(!bar.classList.contains('is-complete'));
+    await scrollTo(3200 - 20);                  // 离底 20px，吸附为 1
+    assert.equal(bar.style.getPropertyValue('--progress'), '1.0000');
+    assert.ok(bar.classList.contains('is-complete'));
+    await scrollTo(0);
+    assert.ok(bar.classList.contains('is-idle'));
+    f.window.close();
+  })();
+});
+
+test('页面短到无法滚动时进度条保持隐藏，而不是显示满格', () => {
+  const f = fixture({height: 810});
+  const bar = f.document.querySelector('.read-progress');
+  assert.ok(bar.classList.contains('is-idle'));
+  assert.equal(bar.style.getPropertyValue('--progress'), '0.0000');
   f.window.close();
 });

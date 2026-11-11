@@ -73,7 +73,7 @@ test('预设名称与 presets.css 一一对应', () => {
   const source = readFileSync(join(__dirname, '../scripts/content-blocks.js'), 'utf8');
   const palettes = source.match(/PALETTES = \[([^\]]*)\]/)[1].match(/'(\w+)'/g).map(item => item.slice(1, -1));
   const typographies = source.match(/TYPOGRAPHIES = \[([^\]]*)\]/)[1].match(/'(\w+)'/g).map(item => item.slice(1, -1));
-  // rose 是 base.css 中的默认色卡，不需要覆盖；literary / poem / essay 需要各自的规则。
+  // rose 是 base.css 中的默认色卡，不需要覆盖；literary / poem 需要各自的规则。
   for (const name of palettes.filter(item => item !== 'rose')) assert.ok(css.includes(`data-palette="${name}"`), name);
   for (const name of typographies) assert.ok(css.includes(`data-typography="${name}"`), name);
 });

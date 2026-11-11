@@ -4,18 +4,26 @@
   const article = document.querySelector('.article-content');
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-  /* 1. 阅读进度：按正文区域计算，写入 CSS 变量 --progress（0–1）；两条进度条共用。 */
+  /* 1. 阅读进度：按页面真实可滚动距离计算（0 = 页首，1 = 滚到底），写入 --progress。
+        不以正文高度估算，所以无论文末留白多少，滚到底时一定填满。
+        离底部 24px 以内直接吸附为 1，避免触控板惯性停在末端前一点点。
+        页面不可滚动（文章很短）时隐藏进度条，而不是显示一条满格的线。 */
   const bars = Array.from(document.querySelectorAll('.read-progress'));
-  const articleBox = document.querySelector('.article-page');
+  const SNAP = 24;
   let progressQueued = false;
 
   function updateProgress() {
     progressQueued = false;
-    if (!articleBox) return;
-    const top = articleBox.getBoundingClientRect().top + window.scrollY;
-    const span = articleBox.offsetHeight - window.innerHeight * 0.6;
-    const value = span > 0 ? Math.min(1, Math.max(0, (window.scrollY - top + window.innerHeight * 0.2) / span)) : 1;
-    for (const bar of bars) bar.style.setProperty('--progress', value.toFixed(4));
+    const max = root.scrollHeight - window.innerHeight;
+    const idle = max <= SNAP;
+    let value = idle ? 0 : window.scrollY / max;
+    if (!idle && max - window.scrollY <= SNAP) value = 1;
+    value = Math.min(1, Math.max(0, value));
+    for (const bar of bars) {
+      bar.style.setProperty('--progress', value.toFixed(4));
+      bar.classList.toggle('is-idle', idle || value < 0.002);
+      bar.classList.toggle('is-complete', value >= 1);
+    }
   }
 
   /* 2. 当前章节高亮。 */

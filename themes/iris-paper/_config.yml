@@ -15,9 +15,17 @@ nav_primary:
 # icon 是 Material Symbols 的图标名，需包含在 source/fonts/MaterialSymbolsOutlined.woff2 中。
 # 分类还没有文章时，仍会生成一个空的分类页面。
 nav_categories:
+  - label: 随笔
+    icon: edit_note
   - label: 文章
     icon: article
   - label: 评论
     icon: forum
   - label: 作品
     icon: palette
+
+# 侧栏分类末尾的归档入口：收录没有上述任何分类的文章与独立页面。
+nav_misc:
+  label: 其他页面
+  icon: folder_open
+  path: /misc/

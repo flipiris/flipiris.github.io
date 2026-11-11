@@ -61,7 +61,7 @@ scripts:
 在 front-matter 中调用版式与配色（均可省略）：
 
 ```yaml
-typography: literary   # literary 文学创作（首行缩进、段间不留空）| poem 诗歌（整体居中、诗行左对齐）| essay 随笔
+typography: literary   # literary 文学创作（首行缩进、段间不留空）| poem 诗歌（整体居中、诗行左对齐）
 palette: mist          # rose（默认）| mist | bamboo | sepia | ink
 ```
 

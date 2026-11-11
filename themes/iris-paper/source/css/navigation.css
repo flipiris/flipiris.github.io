@@ -31,6 +31,7 @@
 
 .home-link {
   width: fit-content;
+  color: rgb(var(--brand));
   border-radius: var(--space);
   font-family: var(--serif);
   font-size: clamp(21px, 1.7vw, 25px);
@@ -305,4 +306,9 @@
 .mobile-nav .icon,
 .post-info-icon .icon {
   font-size: 24px;
+}
+
+/* 顶栏里的目录按钮与信息按钮同为 accent。 */
+.mobile-nav {
+  color: rgb(var(--accent));
 }

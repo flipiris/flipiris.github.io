@@ -66,7 +66,8 @@ index_generator:
   order_by: -date
 
 # Category & Tag
-default_category: uncategorized
+# 无分类的内容不套默认分类，由主题归入「其他页面」（/misc/）。
+default_category:
 category_map:
 tag_map:
 

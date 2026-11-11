@@ -1,6 +1,7 @@
 <%
 const sections = nav_sections();
 const here = url_for(page.path || '').replace(/index\.html$/, '');
+const miscActive = sections.misc && here === url_for(sections.misc.path).replace(/index\.html$/, '');
 const belongs = label => !!(page.categories && page.categories.toArray && page.categories.toArray().some(item => item.name === label));
 %>
 <ul class="nav-tree nav-primary">
@@ -25,6 +26,15 @@ const belongs = label => !!(page.categories && page.categories.toArray && page.c
       </a>
     </li>
   <% }); %>
+  <% if (sections.misc) { %>
+    <li>
+      <a href="<%- url_for(sections.misc.path) %>"<% if (miscActive) { %> aria-current="page"<% } %>>
+        <%- partial('_partial/icon', {name: sections.misc.icon}) %>
+        <span class="nav-label"><%= sections.misc.label %></span>
+        <span class="nav-count"><%= sections.misc.count %></span>
+      </a>
+    </li>
+  <% } %>
 </ul>
 
 <% if (page.layout === 'page') {

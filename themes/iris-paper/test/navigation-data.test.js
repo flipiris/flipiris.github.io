@@ -12,7 +12,10 @@ function fixture() {
   runInNewContext(readFileSync(join(__dirname, '../scripts/navigation-data.js'), 'utf8'), {
     require,
     hexo: {
-      theme: {config: {nav_categories: [{label: '文章'}, {label: '评论'}]}},
+      theme: {config: {
+        nav_categories: [{label: '作品'}, {label: '随笔'}],
+        nav_misc: {label: '其他页面', icon: 'folder_open', path: '/misc/'}
+      }},
       config: {category_dir: 'categories', tag_dir: 'tags', filename_case: 0},
       extend: {
         helper: {register: (name, fn) => { helpers[name] = fn; }},
@@ -69,8 +72,34 @@ test('标签索引页与未创建文章的导航分类都会生成页面', () =>
   const {generators} = fixture();
   assert.equal(generators['tag-index']().path, 'tags/index.html');
   assert.equal(generators['tag-index']().layout, 'tags');
-  const pages = generators['nav-category-pages']({categories: {findOne: query => query.name === '文章' ? {} : null}});
+  const pages = generators['nav-category-pages']({categories: {findOne: query => query.name === '作品' ? {} : null}});
   assert.equal(pages.length, 1);
-  assert.equal(pages[0].data.category, '评论');
+  assert.equal(pages[0].data.category, '随笔');
   assert.match(pages[0].path, /index\.html$/);
+});
+
+test('其他页面收录没有导航分类的文章与独立页，按发布日期倒序；有分类的不收录', () => {
+  const {helpers, generators} = fixture();
+  const category = name => ({toArray: () => [{name}]});
+  const none = {toArray: () => []};
+  const posts = [
+    {title: '无分类', path: 'a/', date: new Date(2026, 0, 2), categories: none},
+    {title: '作品', path: 'b/', date: new Date(2026, 0, 3), categories: category('作品')},
+    {title: '随笔', path: 'c/', date: new Date(2026, 0, 4), categories: category('随笔')},
+    {title: '未列入导航的分类', path: 'd/', date: new Date(2026, 0, 5), categories: category('杂项')},
+    {title: '草稿', path: 'e/', published: false, date: new Date(2026, 0, 6), categories: none}
+  ];
+  const pages = [{title: '关于', path: 'about/', date: new Date(2026, 0, 1), categories: none}];
+  const locals = {posts: {toArray: () => posts}, pages: {toArray: () => pages}};
+  const theme = {nav_categories: [{label: '作品'}, {label: '随笔'}], nav_misc: {label: '其他页面', icon: 'folder_open', path: '/misc/'}};
+  const index = generators['misc-index'].call({}, locals);
+  assert.equal(index.path, 'misc/index.html');
+  assert.equal(index.layout, 'misc');
+  assert.deepEqual(Array.from(index.data.posts.toArray(), item => item.title), ['未列入导航的分类', '无分类', '关于']);
+  const sections = helpers.nav_sections.call({
+    config: {category_dir: 'categories', filename_case: 0}, theme,
+    site: {categories: {findOne: () => null}, posts: locals.posts, pages: locals.pages}
+  });
+  assert.equal(sections.misc.count, 3);
+  assert.equal(sections.misc.path, '/misc/');
 });

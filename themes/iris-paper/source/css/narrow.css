@@ -25,6 +25,12 @@ html {
   scroll-padding-top: calc(var(--top-nav-height) + var(--space) * 4);
 }
 
+.article-content {
+  font-size: 15px;
+  letter-spacing: 0.025em;
+  line-height: 1.75;
+}
+
 /* 2. 顶栏：紧凑，半透明毛玻璃（高模糊、提饱和、顶部高光），下缘留给阅读进度。 */
 .top-nav {
   grid-template-columns: var(--control-size) minmax(0, 1fr) auto;

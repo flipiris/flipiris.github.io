@@ -22,6 +22,16 @@
 `https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,100..700,0..1,0&icon_names=article,forum,...&display=block`
 （把 `icon_names` 换成按字母排序的全部所需图标名），从返回的 CSS 取出 `.woff2` 地址，覆盖保存为 `source/fonts/MaterialSymbolsOutlined.woff2`。
 
+## 字体回退
+
+`--UI-font` 与 `--serif` 的末尾追加了 `--local-cjk`：`Songti SC`（macOS）、`STSong`、思源宋体（`Source Han Serif SC`、`Noto Serif CJK SC`、`Noto Serif SC`）、`Songti TC`、`SimSun`、`PMingLiU`。网络字体尚未到达或加载失败时，浏览器直接用这些本机字体，字体到位后再替换，不会出现空白文字。要增删本机字体，只改 `base.css` 里的 `--local-cjk` 一行。
+
+注意：回退字体与网络字体的字形宽度不同，替换时行尾可能轻微重排；`font-display: swap` 保证文字始终可见。
+
+## 站点标识色
+
+站点名称使用 `--brand`（默认酒红 `114 30 52`），窄屏顶栏的目录按钮使用 `--accent`。每套配色预设各自给出一个 `--brand`，与它的 `--accent` 协调。
+
 ## 字体与渲染速度
 
 原始字体（共约 90 MB）放在站点根目录的 `fonts-src/`，不进入发布产物。`tools/build-fonts.py` 把每种字体切成：
@@ -55,14 +65,14 @@ python3 -m venv /tmp/ftvenv && /tmp/ftvenv/bin/pip install fonttools brotli   # 
 
 在页面 front-matter 中设置，由 `layout.ejs` 写成 `<body data-typography data-palette>`；名称由 `scripts/content-blocks.js` 校验，未知名称会退回默认并在构建时给出警告。
 
-- `typography`：`literary` 文学创作（首行缩进 2em，段间不留空）、`poem` 诗歌（整篇以 `fit-content` 取最长诗行宽度，再由 `margin-inline: auto` 居中，诗行左对齐，不使用 padding 凑位置）、`essay` 随笔（左对齐、不缩进）。
+- `typography`：`literary` 文学创作（首行缩进 2em，段间不留空）、`poem` 诗歌（整篇以 `fit-content` 取最长诗行宽度，再由 `margin-inline: auto` 居中，诗行左对齐，不使用 padding 凑位置）。
 - `palette`：`rose`（默认）、`mist`、`bamboo`、`sepia`、`ink`（深色）。预设只覆盖 `base.css` 的色卡变量（RGB 通道），所以所有组件自动跟随。
 
 新增预设：在 `presets.css` 添加 `body[data-palette="名称"]` 或 `[data-typography="名称"]` 规则，并把名称加入 `scripts/content-blocks.js` 顶部的列表；`npm run test:theme` 会检查两处是否一致。
 
 ## 侧栏结构
 
-自上而下：页面一览、标签索引；带图标的分类（文章、评论、作品，附文章数）；最近新增；全站信息。分类由 `_config.yml` 的 `nav_primary` / `nav_categories` 配置，分类尚无文章时仍生成一个空页面。页面模板的「本页目录」位于分类之后。
+自上而下：页面一览、标签索引；带图标的分类（文章、随笔、评论、作品，附文章数），末尾是「其他页面」；最近新增；全站信息。分类由 `_config.yml` 的 `nav_primary` / `nav_categories` 配置，分类尚无文章时仍生成一个空页面。\n\n「其他页面」（`nav_misc`，地址 `/misc/`）收录所有没有导航分类的文章与独立页面，按发布日期倒序，一页列完。因此根目录 `_config.yml` 的 `default_category` 已留空：无分类的内容不再被 Hexo 自动归入 `uncategorized`。给文章写上 `nav_categories` 中的分类，它就从「其他页面」移到该分类。页面模板的「本页目录」位于分类之后。
 
 ## 信息窗
 
@@ -70,7 +80,7 @@ python3 -m venv /tmp/ftvenv && /tmp/ftvenv/bin/pip install fonttools brotli   # 
 
 ## 阅读进度与逐段浮现（仅文章）
 
-文章页隐藏浏览器滚动条（`html.kind-post`），改用一条 2px 的横向细进度条，进度写入 CSS 变量 `--progress`：宽屏位于信息窗上缘，窄屏位于顶栏下缘。
+文章页隐藏浏览器滚动条（`html.kind-post`），改用一条 2px 的横向细进度条，进度写入 CSS 变量 `--progress`：宽屏位于信息窗上缘，窄屏位于顶栏下缘。进度 = `scrollY ÷ (文档高度 − 视口高度)`，与文末留白无关，所以滚到底必然为 100%；离底 24px 以内吸附为 100%，避免触控板惯性停在末端前一点点。填充条从淡到浓渐变，前端带一个亮点，滚到底时亮点收起、整条定格；还在页首（或页面短到无法滚动）时整条淡出。
 
 正文的每个块级子元素在进入视口时依次浮现（同批错开 50ms，最多 250ms）。首屏已可见的段落不做动画；未执行脚本、或系统开启「减少动态效果」时，全部内容直接显示。
 

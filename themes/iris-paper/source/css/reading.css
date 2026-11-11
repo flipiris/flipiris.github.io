@@ -23,11 +23,15 @@
 /* 1. 正文。段落缩进、对齐由 data-typography 预设决定，见 presets.css。 */
 .article-content {
   font-family: var(--serif);
+  font-weight: 500;
   font-size: 16px;
+  letter-spacing: 0.05em;
   line-height: 1.8;
   text-align: justify;
-  letter-spacing: 0.05em;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  line-break: strict;
+  word-break: normal;
+  text-autospace: normal;
 }
 
 .article-content p {
@@ -37,8 +41,8 @@
 .article-content h2,
 .article-content h3,
 .article-content h4 {
-  margin-top: 1.8em;
-  margin-bottom: 0.7em;
+  margin-top: 2em;
+  margin-bottom: 1.5em;
   font-weight: 700;
   line-height: 1.5;
 }
@@ -57,7 +61,7 @@ hr {
 
 .article-content img,
 .article-content video {
-  max-width: 100%;
+  max-width: 85%;
   height: auto;
 }
 
@@ -148,22 +152,46 @@ hr {
   }
 }
 
-/* 3. 阅读进度条：1.5px 横向细条，transform 缩放，不触发布局。 */
+/* 3. 阅读进度条：2px 横向细条，只用 transform / opacity。
+      填充条用 translate 而不是 scaleX 推进，圆头不会被拉扁；
+      轨道保留一层极淡底色，渐变从淡到浓并在前端留一个亮点，
+      起点处（未开始）淡出，到底时亮点收起、整条定格为实线。 */
 .read-progress {
   position: absolute;
   height: 2px;
   overflow: hidden;
   border-radius: 1px;
+  background: rgb(var(--accent) / 9%);
   pointer-events: none;
+  transition: opacity var(--motion-base) ease;
+}
+
+.read-progress.is-idle {
+  opacity: 0;
 }
 
 .read-progress > span {
+  position: relative;
   display: block;
   width: 100%;
   height: 100%;
-  background: rgb(var(--accent) / 75%);
-  transform: scaleX(var(--progress, 0));
-  transform-origin: 0 50%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgb(var(--accent) / 28%), rgb(var(--accent) / 82%));
+  transform: translate3d(calc(var(--progress, 0) * 100% - 100%), 0, 0);
+  transition: transform 120ms linear;
+}
+
+.read-progress > span::after {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 18px;
+  background: linear-gradient(90deg, transparent, rgb(var(--accent)));
+  content: "";
+  transition: opacity var(--motion-base) ease;
+}
+
+.read-progress.is-complete > span::after {
+  opacity: 0;
 }
 
 /* 宽屏：位于信息窗上缘；窄屏位于顶栏下缘（见 narrow.css）。 */

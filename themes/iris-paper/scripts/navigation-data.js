@@ -2,6 +2,21 @@
 
 const {slugize} = require('hexo-util');
 
+// 属于导航中某个分类的页面不进入「其他页面」。
+function isMisc(page, labels) {
+  const categories = page.categories && page.categories.toArray ? page.categories.toArray() : [];
+  return !categories.some(category => labels.includes(category.name));
+}
+
+function miscPages(site, theme) {
+  const labels = ((theme && theme.nav_categories) || []).map(item => item.label);
+  return site.posts.toArray().filter(post => post.published !== false)
+    .concat(site.pages.toArray())
+    .filter(page => isMisc(page, labels))
+    .sort((a, b) => (b.date ? b.date.valueOf() : 0) - (a.date ? a.date.valueOf() : 0)
+      || a.path.localeCompare(b.path));
+}
+
 hexo.extend.helper.register('recent_pages', function() {
   return this.site.posts.toArray().filter(post => post.published !== false)
     .concat(this.site.pages.toArray())
@@ -20,7 +35,9 @@ function categoryPath(config, name) {
 hexo.extend.helper.register('nav_sections', function() {
   const theme = this.theme || {};
   const categories = this.site.categories;
+  const misc = theme.nav_misc;
   return {
+    misc: misc ? {label: misc.label, icon: misc.icon, path: misc.path, count: miscPages(this.site, theme).length} : null,
     primary: (theme.nav_primary || []).map(item => ({label: item.label, path: item.path})),
     categories: (theme.nav_categories || []).map(item => {
       const found = categories.findOne ? categories.findOne({name: item.label}) : null;
@@ -40,6 +57,18 @@ hexo.extend.generator.register('category-index', function() {
     path: `${hexo.config.category_dir}/index.html`,
     layout: 'categories',
     data: {title: '分类', layout: 'categories'}
+  };
+});
+
+// 「其他页面」：没有导航分类的文章与独立页面，按发布日期倒序，一页列完。
+hexo.extend.generator.register('misc-index', function(locals) {
+  const misc = hexo.theme.config && hexo.theme.config.nav_misc;
+  if (!misc) return;
+  const posts = miscPages({posts: {toArray: () => locals.posts.toArray()}, pages: {toArray: () => locals.pages.toArray()}}, hexo.theme.config);
+  return {
+    path: `${misc.path.replace(/^\/|\/$/g, '')}/index.html`,
+    layout: 'misc',
+    data: {title: misc.label, layout: 'misc', posts: {length: posts.length, each: callback => posts.forEach(callback), toArray: () => posts}, current: 1, total: 1}
   };
 });
 

@@ -37,20 +37,20 @@
 .page-header h1 {
   margin: 0;
   font-family: var(--serif);
-  font-size: 30px;
-  font-weight: 700;
+  font-size: 25px;
+  font-weight: 900;
   line-height: 1.5;
   overflow-wrap: anywhere;
 }
 
 .page-header h1::after {
   display: inline-block;
-  width: 0.58em;
-  height: 0.58em;
-  margin-left: 0.4em;
+  width: 0.5em;
+  height: 0.5em;
+  margin-left: 0.25em;
   border-radius: 50%;
   background: rgb(var(--accent) / 25%);
-  vertical-align: 0.06em;
+  vertical-align: 0.05em;
   content: "";
 }
 
