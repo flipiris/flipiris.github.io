@@ -19,22 +19,23 @@
 </head>
 
 
-<body>
+<body<% if (is_home() || page.layout === 'post' || page.layout === 'page' || is_archive() || is_category() || is_tag() || page.layout === 'categories') { %> class="content-layout"<% } %>>
   <a class="skip-link" href="#main-content">跳转到正文</a>
 
   <!-- 通栏页眉暂作占位；导航浮在上方，窄屏由 top-nav 承载整个顶栏。 -->
   <header class="site-header">
     <nav id="top-nav" class="top-nav<%= page.layout === 'post' ? ' has-post-info' : '' %>" aria-label="站点导航">
-      <button
-        id="mobile-nav"
-        class="mobile-nav"
-        type="button"
-        aria-label="打开目录"
-        aria-controls="mobile-menu"
-        aria-expanded="false"
-      >
-        <%- partial('_partial/icon', {name: 'menu'}) %>
-      </button>
+      <details id="mobile-menu" class="mobile-menu hover-panel" data-panel-mode="narrow">
+        <summary id="mobile-nav" class="mobile-nav" aria-label="网站目录" aria-controls="mobile-menu-content">
+          <%- partial('_partial/icon', {name: 'menu'}) %>
+        </summary>
+        <div id="mobile-menu-content" class="mobile-menu-body panel-body">
+          <nav aria-label="网站目录">
+            <%- partial('_partial/navigation') %>
+          </nav>
+          <%- partial('_partial/site-stats') %>
+        </div>
+      </details>
       <div class="site-identity">
         <a class="home-link" href="<%- url_for('/') %>"><%= config.title %></a>
         <span class="subtitle"><%= config.subtitle %></span>
@@ -44,25 +45,16 @@
       <% } %>
     </nav>
     <nav id="side-nav" class="side-nav" aria-label="网站目录">
-      <div class="side-nav-content">
-        <%- partial('_partial/navigation') %>
+      <div class="side-nav-panel">
+        <div class="side-nav-content">
+          <%- partial('_partial/navigation') %>
+        </div>
+        <%- partial('_partial/site-stats') %>
       </div>
-      <%- partial('_partial/site-stats') %>
     </nav>
   </header>
 
-  <dialog id="mobile-menu" class="mobile-menu" aria-labelledby="mobile-menu-title">
-    <header class="mobile-menu-header">
-      <h2 id="mobile-menu-title">目录</h2>
-      <button class="close-menu" type="button" aria-label="关闭目录">
-        <%- partial('_partial/icon', {name: 'close'}) %>
-      </button>
-    </header>
-    <nav aria-label="网站目录">
-      <%- partial('_partial/navigation') %>
-    </nav>
-    <%- partial('_partial/site-stats') %>
-  </dialog>
+  <button class="menu-backdrop" type="button" aria-label="关闭目录" tabindex="-1" hidden></button>
 
   <!-- main 不设版心；首页、阅读页自行选择 .page-frame。 -->
   <main id="main-content" tabindex="-1">

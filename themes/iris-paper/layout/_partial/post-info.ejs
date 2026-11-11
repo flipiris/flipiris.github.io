@@ -1,13 +1,20 @@
-<% const headings = toc(page.content || '', {list_number: false}); %>
-<details class="post-info" open>
+<% const headings = toc(page.content || '', {list_number: false});
+const stats = page_stats(page.content); %>
+<details class="post-info hover-panel" data-panel-mode="narrow" open>
   <summary aria-label="信息与大纲">
-    <span class="post-info-label">信息与大纲</span>
     <span class="post-info-icon"><%- partial('_partial/icon', {name: 'info'}) %></span>
-    <span class="post-info-chevron"><%- partial('_partial/icon', {name: 'chevron'}) %></span>
   </summary>
-  <div class="post-info-body">
+  <div class="post-info-body panel-body">
     <section aria-label="文章信息">
       <dl class="post-meta">
+        <div>
+          <dt>正文</dt>
+          <dd><%= stats.words.toLocaleString('zh-CN') %> 字</dd>
+        </div>
+        <div>
+          <dt>预计阅读</dt>
+          <dd>约 <%= stats.minutes %> 分钟</dd>
+        </div>
         <div>
           <dt>作者</dt>
           <dd><%= page.author || config.author %></dd>

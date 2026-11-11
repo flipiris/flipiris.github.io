@@ -10,7 +10,8 @@
     "build": "hexo generate",
     "clean": "hexo clean",
     "deploy": "hexo deploy",
-    "server": "hexo server"
+    "server": "hexo server",
+    "test:theme": "node --test themes/iris-paper/test/*.test.js"
   },
   "hexo": {
     "version": "8.1.2"
@@ -28,5 +29,8 @@
     "hexo-server": "^3.0.0",
     "hexo-theme-landscape": "^1.0.0",
     "htmlparser2": "^10.1.0"
+  },
+  "devDependencies": {
+    "jsdom": "^25.0.1"
   }
 }

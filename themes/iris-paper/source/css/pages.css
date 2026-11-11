@@ -1,6 +1,6 @@
-/* 1. 纸张只应用于普通页面，自由作品仍使用完整画布。 */
+/* 1. 首页不铺纸张；归档与阅读页的纸张总宽度上限为 750px。 */
 .page-frame {
-  width: calc(100% - 2 * var(--content-left));
+  width: var(--frame-width);
   max-width: var(--content-width);
   margin-inline: auto;
 }
@@ -11,10 +11,19 @@
   position: relative;
   min-height: calc(100dvh - var(--page-top) - var(--footer-height));
   margin-top: var(--page-top);
+}
+
+.archive-page,
+.article-page {
+  max-width: var(--paper-width);
   padding: var(--paper-padding);
   border-radius: var(--paper-radius);
   background: rgb(var(--paper));
-  box-shadow: 0 var(--space) calc(var(--space) * 5) rgb(var(--shadow) / 5%);
+  box-shadow: var(--paper-shadow);
+}
+
+.home-page {
+  padding: var(--paper-padding);
 }
 
 .page-header {
@@ -30,13 +39,34 @@
   overflow-wrap: anywhere;
 }
 
-.page-header::before {
-  display: block;
-  width: calc(var(--space) * 8);
-  height: 3px;
-  margin-bottom: calc(var(--space) * 3);
-  background: rgb(var(--accent));
+.page-header h1::after {
+  display: inline-block;
+  width: 0.58em;
+  height: 0.58em;
+  margin-left: 0.4em;
+  border-radius: 50%;
+  background: rgb(var(--accent) / 25%);
+  vertical-align: 0.06em;
   content: "";
+}
+
+.category-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.category-list a {
+  display: flex;
+  justify-content: space-between;
+  gap: calc(var(--space) * 4);
+  padding-block: calc(var(--space) * 3);
+  border-bottom: 1px solid rgb(var(--line));
+}
+
+.category-count {
+  color: rgb(var(--muted));
+  font-variant-numeric: tabular-nums;
 }
 
 /* 2. 内容索引：只显示日期与标题。 */
@@ -74,8 +104,10 @@
   text-underline-offset: var(--space);
 }
 
-.post-item a:hover {
-  text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+  .post-item a:hover {
+    text-decoration: underline;
+  }
 }
 
 .empty-state {

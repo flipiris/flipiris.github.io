@@ -15,31 +15,37 @@
   --serif: "Times New Roman", "GenRyuMin2TW", "Noto Serif CJK SC", Georgia, serif;
 
   --space: 4px;
-  --layout-width: 1440px;
-  --nav-left: max(calc(var(--space) * 6), calc((100vw - var(--layout-width)) / 2));
-  --nav-top: calc(var(--space) * 4);
+  --layout-gutter: clamp(16px, 2vw, 24px);
+  --nav-top: calc((var(--header-height) - var(--top-nav-height)) / 2);
   --nav-width: clamp(176px, 16vw, 224px);
   --top-nav-height: calc(var(--space) * 13);
   --nav-gap: calc(var(--space) * 2);
-  --nav-radius: calc(var(--space) * 4);
+  --nav-radius: calc(var(--space) * 2);
+  --drawer-radius: calc(var(--space) * 2);
   --nav-padding: calc(var(--space) * 3);
-  --nav-axis: calc(var(--nav-left) + var(--nav-width) / 2);
   --nav-blur: 18px;
+  --top-nav-blur: calc(var(--nav-blur) + var(--space) * 3);
+  --dropdown-limit: 50dvh;
   --control-size: calc(var(--space) * 11);
   --info-summary-height: calc(var(--space) * 13);
 
   /* 左右栏等宽，正文居中；纸张内边距不挤占正文的阅读宽度。 */
-  --content-gap: clamp(20px, 2.5vw, 40px);
-  --content-left: calc(var(--nav-left) + var(--nav-width) + var(--content-gap));
   --content-width: 1000px;
   --reading-width: 750px;
+  --paper-width: var(--reading-width);
   --paper-padding: clamp(24px, 2.5vw, 36px);
   --paper-radius: 3px;
-  --page-gutter: var(--nav-left);
-  --rail-top: calc(var(--nav-top) + var(--top-nav-height) + var(--nav-gap));
+  --page-gutter: var(--layout-gutter);
+  --rail-top: calc(var(--nav-top) + var(--top-nav-height) + var(--space) * 4);
   --rail-height: 80vh;
-  --header-height: calc(var(--rail-top) + var(--space) * 15);
+  --sidebar-height: 70vh;
+  --header-height: calc(var(--space) * 32);
   --page-top: calc(var(--header-height) - var(--space) * 8);
+  --paper-shadow: 0 var(--space) calc(var(--space) * 5) rgb(var(--shadow) / 5%);
+  --float-shadow: 0 calc(var(--space) / 2) calc(var(--space) * 3) rgb(var(--shadow) / 3%);
+  --drawer-shadow: 0 calc(var(--space) * 3) calc(var(--space) * 4) calc(var(--space) * -3) rgb(var(--shadow) / 10%), var(--float-shadow);
+  --hover-opacity: 7%;
+  --hover-inset: var(--space);
   --footer-height: calc(var(--space) * 20);
 
   --motion-fast: 160ms;
@@ -58,6 +64,14 @@ html {
 }
 
 body {
+  /* 在同一元素解析版心与栏位，随页面类型一起改变，四段横向留白等宽。 */
+  --frame-max-width: var(--content-width);
+  --frame-width: min(var(--frame-max-width), calc(100vw - 2 * var(--nav-width) - 4 * var(--layout-gutter)));
+  --nav-left: calc((100vw - var(--frame-width) - 2 * var(--nav-width)) / 4);
+  --nav-axis: calc(var(--nav-left) + var(--nav-width) / 2);
+  --content-gap: var(--nav-left);
+  --content-left: calc(var(--nav-left) + var(--nav-width) + var(--content-gap));
+
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
@@ -76,8 +90,10 @@ a {
   transition: color var(--motion-fast) ease, background-color var(--motion-fast) ease;
 }
 
-a:hover {
-  color: rgb(var(--accent));
+@media (hover: hover) and (pointer: fine) {
+  a:hover {
+    color: rgb(var(--accent));
+  }
 }
 
 button {
@@ -89,7 +105,7 @@ button {
 a:focus-visible,
 button:focus-visible {
   outline: 2px solid rgb(var(--accent));
-  outline-offset: var(--space);
+  outline-offset: -2px;
 }
 
 ::selection {
@@ -105,6 +121,10 @@ button:focus-visible {
 
 #main-content:focus {
   outline: none;
+}
+
+body.content-layout {
+  --frame-max-width: var(--paper-width);
 }
 
 .skip-link {
@@ -125,15 +145,19 @@ button:focus-visible {
 /* 3. 窄屏只替换布局变量，导航直接成为顶栏。 */
 @media (max-width: 860px) {
   :root {
-    --nav-left: calc(var(--space) * 4);
     --nav-top: 0px;
     --top-nav-height: calc(var(--control-size) + var(--space) * 5);
     --nav-gap: calc(var(--space) * 2);
     --page-gutter: clamp(12px, 3vw, 24px);
-    --content-left: var(--page-gutter);
     --paper-padding: clamp(20px, 5vw, 40px);
     --header-height: calc(var(--top-nav-height) + var(--space) * 12);
     --page-top: calc(var(--header-height) - var(--space) * 8);
+  }
+
+  body {
+    --nav-left: calc(var(--space) * 4);
+    --frame-width: min(var(--frame-max-width), calc(100vw - 2 * var(--page-gutter)));
+    --content-left: var(--page-gutter);
   }
 
   html {

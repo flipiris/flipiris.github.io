@@ -1,0 +1,6 @@
+<footer class="article-footer">
+  <% if (page.date) { %>
+    <time class="article-date" datetime="<%= date_xml(page.date) %>"><%= date(page.date, 'YYYY.MM.DD') %></time>
+  <% } %>
+  <em>by <%= page.author || config.author %></em>
+</footer>

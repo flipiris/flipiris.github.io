@@ -11,3 +11,5 @@ menu:
     path: /
   - label: 文章归档
     path: /archives/
+  - label: 分类
+    path: /categories/

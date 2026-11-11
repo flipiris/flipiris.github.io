@@ -22,6 +22,11 @@ function countWords(content) {
   return characters + (words.match(/[\p{L}\p{N}]+(?:['’\-][\p{L}\p{N}]+)*/gu) || []).length;
 }
 
+hexo.extend.helper.register('page_stats', function(content) {
+  const words = countWords(content || '');
+  return {words, minutes: Math.max(1, Math.ceil(words / 300))};
+});
+
 hexo.extend.helper.register('site_stats', function() {
   // 使用当前构建可见的内容，默认构建不包含草稿及未来文章。
   const posts = this.site.posts.toArray().filter(post => post.published !== false);

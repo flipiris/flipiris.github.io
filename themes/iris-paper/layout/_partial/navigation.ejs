@@ -1,5 +1,13 @@
 <%- partial('_partial/navigation-tree', {items: theme.menu}) %>
 
+<% const recent = recent_pages(); %>
+<% if (recent.length) { %>
+  <section class="recent-pages" aria-label="最近新增">
+    <h2>最近新增</h2>
+    <%- partial('_partial/navigation-tree', {items: recent}) %>
+  </section>
+<% } %>
+
 <% if (page.layout !== 'post' && (is_post() || (page.layout && !is_home() && !is_archive()))) {
   const headings = toc(page.content || '', {list_number: false});
 %>

@@ -6,16 +6,19 @@ const {readFileSync} = require('node:fs');
 const {join} = require('node:path');
 const {runInNewContext} = require('node:vm');
 
-function stats(posts = [], pages = []) {
-  let helper;
+function helpers() {
+  const registered = {};
   runInNewContext(readFileSync(join(__dirname, '../scripts/site-stats.js'), 'utf8'), {
     require,
     hexo: {extend: {helper: {register(name, callback) {
-      assert.equal(name, 'site_stats');
-      helper = callback;
+      registered[name] = callback;
     }}}}
   });
-  return helper.call({site: {
+  return registered;
+}
+
+function stats(posts = [], pages = []) {
+  return helpers().site_stats.call({site: {
     posts: {toArray: () => posts},
     pages: {toArray: () => pages}
   }});
@@ -26,6 +29,15 @@ test('空站点为零，不产生虚假的更新时间', () => {
   assert.equal(result.pages, 0);
   assert.equal(result.words, 0);
   assert.equal(result.updated, undefined);
+});
+
+test('页面统计复用正文字数口径，以每分钟 300 字向上取整', () => {
+  const pageStats = helpers().page_stats;
+  assert.equal(pageStats('<p>中文 Hello</p><pre>不计代码</pre>').words, 3);
+  assert.equal(pageStats('<p>' + '字'.repeat(300) + '</p>').minutes, 1);
+  assert.equal(pageStats('<p>' + '字'.repeat(301) + '</p>').minutes, 2);
+  assert.equal(pageStats('').words, 0);
+  assert.equal(pageStats('').minutes, 1);
 });
 
 test('仅计算已发布文章与独立页面，跳过草稿', () => {

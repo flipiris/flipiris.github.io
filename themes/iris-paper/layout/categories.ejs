@@ -1,0 +1,15 @@
+<section class="archive-page page-frame" aria-labelledby="category-title">
+  <header class="page-header">
+    <h1 id="category-title">分类</h1>
+  </header>
+  <% const categories = site.categories.sort('name').toArray().filter(category => category.length); %>
+  <% if (categories.length) { %>
+    <ul class="category-list">
+      <% categories.forEach(function(category) { %>
+        <li><a href="<%- url_for(category.path) %>"><span><%= category.name %></span><span class="category-count"><%= category.length %> 篇</span></a></li>
+      <% }); %>
+    </ul>
+  <% } else { %>
+    <p class="empty-state">暂无分类。</p>
+  <% } %>
+</section>

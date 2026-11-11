@@ -46,19 +46,23 @@
   line-height: 1.8;
 }
 
+/* 宽屏目录常驻，无开关；与站点标识共用位置轴线。 */
 .side-nav {
+  top: var(--rail-top);
+  min-width: 0;
+  border: 0;
+  border-radius: var(--nav-radius);
+  background: rgb(var(--paper) / 90%);
+  box-shadow: var(--float-shadow);
+  -webkit-backdrop-filter: blur(var(--nav-blur));
+  backdrop-filter: blur(var(--nav-blur));
+}
+
+.side-nav-panel {
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
-  top: var(--rail-top);
-  max-height: min(var(--rail-height), calc(100dvh - var(--rail-top) - var(--nav-left)));
-  min-width: 0;
+  height: var(--sidebar-height);
   padding: var(--nav-padding);
-  border: 1px solid rgb(var(--accent) / 14%);
-  border-radius: var(--nav-radius);
-  background: rgb(var(--paper) / 80%);
-  box-shadow: 0 calc(var(--space) * 2) calc(var(--space) * 6) rgb(var(--shadow) / 4%);
-  -webkit-backdrop-filter: blur(var(--nav-blur)) saturate(120%);
-  backdrop-filter: blur(var(--nav-blur)) saturate(120%);
 }
 
 .side-nav-content {
@@ -84,6 +88,9 @@
 .toc-link {
   position: relative;
   display: block;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
   padding: calc(var(--space) * 1.5) calc(var(--space) * 3);
   border-radius: calc(var(--space) * 2);
   font-size: 14px;
@@ -94,11 +101,18 @@
     box-shadow var(--motion-fast) ease;
 }
 
+/* 侧栏链接高亮更舒展，仍留在点击区域内，不触及浮窗边缘。 */
+:is(.side-nav, .mobile-menu-body) .nav-tree a {
+  --hover-inset: calc(var(--space) / 2);
+  --hover-opacity: 9%;
+  padding-block: calc(var(--space) * 2);
+}
+
 /* 高亮保留当前页标记，悬停另加 accent，不改变链接尺寸或文字位置。 */
 .nav-tree a::before,
 .toc-link::before {
   position: absolute;
-  inset: calc(var(--space) * 2) auto calc(var(--space) * 2) 0;
+  inset: calc(var(--space) * 2 + var(--hover-inset)) auto calc(var(--space) * 2 + var(--hover-inset)) var(--hover-inset);
   width: 2px;
   border-radius: var(--space);
   background: rgb(var(--accent));
@@ -107,17 +121,8 @@
   transition: opacity var(--motion-fast) ease;
 }
 
-.nav-tree a:is(:hover, :focus-visible),
-.toc-link:is(:hover, :focus-visible) {
-  background: rgb(var(--accent) / 10%);
-  color: rgb(var(--accent));
-  box-shadow: inset 0 0 0 1px rgb(var(--accent) / 15%);
-  text-decoration: none;
-}
-
 .nav-tree a[aria-current="page"],
 .toc-link[aria-current="location"] {
-  background: rgb(var(--nav-active) / 85%);
   color: rgb(var(--accent));
   font-weight: 700;
 }
@@ -127,9 +132,10 @@
   opacity: 1;
 }
 
-.nav-tree a[aria-current="page"]:is(:hover, :focus-visible),
-.toc-link[aria-current="location"]:is(:hover, :focus-visible) {
-  background: linear-gradient(rgb(var(--accent) / 10%), rgb(var(--accent) / 10%)), rgb(var(--nav-active));
+.nav-tree a[aria-current="page"]::after,
+.toc-link[aria-current="location"]::after {
+  background: rgb(var(--nav-active) / 85%);
+  opacity: 1;
 }
 
 .nav-ancestor {
@@ -143,13 +149,15 @@
   border-left: 1px solid rgb(var(--accent) / 18%);
 }
 
-.page-directory {
+.page-directory,
+.recent-pages {
   margin-top: calc(var(--space) * 3);
   padding-top: calc(var(--space) * 3);
   border-top: 1px solid rgb(var(--line));
 }
 
 .page-directory h2,
+.recent-pages h2,
 .site-stats h2 {
   margin: 0 calc(var(--space) * 3) calc(var(--space) * 2);
   color: rgb(var(--accent));
@@ -194,108 +202,79 @@
   font-weight: 700;
 }
 
-/* 3. 窄屏目录：原生 dialog 处理焦点与 Esc。 */
-.mobile-nav {
-  display: none;
-  height: var(--control-size);
-  width: var(--control-size);
-  padding: 0;
-  border: 0;
-  border-radius: calc(var(--space) * 2);
-  background: transparent;
+/* 3. 高亮是容器内缩一圈的独立底层，不改变文字、边框或点击区域。 */
+:is(.nav-tree a, .toc-link, .hover-panel > summary, .post-tags a, .pagination a) {
+  position: relative;
+  isolation: isolate;
 }
 
-.mobile-nav:hover,
-.close-menu:hover {
-  background: rgb(var(--accent) / 12%);
-  color: rgb(var(--accent));
+:is(.nav-tree a, .toc-link, .hover-panel > summary, .post-tags a, .pagination a)::after {
+  position: absolute;
+  z-index: -1;
+  inset: var(--hover-inset);
+  border-radius: max(2px, calc(var(--nav-radius) - var(--hover-inset)));
+  background: rgb(var(--accent) / var(--hover-opacity));
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-fast) ease, background-color var(--motion-fast) ease;
+}
+
+:is(.nav-tree a, .toc-link, .hover-panel > summary, .post-tags a, .pagination a):focus-visible::after,
+.hover-panel:is([data-state="opening"], [data-state="open"]) > summary::after {
+  opacity: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :is(.nav-tree a, .toc-link, .hover-panel > summary, .post-tags a, .pagination a):hover {
+    color: rgb(var(--accent));
+  }
+
+  :is(.nav-tree a, .toc-link, .hover-panel > summary, .post-tags a, .pagination a):hover::after {
+    opacity: 1;
+  }
+
+  .nav-tree a[aria-current="page"]:hover::after,
+  .toc-link[aria-current="location"]:hover::after {
+    background: linear-gradient(rgb(var(--accent) / var(--hover-opacity)), rgb(var(--accent) / var(--hover-opacity))), rgb(var(--nav-active) / 85%);
+  }
+}
+
+.hover-panel > summary {
+  max-width: 100%;
+  overflow: hidden;
+  cursor: pointer;
+  list-style: none;
+}
+
+.hover-panel > summary::-webkit-details-marker {
+  display: none;
+}
+
+.hover-panel > summary:focus-visible {
+  outline: 2px solid rgb(var(--accent));
+  outline-offset: calc(-1 * var(--hover-inset) - 2px);
+}
+
+/* 显隐动画由 navigation.js 每次创建，并在退场完成后才关闭 details。 */
+.menu-backdrop {
+  display: none;
 }
 
 .mobile-menu {
-  position: fixed;
-  inset: var(--nav-left) auto var(--nav-left) var(--nav-left);
-  width: min(320px, calc(100vw - var(--nav-left) * 2));
-  height: calc(100dvh - var(--nav-left) * 2);
-  max-height: none;
-  margin: 0;
-  padding: calc(var(--space) * 4);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  border: 1px solid rgb(var(--accent) / 18%);
-  border-radius: var(--nav-radius);
-  background: rgb(var(--paper) / 90%);
-  -webkit-backdrop-filter: blur(var(--nav-blur));
-  backdrop-filter: blur(var(--nav-blur));
+  display: none;
 }
 
-.mobile-menu[open] {
-  animation: menu-enter var(--motion-base) var(--ease-out);
-}
-
-.mobile-menu::backdrop {
-  background: rgb(var(--ink) / 24%);
-  -webkit-backdrop-filter: blur(calc(var(--space) / 2));
-  backdrop-filter: blur(calc(var(--space) / 2));
-}
-
-.mobile-menu[open]::backdrop {
-  animation: backdrop-enter var(--motion-base) ease;
-}
-
-.mobile-menu-header {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  margin-bottom: calc(var(--space) * 4);
-}
-
-.mobile-menu-header h2 {
-  margin: 0 calc(var(--space) * 3);
-  color: rgb(var(--accent));
-  font-size: 16px;
-  font-weight: 700;
-}
-
-.close-menu {
+.mobile-nav {
   display: grid;
   place-items: center;
   width: var(--control-size);
   height: var(--control-size);
   padding: 0;
-  border: 0;
-  border-radius: calc(var(--space) * 2);
-  background: transparent;
+  border-radius: var(--nav-radius);
 }
 
-button {
-  transition: background-color var(--motion-fast) ease, color var(--motion-fast) ease;
-}
-
-.nav-open {
-  overflow: hidden;
-}
-
-@keyframes menu-enter {
-  from {
-    opacity: 0;
-    transform: translateX(calc(var(--space) * -3));
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes backdrop-enter {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* 4. top-nav 承接整个窄屏顶栏，副标题保持在右侧。 */
+/* 4. 窄屏：左侧目录横向滑出，信息窗从顶栏向下展开。 */
 @media (max-width: 860px) {
   .top-nav {
     grid-template-columns: var(--control-size) minmax(0, 1fr) auto;
@@ -308,17 +287,20 @@ button {
     width: 100%;
     height: var(--top-nav-height);
     padding: 0 var(--nav-left);
-    transform: none;
     border: 0;
-    border-bottom: 1px solid rgb(var(--accent) / 18%);
-    border-radius: 0;
-    background: rgb(var(--paper) / 85%);
-    -webkit-backdrop-filter: blur(var(--nav-blur)) saturate(120%);
-    backdrop-filter: blur(var(--nav-blur)) saturate(120%);
+    border-bottom: 1px solid rgb(var(--accent) / 20%);
+    background: linear-gradient(rgb(var(--header-bg) / 12%), rgb(var(--header-bg) / 12%)), rgb(var(--paper) / 62%);
+    box-shadow: var(--float-shadow);
+    -webkit-backdrop-filter: blur(var(--top-nav-blur)) saturate(135%);
+    backdrop-filter: blur(var(--top-nav-blur)) saturate(135%);
   }
 
   .top-nav.has-post-info {
     grid-template-columns: var(--control-size) minmax(0, 1fr) auto var(--control-size);
+  }
+
+  .top-nav:has(.hover-panel[open]) {
+    box-shadow: none;
   }
 
   .site-identity {
@@ -339,8 +321,43 @@ button {
     display: none;
   }
 
-  .mobile-nav {
-    display: grid;
-    place-items: center;
+  .mobile-menu {
+    display: block;
+    width: var(--control-size);
+    border-radius: var(--nav-radius);
+  }
+
+  .mobile-menu-body {
+    position: absolute;
+    top: calc(100% + 1px);
+    left: 0;
+    width: min(320px, 100%);
+    height: calc(100dvh - var(--top-nav-height));
+    max-height: calc(100dvh - var(--top-nav-height));
+    padding: var(--nav-padding);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 0;
+    border-radius: 0 var(--drawer-radius) var(--drawer-radius) 0;
+    background: rgb(var(--paper));
+    box-shadow: var(--drawer-shadow);
+  }
+
+  .menu-backdrop:not([hidden]) {
+    display: block;
+    position: fixed;
+    z-index: 2;
+    inset: var(--top-nav-height) 0 0;
+    width: 100%;
+    height: calc(100dvh - var(--top-nav-height));
+    padding: 0;
+    border: 0;
+    background: rgb(var(--ink) / 8%);
+    -webkit-backdrop-filter: blur(calc(var(--space) * 2)) saturate(110%);
+    backdrop-filter: blur(calc(var(--space) * 2)) saturate(110%);
+  }
+
+  body.nav-open {
+    overflow: hidden;
   }
 }
