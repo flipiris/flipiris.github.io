@@ -22,27 +22,32 @@
 <body>
   <a class="skip-link" href="#main-content">跳转到正文</a>
 
-  <!-- 宽屏按 Grid 排列标识与侧栏；窄屏合为固定顶栏。 -->
+  <!-- 通栏页眉暂作占位；导航浮在上方，窄屏由 top-nav 承载整个顶栏。 -->
   <header class="site-header">
-    <button
-      id="mobile-nav"
-      class="mobile-nav"
-      type="button"
-      aria-label="打开目录"
-      aria-controls="mobile-menu"
-      aria-expanded="false"
-    >
-      <%- partial('_partial/icon', {name: 'menu'}) %>
-    </button>
-
-    <nav id="top-nav" class="top-nav" aria-label="站点标识">
-      <a class="home-link" href="<%- url_for('/') %>"><%= config.title %></a>
-      <span class="subtitle"><%= config.subtitle %></span>
+    <nav id="top-nav" class="top-nav<%= page.layout === 'post' ? ' has-post-info' : '' %>" aria-label="站点导航">
+      <button
+        id="mobile-nav"
+        class="mobile-nav"
+        type="button"
+        aria-label="打开目录"
+        aria-controls="mobile-menu"
+        aria-expanded="false"
+      >
+        <%- partial('_partial/icon', {name: 'menu'}) %>
+      </button>
+      <div class="site-identity">
+        <a class="home-link" href="<%- url_for('/') %>"><%= config.title %></a>
+        <span class="subtitle"><%= config.subtitle %></span>
+      </div>
+      <% if (page.layout === 'post') { %>
+        <%- partial('_partial/post-info') %>
+      <% } %>
     </nav>
     <nav id="side-nav" class="side-nav" aria-label="网站目录">
       <div class="side-nav-content">
         <%- partial('_partial/navigation') %>
       </div>
+      <%- partial('_partial/site-stats') %>
     </nav>
   </header>
 
@@ -56,6 +61,7 @@
     <nav aria-label="网站目录">
       <%- partial('_partial/navigation') %>
     </nav>
+    <%- partial('_partial/site-stats') %>
   </dialog>
 
   <!-- main 不设版心；首页、阅读页自行选择 .page-frame。 -->

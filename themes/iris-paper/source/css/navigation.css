@@ -1,44 +1,80 @@
-/* 1. top-nav：站点标识。 */
-.top-nav {
+/* 1. 通栏页眉仅预留位置，固定导航共用同一条中心轴。 */
+.site-header {
+  position: absolute;
+  inset: 0 0 auto;
+  height: var(--header-height);
+}
+
+.top-nav,
+.side-nav {
   position: fixed;
   z-index: 3;
-  top: var(--nav-top);
-  left: var(--nav-left);
+  left: calc(var(--nav-axis) - var(--nav-width) / 2);
   width: var(--nav-width);
+}
+
+.top-nav {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  top: var(--nav-top);
   height: var(--top-nav-height);
+  min-width: 0;
+  padding-inline: var(--nav-padding);
+}
+
+.site-identity {
+  display: grid;
+  justify-items: end;
+  max-width: 100%;
 }
 
 .home-link {
-  display: flex;
-  align-items: center;
-  height: 100%;
-  padding: 0 16px;
-  border-radius: inherit;
+  width: fit-content;
+  border-radius: var(--space);
   font-family: var(--serif);
-  font-size: 25px;
-  text-decoration: italic;
+  font-size: clamp(21px, 1.7vw, 25px);
+  font-weight: 700;
+  line-height: 1.3;
   overflow-wrap: anywhere;
 }
 
-/* 2. side-nav：宽屏目录，独立滚动，不跟随正文移动。 */
+.subtitle {
+  color: rgb(var(--accent));
+  font-size: 12px;
+  font-style: italic;
+  line-height: 1.8;
+}
+
 .side-nav {
-  position: fixed;
-  z-index: 2;
-  top: calc(var(--nav-top) + var(--top-nav-height) + var(--nav-gap));
-  left: var(--nav-left);
-  width: var(--nav-width);
-  max-height: calc(100dvh - var(--nav-top) - var(--top-nav-height) - var(--nav-gap) - 24px);
-  overflow-y: auto;
-  padding: 12px;
-  border: 1px solid var(--line);
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  top: var(--rail-top);
+  max-height: min(var(--rail-height), calc(100dvh - var(--rail-top) - var(--nav-left)));
+  min-width: 0;
+  padding: var(--nav-padding);
+  border: 1px solid rgb(var(--accent) / 14%);
   border-radius: var(--nav-radius);
-  background: var(--paper);
-  box-shadow: 0 8px 24px rgb(40 48 58 / 4%);
+  background: rgb(var(--paper) / 80%);
+  box-shadow: 0 calc(var(--space) * 2) calc(var(--space) * 6) rgb(var(--shadow) / 4%);
+  -webkit-backdrop-filter: blur(var(--nav-blur)) saturate(120%);
+  backdrop-filter: blur(var(--nav-blur)) saturate(120%);
+}
+
+.side-nav-content {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--accent) / 35%) transparent;
 }
 
 .nav-tree,
 .toc,
 .toc-child {
+  display: grid;
+  align-content: start;
+  gap: var(--space);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -46,137 +82,257 @@
 
 .nav-tree a,
 .toc-link {
+  position: relative;
   display: block;
-  padding: 8px 10px;
-  border-radius: 7px;
+  padding: calc(var(--space) * 1.5) calc(var(--space) * 3);
+  border-radius: calc(var(--space) * 2);
   font-size: 14px;
+  line-height: 1.6;
   overflow-wrap: anywhere;
+  transition: color var(--motion-fast) ease,
+    background-color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease;
 }
 
-.nav-tree a:hover,
-.toc-link:hover {
-  background: var(--nav-active);
+/* 高亮保留当前页标记，悬停另加 accent，不改变链接尺寸或文字位置。 */
+.nav-tree a::before,
+.toc-link::before {
+  position: absolute;
+  inset: calc(var(--space) * 2) auto calc(var(--space) * 2) 0;
+  width: 2px;
+  border-radius: var(--space);
+  background: rgb(var(--accent));
+  content: "";
+  opacity: 0;
+  transition: opacity var(--motion-fast) ease;
+}
+
+.nav-tree a:is(:hover, :focus-visible),
+.toc-link:is(:hover, :focus-visible) {
+  background: rgb(var(--accent) / 10%);
+  color: rgb(var(--accent));
+  box-shadow: inset 0 0 0 1px rgb(var(--accent) / 15%);
   text-decoration: none;
 }
 
-.nav-tree a[aria-current="page"] {
-  background: var(--nav-active);
-  color: var(--accent);
+.nav-tree a[aria-current="page"],
+.toc-link[aria-current="location"] {
+  background: rgb(var(--nav-active) / 85%);
+  color: rgb(var(--accent));
+  font-weight: 700;
+}
+
+.nav-tree a[aria-current="page"]::before,
+.toc-link[aria-current="location"]::before {
+  opacity: 1;
+}
+
+.nav-tree a[aria-current="page"]:is(:hover, :focus-visible),
+.toc-link[aria-current="location"]:is(:hover, :focus-visible) {
+  background: linear-gradient(rgb(var(--accent) / 10%), rgb(var(--accent) / 10%)), rgb(var(--nav-active));
 }
 
 .nav-ancestor {
-  color: var(--accent);
+  color: rgb(var(--accent));
 }
 
-/* 子目录用缩进与细线表示父子关系。 */
 .nav-tree .nav-tree,
 .toc-child {
-  margin-left: 10px;
-  padding-left: 10px;
-  border-left: 1px solid var(--line);
+  margin-left: calc(var(--space) * 2.5);
+  padding-left: calc(var(--space) * 2.5);
+  border-left: 1px solid rgb(var(--accent) / 18%);
 }
 
 .page-directory {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--line);
+  margin-top: calc(var(--space) * 3);
+  padding-top: calc(var(--space) * 3);
+  border-top: 1px solid rgb(var(--line));
 }
 
-.page-directory h2 {
-  margin: 0 10px 8px;
-  color: var(--muted);
-  font-size: 13px;
+.page-directory h2,
+.site-stats h2 {
+  margin: 0 calc(var(--space) * 3) calc(var(--space) * 2);
+  color: rgb(var(--accent));
+  font-size: 12px;
   font-weight: 400;
 }
 
-/* 3. mobile-nav：窄屏顶栏最左侧的目录开关。 */
+/* 2. 全站记录停靠侧栏底部；目录过长时仍可独立滚动。 */
+.site-stats {
+  margin-top: calc(var(--space) * 3);
+  padding-top: calc(var(--space) * 3);
+  border-top: 1px solid rgb(var(--accent) / 18%);
+}
+
+.site-stats dl {
+  display: grid;
+  gap: var(--space);
+  margin: 0;
+  padding: 0 calc(var(--space) * 3) var(--space);
+  font-size: 13px;
+}
+
+.site-stats dl > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: calc(var(--space) * 2);
+}
+
+.site-stats dt {
+  color: rgb(var(--muted));
+}
+
+.site-stats dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.site-stats .stat-number {
+  color: rgb(var(--accent));
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* 3. 窄屏目录：原生 dialog 处理焦点与 Esc。 */
 .mobile-nav {
   display: none;
-  height: 40px;
-  width: 40px;
+  height: var(--control-size);
+  width: var(--control-size);
   padding: 0;
   border: 0;
-  border-radius: 8px;
+  border-radius: calc(var(--space) * 2);
   background: transparent;
 }
 
-.mobile-nav:hover {
-  background: var(--nav-active);
+.mobile-nav:hover,
+.close-menu:hover {
+  background: rgb(var(--accent) / 12%);
+  color: rgb(var(--accent));
 }
 
-/* 4. 窄屏展开的目录，链接与宽屏共用 navigation.ejs。 */
 .mobile-menu {
   position: fixed;
-  inset: 16px auto 16px 16px;
-  width: min(300px, calc(100vw - 32px));
-  height: calc(100dvh - 32px);
+  inset: var(--nav-left) auto var(--nav-left) var(--nav-left);
+  width: min(320px, calc(100vw - var(--nav-left) * 2));
+  height: calc(100dvh - var(--nav-left) * 2);
   max-height: none;
   margin: 0;
-  padding: 16px;
+  padding: calc(var(--space) * 4);
   overflow-y: auto;
-  border: 1px solid var(--line);
+  overscroll-behavior: contain;
+  border: 1px solid rgb(var(--accent) / 18%);
   border-radius: var(--nav-radius);
-  background: var(--paper);
+  background: rgb(var(--paper) / 90%);
+  -webkit-backdrop-filter: blur(var(--nav-blur));
+  backdrop-filter: blur(var(--nav-blur));
+}
+
+.mobile-menu[open] {
+  animation: menu-enter var(--motion-base) var(--ease-out);
 }
 
 .mobile-menu::backdrop {
-  background: rgb(30 35 42 / 24%);
+  background: rgb(var(--ink) / 24%);
+  -webkit-backdrop-filter: blur(calc(var(--space) / 2));
+  backdrop-filter: blur(calc(var(--space) / 2));
+}
+
+.mobile-menu[open]::backdrop {
+  animation: backdrop-enter var(--motion-base) ease;
 }
 
 .mobile-menu-header {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: calc(var(--space) * 4);
 }
 
 .mobile-menu-header h2 {
-  margin: 0 10px;
+  margin: 0 calc(var(--space) * 3);
+  color: rgb(var(--accent));
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 700;
 }
 
 .close-menu {
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: var(--control-size);
+  height: var(--control-size);
   padding: 0;
   border: 0;
-  border-radius: 8px;
+  border-radius: calc(var(--space) * 2);
   background: transparent;
 }
 
-.close-menu:hover {
-  background: var(--nav-active);
+button {
+  transition: background-color var(--motion-fast) ease, color var(--motion-fast) ease;
 }
 
 .nav-open {
   overflow: hidden;
 }
 
+@keyframes menu-enter {
+  from {
+    opacity: 0;
+    transform: translateX(calc(var(--space) * -3));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes backdrop-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 4. top-nav 承接整个窄屏顶栏，副标题保持在右侧。 */
 @media (max-width: 860px) {
-  /* 整条顶栏固定，两个子元素在同一行排列。 */
-  .site-header {
-    display: flex;
-    position: fixed;
-    z-index: 3;
+  .top-nav {
+    grid-template-columns: var(--control-size) minmax(0, 1fr) auto;
+    align-items: center;
+    align-content: normal;
+    justify-items: start;
+    gap: var(--nav-gap);
     top: 0;
     left: 0;
-    align-items: center;
-    gap: 12px;
     width: 100%;
-    height: 50px;
-    padding: 12px var(--nav-left);
-    border-bottom: 1px solid var(--line);
-    background: var(--bg);
+    height: var(--top-nav-height);
+    padding: 0 var(--nav-left);
+    transform: none;
+    border: 0;
+    border-bottom: 1px solid rgb(var(--accent) / 18%);
+    border-radius: 0;
+    background: rgb(var(--paper) / 85%);
+    -webkit-backdrop-filter: blur(var(--nav-blur)) saturate(120%);
+    backdrop-filter: blur(var(--nav-blur)) saturate(120%);
   }
 
-  .top-nav {
-    position: static;
-    flex: 1;
-    min-width: 0;
-    width: auto;
+  .top-nav.has-post-info {
+    grid-template-columns: var(--control-size) minmax(0, 1fr) auto var(--control-size);
+  }
+
+  .site-identity {
+    display: contents;
+  }
+
+  .home-link {
+    font-size: clamp(18px, 4.5vw, 22px);
+  }
+
+  .subtitle {
+    justify-self: end;
+    text-align: right;
+    white-space: nowrap;
   }
 
   .side-nav {
@@ -185,7 +341,6 @@
 
   .mobile-nav {
     display: grid;
-    flex-shrink: 0;
     place-items: center;
   }
 }

@@ -1,0 +1,39 @@
+@font-face {
+    font-family:"ChillJinshuSongPro";
+    font-weight: normal;
+    src: url("../fonts/ChillJinshuSongPro_Regular.woff");
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family:"ChillJinshuSongPro";
+    font-weight: bold;
+    src: url("../fonts/ChillJinshuSongPro_Soft.otf");
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family:"GenRyuMin2TW";
+    font-weight: 400 500;
+    src: url("../fonts/GenRyuMin2TW-M.otf");
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family:"GenRyuMin2TW";
+    font-weight: 700;
+    src: url("../fonts/GenRyuMin2TW-B.otf");
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family:"GenRyuMin2TW";
+    font-weight: 900;
+    src: url("../fonts/GenRyuMin2TW-H.otf");
+    font-style: normal;
+    font-display: swap;
+}

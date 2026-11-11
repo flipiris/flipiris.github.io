@@ -1,4 +1,4 @@
-/* 1. 可选版心：首页、归档和普通阅读页使用。 */
+/* 1. 纸张只应用于普通页面，自由作品仍使用完整画布。 */
 .page-frame {
   width: calc(100% - 2 * var(--content-left));
   max-width: var(--content-width);
@@ -8,21 +8,35 @@
 .home-page,
 .archive-page,
 .article-page {
-  padding-top: var(--page-top);
-  padding-bottom: 64px;
+  position: relative;
+  min-height: calc(100dvh - var(--page-top) - var(--footer-height));
+  margin-top: var(--page-top);
+  padding: var(--paper-padding);
+  border-radius: var(--paper-radius);
+  background: rgb(var(--paper));
+  box-shadow: 0 var(--space) calc(var(--space) * 5) rgb(var(--shadow) / 5%);
 }
 
 .page-header {
-  margin-bottom: 36px;
+  margin-bottom: calc(var(--space) * 6);
 }
 
 .page-header h1 {
   margin: 0;
   font-family: var(--serif);
   font-size: 30px;
-  font-weight: 500;
+  font-weight: 700;
   line-height: 1.5;
   overflow-wrap: anywhere;
+}
+
+.page-header::before {
+  display: block;
+  width: calc(var(--space) * 8);
+  height: 3px;
+  margin-bottom: calc(var(--space) * 3);
+  background: rgb(var(--accent));
+  content: "";
 }
 
 /* 2. 内容索引：只显示日期与标题。 */
@@ -34,19 +48,19 @@
 
 .post-item {
   display: grid;
-  grid-template-columns: 112px minmax(0, 1fr);
+  grid-template-columns: calc(var(--space) * 24) minmax(0, 1fr);
   align-items: baseline;
-  gap: 24px;
-  padding: 18px 0;
-  border-top: 1px solid var(--line);
+  gap: calc(var(--space) * 6);
+  padding: calc(var(--space) * 4.5) 0;
+  border-top: 1px solid rgb(var(--line));
 }
 
 .post-item:last-child {
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid rgb(var(--line));
 }
 
 .post-item time {
-  color: var(--muted);
+  color: rgb(var(--muted));
   font-size: 13px;
   font-variant-numeric: tabular-nums;
 }
@@ -56,10 +70,16 @@
   font-family: var(--serif);
   font-size: 20px;
   overflow-wrap: anywhere;
+  text-decoration-color: rgb(var(--accent) / 35%);
+  text-underline-offset: var(--space);
+}
+
+.post-item a:hover {
+  text-decoration: underline;
 }
 
 .empty-state {
-  color: var(--muted);
+  color: rgb(var(--muted));
 }
 
 /* 3. 分页与页脚。 */
@@ -77,14 +97,14 @@
 }
 
 .pagination .current {
-  background: var(--nav-active);
+  background: rgb(var(--accent) / 10%);
+  color: rgb(var(--accent));
 }
 
 .site-footer {
   text-align: center;
-  padding-top: 20px;
-  padding-bottom: 24px;
-  color: var(--muted);
+  padding-block: calc(var(--space) * 6);
+  color: rgb(var(--muted));
 }
 
 .site-footer small {
@@ -94,7 +114,7 @@
 @media (max-width: 860px) {
   .post-item {
     grid-template-columns: minmax(0, 1fr);
-    gap: 4px;
+    gap: var(--space);
   }
 }
 

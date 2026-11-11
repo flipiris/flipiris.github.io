@@ -2,8 +2,36 @@
   const info = document.querySelector('.post-info');
   if (!info) return;
 
-  // 窄屏先让读者看到正文；原生 details 无脚本时也可操作。
-  if (window.matchMedia('(max-width: 860px)').matches) info.open = false;
+  const narrowScreen = window.matchMedia('(max-width: 860px)');
+  const summary = info.querySelector('summary');
+
+  // 同一个 details：宽屏浮窗，窄屏顶栏抽屉。
+  if (narrowScreen.matches) info.open = false;
+  narrowScreen.addEventListener('change', event => {
+    info.open = !event.matches;
+  });
+
+  document.querySelector('#mobile-nav').addEventListener('click', () => {
+    if (narrowScreen.matches) info.open = false;
+  });
+
+  document.addEventListener('pointerdown', event => {
+    if (narrowScreen.matches && info.open && !info.contains(event.target)) info.open = false;
+  });
+
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && narrowScreen.matches && info.open) {
+      info.open = false;
+      summary.focus({preventScroll: true});
+    }
+  });
+
+  info.addEventListener('click', event => {
+    if (narrowScreen.matches && event.target.closest('.toc-link')) {
+      info.open = false;
+      summary.focus({preventScroll: true});
+    }
+  });
 
   const sections = Array.from(info.querySelectorAll('.toc-link'), (link) => ({
     link,

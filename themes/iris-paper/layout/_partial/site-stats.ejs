@@ -1,0 +1,20 @@
+<% const stats = site_stats(); %>
+<section class="site-stats" aria-label="全站记录">
+  <h2>全站记录</h2>
+  <dl>
+    <div>
+      <dt>页面</dt>
+      <dd><span class="stat-number"><%= stats.pages.toLocaleString('zh-CN') %></span> 页</dd>
+    </div>
+    <div>
+      <dt>正文</dt>
+      <dd><span class="stat-number"><%= stats.words.toLocaleString('zh-CN') %></span> 字</dd>
+    </div>
+    <% if (stats.updated) { %>
+      <div>
+        <dt>最近更新</dt>
+        <dd><time datetime="<%= date_xml(stats.updated) %>"><%= date(stats.updated, 'YYYY.MM.DD') %></time></dd>
+      </div>
+    <% } %>
+  </dl>
+</section>

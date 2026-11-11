@@ -1,47 +1,59 @@
-/* 1. 全站变量：配色、字体、导航位置与版心尺寸。 */
+/* 1. 色卡只存 RGB 通道数组；在使用处通过 rgb(var(--色名) / 透明度) 取色。 */
 :root {
-  --bg: #f7f6f2;
-  --paper: #fffefa;
-  --ink: #34383e;
-  --muted: #70727a;
-  --accent: #506f8a;
-  --line: #e2dfdc;
-  --nav-active: #e6edf3;
+  --bg: 247 246 242;
+  --paper: 255 254 250;
+  --ink: 52 56 62;
+  --muted: 112 114 122;
+  --accent: 138 80 105;
+  --line: 226 223 220;
+  --nav-active: 230 237 243;
+  --header-bg: 244 201 203;
+  --code-bg: 238 239 239;
+  --shadow: 40 48 58;
 
-  --UI-font: "寒蝉锦书宋Pro", sans-serif;
+  --UI-font: "Times New Roman", "ChillJinshuSongPro", sans-serif;
   --serif: "Times New Roman", "GenRyuMin2TW", "Noto Serif CJK SC", Georgia, serif;
 
-  /* 宽屏整体居中：超出布局宽度的空间留在两侧。 */
-  --layout-width: 1360px;
-  --nav-left: max(32px, calc((100vw - var(--layout-width)) / 2));
-  --nav-top: 24px;
+  --space: 4px;
+  --layout-width: 1440px;
+  --nav-left: max(calc(var(--space) * 6), calc((100vw - var(--layout-width)) / 2));
+  --nav-top: calc(var(--space) * 4);
   --nav-width: clamp(176px, 16vw, 224px);
-  --top-nav-height: 52px;
-  --nav-gap: 12px;
-  --nav-radius: 16px;
+  --top-nav-height: calc(var(--space) * 13);
+  --nav-gap: calc(var(--space) * 2);
+  --nav-radius: calc(var(--space) * 4);
+  --nav-padding: calc(var(--space) * 3);
+  --nav-axis: calc(var(--nav-left) + var(--nav-width) / 2);
+  --nav-blur: 18px;
+  --control-size: calc(var(--space) * 11);
+  --info-summary-height: calc(var(--space) * 13);
 
-  /* 两侧预留等宽栏位；自由作品仍可使用整个画布。 */
-  --content-gap: clamp(24px, 3vw, 40px);
+  /* 左右栏等宽，正文居中；纸张内边距不挤占正文的阅读宽度。 */
+  --content-gap: clamp(20px, 2.5vw, 40px);
   --content-left: calc(var(--nav-left) + var(--nav-width) + var(--content-gap));
   --content-width: 1000px;
   --reading-width: 750px;
+  --paper-padding: clamp(24px, 2.5vw, 36px);
+  --paper-radius: 3px;
   --page-gutter: var(--nav-left);
   --rail-top: calc(var(--nav-top) + var(--top-nav-height) + var(--nav-gap));
   --rail-height: 80vh;
-  --page-top: var(--rail-top);
+  --header-height: calc(var(--rail-top) + var(--space) * 15);
+  --page-top: calc(var(--header-height) - var(--space) * 8);
+  --footer-height: calc(var(--space) * 20);
 
   --motion-fast: 160ms;
   --motion-base: 240ms;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* 2. 基础样式，不替作品设置标题、段落和媒体尺寸。 */
+/* 2. 全站基础，不替自由作品设置版心与媒体尺寸。 */
 * {
   box-sizing: border-box;
 }
 
 html {
-  scroll-padding-top: 32px;
+  scroll-padding-top: calc(var(--space) * 8);
   scroll-behavior: smooth;
 }
 
@@ -50,8 +62,8 @@ body {
   flex-direction: column;
   min-height: 100dvh;
   margin: 0;
-  background: var(--bg);
-  color: var(--ink);
+  background: rgb(var(--bg));
+  color: rgb(var(--ink));
   font-family: var(--UI-font);
   font-size: 16px;
   line-height: 1.7;
@@ -65,7 +77,7 @@ a {
 }
 
 a:hover {
-  background: var(--nav-active);
+  color: rgb(var(--accent));
 }
 
 button {
@@ -76,15 +88,16 @@ button {
 
 a:focus-visible,
 button:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 4px;
+  outline: 2px solid rgb(var(--accent));
+  outline-offset: var(--space);
 }
 
 ::selection {
-  background: var(--nav-active);
+  background: rgb(var(--accent) / 20%);
 }
 
 #main-content {
+  position: relative;
   flex: 1;
   width: 100%;
   min-width: 0;
@@ -98,36 +111,37 @@ button:focus-visible {
   position: fixed;
   z-index: 10;
   top: -100px;
-  left: 16px;
-  padding: 8px 16px;
-  border-radius: 8px;
-  background: var(--ink);
-  color: var(--paper);
+  left: calc(var(--space) * 4);
+  padding: calc(var(--space) * 2) calc(var(--space) * 4);
+  border-radius: calc(var(--space) * 2);
+  background: rgb(var(--ink));
+  color: rgb(var(--paper));
 }
 
 .skip-link:focus {
-  top: 8px;
+  top: calc(var(--space) * 2);
 }
 
-/* 3. 窄屏：菜单和站点标识合为顶栏，正文从顶栏下方开始。 */
+/* 3. 窄屏只替换布局变量，导航直接成为顶栏。 */
 @media (max-width: 860px) {
   :root {
-    --nav-left: 16px;
-    --nav-top: 16px;
-    --nav-width: 168px;
-    --top-nav-height: 36px;
-    --nav-gap: 8px;
-    --content-left: 24px;
-    --page-gutter: 24px;
-    --page-top: 96px;
+    --nav-left: calc(var(--space) * 4);
+    --nav-top: 0px;
+    --top-nav-height: calc(var(--control-size) + var(--space) * 5);
+    --nav-gap: calc(var(--space) * 2);
+    --page-gutter: clamp(12px, 3vw, 24px);
+    --content-left: var(--page-gutter);
+    --paper-padding: clamp(20px, 5vw, 40px);
+    --header-height: calc(var(--top-nav-height) + var(--space) * 12);
+    --page-top: calc(var(--header-height) - var(--space) * 8);
   }
 
   html {
-    scroll-padding-top: var(--page-top);
+    scroll-padding-top: calc(var(--top-nav-height) + var(--space) * 4);
   }
 }
 
-/* 4. 尊重系统减少动态效果设置，包括目录定位。 */
+/* 4. 减少动态效果，包括目录定位。 */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
