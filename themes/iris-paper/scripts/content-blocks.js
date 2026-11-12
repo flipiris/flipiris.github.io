@@ -1,11 +1,24 @@
 'use strict';
 
+const fs = require('node:fs');
+const path = require('node:path');
 const {parseDocument, DomUtils} = require('htmlparser2');
 const {escapeHTML} = require('hexo-util');
 const PALETTES = ['rose', 'tech', 'wanderers', 'sepia', 'ink'];
 const TYPOGRAPHIES = ['standard', 'enhanced', 'literary', 'poem'];
 
 const NOTE_CLASS = /(?:^|\s)note(?:\s|$)/;
+const IMAGE_PARAGRAPH = /<p>\s*(<img\b[^>]*>)\s*<\/p>/g;
+const IMAGE_TITLE = /\s+title="([^"]*)"/;
+
+function figureCaptions(content) {
+  return String(content || '').replace(IMAGE_PARAGRAPH, (paragraph, image) => {
+    const title = IMAGE_TITLE.exec(image);
+    const caption = title ? title[1].trim() : '';
+    if (!caption) return paragraph;
+    return `<figure>${image.replace(IMAGE_TITLE, '')}<figcaption>${caption}</figcaption></figure>`;
+  });
+}
 
 function isNote(node) {
   return node.type === 'tag' && node.name === 'div' && NOTE_CLASS.test(node.attribs.class || '');
@@ -36,10 +49,27 @@ function splitNote(content) {
 }
 
 const notes = new Map();
-hexo.extend.filter.register('before_generate', () => notes.clear());
+let homeContent;
+hexo.extend.filter.register('before_generate', () => {
+  notes.clear();
+  homeContent = undefined;
+});
 hexo.extend.helper.register('split_note', function(content = '') {
   if (!notes.has(content)) notes.set(content, splitNote(content));
   return notes.get(content);
+});
+
+hexo.extend.helper.register('figures', figureCaptions);
+hexo.extend.filter.register('after_post_render', data => {
+  data.content = figureCaptions(data.content);
+  return data;
+});
+
+hexo.extend.helper.register('home_content', function() {
+  if (homeContent !== undefined) return homeContent;
+  const file = path.join(hexo.source_dir, '_data/home.md');
+  homeContent = fs.existsSync(file) ? figureCaptions(hexo.render.renderSync({path: file})) : '';
+  return homeContent;
 });
 const warned = new Set();
 function pick(kind, value, allowed) {
@@ -76,4 +106,4 @@ hexo.extend.helper.register('canvas_document', function(content, base, bridge) {
   return prepared.replace(/<\/body>/i, script + '</body>');
 });
 
-module.exports = {splitNote};
+module.exports = {splitNote, figureCaptions};

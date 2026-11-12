@@ -1,11 +1,9 @@
-<% const stats = site_stats(); const activity = site_activity(); const homeData = site.data.home || {}; %>
-<figure class="home-image">
-  <img src="<%= homeData.image || 'https://cdn.mer.run/i/2026/05/13/6a04943a86de3.jpg' %>" alt="<%= homeData.image_alt || '' %>" fetchpriority="high">
-  <figcaption class="home-image-caption"><%= homeData.caption || '' %></figcaption>
-</figure>
-<section class="home-intro article-content" aria-label="首页文字">
-  <%- markdown(homeData.text || '') %>
+<% const stats = site_stats(); const activity = site_activity(); const intro = home_content(); %>
+<% if (intro.trim()) { %>
+<section class="home-intro article-content" aria-label="首页介绍">
+  <%- intro %>
 </section>
+<% } %>
 <section class="home-section" aria-labelledby="overview-title">
   <div class="section-heading"><h2 id="overview-title">全站概览</h2><a href="<%- url_for('/archives/') %>">浏览页面 →</a></div>
   <div class="home-overview">

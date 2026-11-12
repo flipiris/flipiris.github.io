@@ -1,6 +1,7 @@
 <%
 const layoutName = page_layout(page);
 const canvas = layoutName === 'canvas';
+const canvasDocument = canvas && /<html[\s>]/i.test(page.content || '');
 const home = is_home();
 const hasInfo = layoutName !== 'page';
 const documentTitle = page.title || (is_category() ? page.category : is_tag() ? page.tag : is_archive() ? '页面一览' : config.title);
@@ -22,13 +23,14 @@ const cssFiles = ['base', 'fonts', 'layout', 'navigation', 'pages', 'prose', 'in
   <script>document.documentElement.classList.add('js')</script>
   <link rel="preload" href="<%- url_for('/fonts/MaterialSymbolsOutlined.woff2') %>" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="<%- url_for('/fonts/ChillJinshuSongPro_Regular-core.woff2') %>" as="font" type="font/woff2" crossorigin>
-  <% if (!canvas) { %>
-    <link rel="preload" href="<%- url_for('/fonts/GenRyuMin2TW-M-core.woff2') %>" as="font" type="font/woff2" crossorigin>
-  <% } %>
+  <link rel="preload" href="<%- url_for('/fonts/GenRyuMin2TW-M-core.woff2') %>" as="font" type="font/woff2" crossorigin>
   <% cssFiles.forEach(function(name) { %>
     <link rel="stylesheet" href="<%- url_for('/css/' + name + '.css') %>">
   <% }); %>
-  <link data-responsive rel="stylesheet" href="<%- url_for('/css/compact.css') %>"<% if (!canvas) { %> media="(max-width: 860px)"<% } %>>
+  <link rel="stylesheet" href="<%- url_for('/css/compact.css') %>"<% if (!canvasDocument) { %> media="(max-width: 860px)"<% } %>>
+  <% if (home) { %>
+    <link rel="stylesheet" href="<%- url_for('/attachments/home/home.css') %>">
+  <% } %>
   <% (page.styles ? [].concat(page.styles) : []).forEach(function(href) { %>
     <link rel="stylesheet" href="<%- url_for(href) %>">
   <% }); %>
@@ -36,7 +38,7 @@ const cssFiles = ['base', 'fonts', 'layout', 'navigation', 'pages', 'prose', 'in
   <% if (hasInfo) { %><script src="<%- url_for('/js/reading.js') %>" defer></script><% } %>
 </head>
 
-<body class="<%= home ? 'is-home' : '' %>" data-layout="<%= layoutName %>" data-alignment="<%= page.alignment === 'balanced' ? 'balanced' : 'centered' %>"<% if (style.palette) { %> data-palette="<%= style.palette %>"<% } %><% if (style.typography) { %> data-typography="<%= style.typography %>"<% } %>>
+<body class="<%= home ? 'is-home' : '' %>" data-layout="<%= layoutName %>" data-alignment="<%= page.alignment === 'balanced' ? 'balanced' : 'centered' %>"<% if (canvas) { %> data-canvas="<%= canvasDocument ? 'document' : 'prose' %>"<% } %><% if (style.palette) { %> data-palette="<%= style.palette %>"<% } %><% if (style.typography) { %> data-typography="<%= style.typography %>"<% } %>>
   <a class="skip-link" href="#main-content">跳转到正文</a>
   <header class="site-header">
     <% if (home) { %><%- partial('_partial/site-identity', {hero: true}) %><% } %>

@@ -1,7 +1,0 @@
- themes/iris-paper/README.md                      |  2 +-
- themes/iris-paper/layout/_partial/page-title.ejs |  3 +--
- themes/iris-paper/source/css/base.css            | 20 ++++++++------------
- themes/iris-paper/source/css/pages.css           | 14 ++++----------
- themes/iris-paper/source/css/presets.css         |  2 +-
- themes/iris-paper/test/page-layout.test.js       | 17 ++++++-----------
- 6 files changed, 21 insertions(+), 37 deletions(-)

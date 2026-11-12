@@ -5,6 +5,7 @@
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   const canvas = document.querySelector('.canvas-document');
+  const canvasDocument = document.body.dataset.canvas === 'document';
   let canvasProgress = 0;
   const bars = Array.from(document.querySelectorAll('.read-progress'));
   const SNAP = 24;
@@ -82,7 +83,7 @@
   updateOutline();
 
   function setupReveal() {
-    if (!article || reduced.matches || !('IntersectionObserver' in window)) return;
+    if (canvasDocument || !article || reduced.matches || !('IntersectionObserver' in window)) return;
     const blocks = Array.from(article.children);
     if (!blocks.length) return;
 

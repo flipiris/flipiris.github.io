@@ -134,8 +134,8 @@ test('独立资源不进入统计、最近更新或其他页面，独立 HTML �
   const site = {posts: {toArray: () => []}, pages: {toArray: () => [
     {path: 'mtf/index.html', content: '<p>正文</p>'},
     {path: 'standalone.html', layout: false, content: '<p>页面</p>'},
-    {path: 'works/style.css', content: '忽略样式'},
-    {path: 'works/main.js', content: '忽略脚本'},
+    {path: 'attachments/style.css', content: '忽略样式'},
+    {path: 'attachments/main.js', content: '忽略脚本'},
     {path: 'draft/index.html', published: false}
   ]}};
   assert.deepEqual(publishedDocuments(site).map(page => page.path), ['mtf/index.html', 'standalone.html']);

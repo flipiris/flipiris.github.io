@@ -1,6 +1,6 @@
 (() => {
   const narrowScreen = window.matchMedia('(max-width: 860px)');
-  const isCompact = () => narrowScreen.matches || document.body.dataset.layout === 'canvas';
+  const isCompact = () => narrowScreen.matches || document.body.dataset.canvas === 'document';
   const hoverPointer = window.matchMedia('(hover: hover) and (pointer: fine)');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const backdrop = document.querySelector('.menu-backdrop');

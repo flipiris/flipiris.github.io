@@ -9,17 +9,20 @@ const {JSDOM} = require('jsdom');
 
 function helpers() {
   const registered = {};
+  const filters = {};
   const warnings = [];
-  let regenerate;
   runInNewContext(readFileSync(join(__dirname, '../scripts/content-blocks.js'), 'utf8'), {
     require,
     module: {exports: {}},
     hexo: {
       log: {warn: message => warnings.push(message)},
-      extend: {filter: {register(name, fn) { regenerate = fn; }}, helper: {register: (name, fn) => { registered[name] = fn; }}}
+      extend: {
+        filter: {register(name, fn) { filters[name] = fn; }},
+        helper: {register: (name, fn) => { registered[name] = fn; }}
+      }
     }
   });
-  return {registered, warnings, regenerate};
+  return {registered, filters, warnings, regenerate: () => filters.before_generate()};
 }
 
 test('没有注释块时正文原样返回，信息窗不出现第二页', () => {
@@ -59,6 +62,27 @@ test('空注释块被移除但不产生第二页', () => {
   assert.deepEqual({...split_note('<div class="note"> </div>x')}, {body: 'x', note: ''});
 });
 
+test('图片 title 转为图注：独占一段的图片生成 figure，其余保持原样', () => {
+  const {figures} = helpers().registered;
+  assert.equal(
+    figures('<p>\n<img src="/a.jpg" alt="山" title="清晨的山">\n</p>'),
+    '<figure><img src="/a.jpg" alt="山"><figcaption>清晨的山</figcaption></figure>'
+  );
+  assert.equal(
+    figures('<p>文字 <img src="/b.jpg" alt="B" title="说明"> 文字</p>'),
+    '<p>文字 <img src="/b.jpg" alt="B" title="说明"> 文字</p>'
+  );
+  assert.equal(figures('<p><img src="/c.jpg" alt="C"></p>'), '<p><img src="/c.jpg" alt="C"></p>');
+  assert.equal(figures(''), '');
+});
+
+test('after_post_render 为正文图片补图注并返回原数据', () => {
+  const {filters} = helpers();
+  const data = {content: '<p><img src="/a.jpg" alt="山" title="清晨的山"></p>'};
+  assert.equal(filters.after_post_render(data), data);
+  assert.equal(data.content, '<figure><img src="/a.jpg" alt="山"><figcaption>清晨的山</figcaption></figure>');
+});
+
 test('配色与版式预设：合法值通过，未知值回退默认并只警告一次', () => {
   const {registered, warnings} = helpers();
   assert.deepEqual({...registered.page_style({palette: 'Tech', typography: 'poem'})}, {palette: 'tech', typography: 'poem'});
@@ -93,9 +117,9 @@ test('完整 HTML 画布保留正文，注入素材基址与隔离通信脚本�
   const {canvas_document} = helpers().registered;
   assert.equal(canvas_document('<p>片段</p>'), '');
   const html = '<html><head><title>原作</title></head><body><h1 id="a">标题</h1>    <p>原文</p></body></html>';
-  const document = canvas_document(html, '/works/test/?a=1&b=2', '/js/canvas-bridge.js');
+  const document = canvas_document(html, '/attachments/test/?a=1&b=2', '/js/canvas-bridge.js');
   const parsed = new JSDOM(document).window.document;
-  assert.equal(parsed.querySelector('base').getAttribute('href'), '/works/test/?a=1&b=2');
+  assert.equal(parsed.querySelector('base').getAttribute('href'), '/attachments/test/?a=1&b=2');
   assert.equal(parsed.querySelector('script').getAttribute('src'), '/js/canvas-bridge.js');
   assert.ok(document.includes('<h1 id="a">标题</h1>    <p>原文</p>'));
 });

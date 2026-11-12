@@ -7,8 +7,8 @@ const {join} = require('node:path');
 const {JSDOM} = require('jsdom');
 const source = readFileSync(join(__dirname, '../source/js/navigation.js'), 'utf8');
 
-function fixture({narrow = true, reduced = false, kind = 'post', canvas = false} = {}) {
-  const dom = new JSDOM(`<!doctype html><html style="--motion-base:240ms;--ease-out:linear"><body class="layout-${kind}" data-layout="${canvas ? 'canvas' : kind === 'page' ? 'page' : 'article'}">
+function fixture({narrow = true, reduced = false, kind = 'post', canvas = false, canvasDocument = false} = {}) {
+  const dom = new JSDOM(`<!doctype html><html style="--motion-base:240ms;--ease-out:linear"><body class="layout-${kind}" data-layout="${canvas ? 'canvas' : kind === 'page' ? 'page' : 'article'}"${canvasDocument ? ' data-canvas="document"' : ''}>
     <details id="site-menu" class="hover-panel"><summary>目录</summary><div class="panel-body">菜单</div></details>
     ${kind === 'page' ? '' : '<details class="post-info hover-panel" open><summary>信息</summary><div class="panel-body"><a href="#chapter">章节</a></div></details>'}
     <button class="menu-backdrop" hidden></button><main>正文</main>
@@ -169,11 +169,24 @@ test('page 不包含信息窗口，窄屏仍可开合站点目录', async () => 
   f.dispose();
 });
 
-test('canvas 宽屏使用顶栏状态机，目录与信息互斥', async () => {
+test('canvas 宽屏使用常驻侧栏，目录与信息同时可见', () => {
   const f = fixture({narrow: false, canvas: true});
+  assert.equal(f.menu.open, true);
+  assert.equal(f.info.open, true);
+  assert.equal(f.menu.dataset.state, 'wide');
+  assert.equal(f.info.dataset.state, 'wide');
+  f.click(f.info);
+  assert.equal(f.info.open, true);
+  f.dispose();
+});
+
+test('完整 HTML 画布宽屏也使用顶栏抽屉，目录与信息互斥', async () => {
+  const f = fixture({narrow: false, canvas: true, canvasDocument: true});
+  assert.equal(f.menu.open, false);
   assert.equal(f.info.open, false);
   f.click(f.menu);
   await f.settle(f.menu);
+  assert.equal(f.menu.open, true);
   f.click(f.info);
   assert.equal(f.menu.dataset.state, 'closing');
   await f.settle(f.menu);
@@ -184,7 +197,7 @@ test('canvas 宽屏使用顶栏状态机，目录与信息互斥', async () => {
 });
 
 test('鼠标悬停展开、移出延迟收起；点击固定展开后不会误收起', async () => {
-  const f = fixture({narrow: false, canvas: true});
+  const f = fixture({narrow: true});
   f.pointer(f.menu, 'pointerenter');
   await f.settle(f.menu);
   assert.equal(f.menu.open, true);

@@ -3,7 +3,6 @@
   if (!form) return;
   const body = document.body;
   const result = document.querySelector('#appearance-code');
-  const responsive = document.querySelector('link[data-responsive]');
   const status = document.querySelector('#appearance-status');
 
   function apply() {
@@ -12,8 +11,9 @@
       palette: palette.value, typography: typography.value,
       layout: layout.value, alignment: alignment.value
     });
+    if (layout.value === 'canvas') body.dataset.canvas = 'prose';
+    else delete body.dataset.canvas;
     document.querySelector('meta[name="color-scheme"]').content = palette.value === 'ink' ? 'dark' : 'light';
-    responsive.media = layout.value === 'canvas' ? 'all' : '(max-width: 860px)';
     result.textContent = `layout: ${layout.value}\nalignment: ${alignment.value}\ntypography: ${typography.value}\npalette: ${palette.value}`;
     status.textContent = `${palette.selectedOptions[0].textContent} · ${layout.selectedOptions[0].textContent} · ${typography.selectedOptions[0].textContent}`;
     document.dispatchEvent(new Event('appearance:layout'));

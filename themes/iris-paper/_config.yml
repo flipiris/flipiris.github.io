@@ -32,9 +32,9 @@ nav_misc:
 
 # 留空时显示禁用按钮；填写完整个人主页链接后启用。
 social:
-  github: ''
-  x: ''
+  github: 'https://github.com/flipiris'
+  x: 'https://x.com/flipiris'
 
 # 分类/标签索引：每页卡片数、每张卡片预览文章数。
-taxonomy_per_page: 8
-taxonomy_preview: 6
+taxonomy_per_page: 10
+taxonomy_preview: 5

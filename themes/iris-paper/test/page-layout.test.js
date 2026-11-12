@@ -40,3 +40,21 @@ test('文学段落外边距保留作者原来的 0.75em，所有 main 使用 100
   assert.match(base, /--page-width: 800px;/);
   assert.match(layout, /#main-content\s*\{[^}]*max-width: 1000px;/);
 });
+
+test('首页专用样式集中在 home.css，只在首页加载，图片宽屏靠右浮动', () => {
+  const root = join(__dirname, '..');
+  const layout = readFileSync(join(root, 'layout/layout.ejs'), 'utf8');
+  assert.match(layout, /if \(home\) \{[\s\S]*?\/attachments\/home\/home\.css/);
+  const home = readFileSync(join(root, '../../source/attachments/home/home.css'), 'utf8');
+  assert.match(home, /\.home-intro > figure:first-of-type\s*\{[\s\S]*?float: right;/);
+  for (const name of ['pages.css', 'layout.css', 'compact.css']) {
+    const css = readFileSync(join(root, 'source/css', name), 'utf8');
+    assert.doesNotMatch(css, /\.home-overview|\.home-intro|\.home-image|site-identity-hero|body\.is-home/);
+  }
+});
+
+test('画布不给侧栏触发器加 backdrop-filter，避免固定抽屉被 40px 父级裁切', () => {
+  const layout = readFileSync(join(__dirname, '../source/css/layout.css'), 'utf8');
+  assert.doesNotMatch(layout, /:is\(\.top-nav, \.site-menu,/);
+  assert.match(layout, /:is\(\.top-nav, \.site-menu-body, \.post-info-body\)/);
+});
