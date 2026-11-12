@@ -3,8 +3,8 @@
 const {parseDocument, DomUtils} = require('htmlparser2');
 
 // 页面元数据可调用的预设；名称对应 source/css/presets.css。
-const PALETTES = ['rose', 'mist', 'bamboo', 'sepia', 'ink'];
-const TYPOGRAPHIES = ['literary', 'poem'];
+const PALETTES = ['rose', 'tech', 'wanderers', 'sepia', 'ink'];
+const TYPOGRAPHIES = ['standard', 'enhanced', 'literary', 'poem'];
 
 const NOTE_CLASS = /(?:^|\s)note(?:\s|$)/;
 
@@ -59,9 +59,29 @@ function pick(kind, value, allowed) {
 hexo.extend.helper.register('page_style', function(page) {
   const data = page || {};
   return {
-    palette: pick('palette', data.palette, PALETTES),
-    typography: pick('typography', data.typography, TYPOGRAPHIES)
+    palette: pick('palette', String(data.palette || '').trim().toLowerCase().replace(/^wanderer$/, 'wanderers'), PALETTES),
+    typography: pick('typography', data.typography, TYPOGRAPHIES) || (!data.typography && data.categories && data.categories.toArray && data.categories.toArray().some(item => ['笔记', '随笔'].includes(item.name)) ? 'enhanced' : '')
   };
 });
 
 module.exports = {splitNote};
+
+
+function pageLayout(page) {
+  if (['canvas', 'work'].includes(page.layout) || page.presentation === 'canvas') return 'canvas';
+  return ['article', 'post'].includes(page.layout) ? 'article' : 'page';
+}
+hexo.extend.helper.register('page_layout', pageLayout);
+hexo.extend.helper.register('page_presentation', function(page) {
+  return pageLayout(page) === 'canvas' ? 'canvas' : 'paper';
+});
+
+hexo.extend.helper.register('canvas_document', function(content, base, bridge) {
+  const html = String(content || '');
+  if (!/<html[\s>]/i.test(html)) return '';
+  // srcdoc 内相对链接默认跟随外层页面；可显式给出作品素材目录。
+  const escaped = String(base || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  const prepared = escaped ? html.replace(/<head([^>]*)>/i, '<head$1><base href="' + escaped + '">') : html;
+  const script = '<script src="' + String(bridge || '/js/canvas-bridge.js').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;') + '"></script>';
+  return prepared.replace(/<\/body>/i, script + '</body>');
+});

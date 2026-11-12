@@ -1,13 +1,11 @@
-# 原首页文案保留在这里；精简后的首页不再输出此区块。
-intro:
-  eyebrow: 这个世界会好吗？
-  title: 有一天<br>我会长出眼睛。
-  description: 
-
 # 侧栏第一组：不带图标的固定入口。
 nav_primary:
+  - label: 最近更新
+    path: /updates/
   - label: 页面一览
     path: /archives/
+  - label: 分类索引
+    path: /categories/
   - label: 标签索引
     path: /tags/
 
@@ -15,7 +13,7 @@ nav_primary:
 # icon 是 Material Symbols 的图标名，需包含在 source/fonts/MaterialSymbolsOutlined.woff2 中。
 # 分类还没有文章时，仍会生成一个空的分类页面。
 nav_categories:
-  - label: 随笔
+  - label: 笔记
     icon: edit_note
   - label: 文章
     icon: article
@@ -29,3 +27,20 @@ nav_misc:
   label: 其他页面
   icon: folder_open
   path: /misc/
+
+# 留空时显示禁用按钮；填写完整个人主页链接后启用。
+social:
+  github: ''
+  x: ''
+
+# 分类/标签索引：每页卡片数、每张卡片预览文章数。
+taxonomy_per_page: 8
+taxonomy_preview: 6
+
+# 仅在文章未写 categories 时，根据 _posts 下的目录设置分类链。
+# 子目录可继续映射；没有映射的目录直接采用目录名。
+folder_categories:
+  notes: 笔记
+  articles: 文章
+  reviews: 评论
+  works: 作品

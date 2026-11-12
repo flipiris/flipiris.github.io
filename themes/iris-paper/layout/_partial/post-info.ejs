@@ -1,10 +1,10 @@
 <%
-const parts = split_note(page.content);
+const parts = split_note(typeof infoContent !== 'undefined' ? infoContent : page.content);
 const headings = toc(parts.body, {list_number: false});
 const stats = page_stats(parts.body);
 const hasNote = !!parts.note;
 %>
-<details class="post-info hover-panel" data-panel-mode="narrow" open>
+<details class="page-info post-info hover-panel" data-panel-mode="narrow" open>
   <summary aria-label="信息与大纲">
     <span class="post-info-icon"><%- partial('_partial/icon', {name: 'info'}) %></span>
   </summary>
@@ -18,7 +18,7 @@ const hasNote = !!parts.note;
     <% } %>
 
     <div class="info-pages" data-page="1">
-      <section class="info-page" id="info-page-1" aria-label="文章信息"<% if (hasNote) { %> role="tabpanel" aria-labelledby="info-tab-1"<% } %>>
+      <section class="info-page" id="info-page-1" aria-label="页面信息"<% if (hasNote) { %> role="tabpanel" aria-labelledby="info-tab-1"<% } %>>
         <dl class="post-stats">
           <div>
             <dt>正文</dt>
@@ -34,11 +34,11 @@ const hasNote = !!parts.note;
             <dt>作者</dt>
             <dd><%= page.author || config.author %></dd>
           </div>
-          <div>
+          <% if (page.date) { %><div>
             <dt>发布</dt>
             <dd><time datetime="<%= date_xml(page.date) %>"><%= date(page.date, 'YYYY.MM.DD') %></time></dd>
-          </div>
-          <% if (page.updated && date(page.updated, 'YYYY-MM-DD') !== date(page.date, 'YYYY-MM-DD')) { %>
+          </div><% } %>
+          <% if (page.updated && (!page.date || date(page.updated, 'YYYY-MM-DD') !== date(page.date, 'YYYY-MM-DD'))) { %>
             <div>
               <dt>更新</dt>
               <dd><time datetime="<%= date_xml(page.updated) %>"><%= date(page.updated, 'YYYY.MM.DD') %></time></dd>
@@ -60,12 +60,12 @@ const hasNote = !!parts.note;
       <% } %>
     </div>
 
-    <nav class="post-outline" aria-label="文章大纲">
+    <nav class="post-outline" aria-label="页面大纲">
       <h2>大纲</h2>
       <% if (headings) { %>
         <%- headings %>
       <% } else { %>
-        <p class="outline-empty">本文暂无章节标题</p>
+        <p class="outline-empty">本页暂无章节标题</p>
       <% } %>
     </nav>
   </div>

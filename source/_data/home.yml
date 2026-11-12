@@ -1,0 +1,6 @@
+# 首页大图、图片注释与正文。text 的每行保持两个空格缩进，可写 Markdown。
+image: https://cdn.mer.run/i/2026/05/13/6a04943a86de3.jpg
+image_alt: ''
+caption: ''
+text: |
+

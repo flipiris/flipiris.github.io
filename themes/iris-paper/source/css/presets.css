@@ -1,6 +1,6 @@
 /* 由页面 front-matter 调用的版式与配色预设：
-     typography: literary | poem
-     palette:    rose（默认，酒红标识） | mist | bamboo | sepia | ink
+     typography: standard | enhanced | literary | poem
+     palette:    rose（默认，酒红标识） | tech | wanderers | sepia | ink
    每套配色同时给出 --brand（站点标识色），默认 rose 为酒红。
    layout.ejs 把它们写成 <body data-typography data-palette>。
    配色只覆盖色卡变量（RGB 通道），所以全站组件自动跟随。 */
@@ -9,12 +9,12 @@
 
 /* 默认：段落之间留白，两端对齐，无缩进。 */
 
-/* 文学创作：首行缩进两字，段间不留空行，符合中文小说的排版惯例。 */
+/* 文学创作：首行缩进两字，保留原有的段落外边距。 */
 [data-typography="literary"] .article-content {
   text-indent: 2em;
 }
 
-[data-typography="literary"] .article-content :is(h2, h3, h4, blockquote, pre, .highlight, figure, .poem, li, td, th) {
+[data-typography="literary"] .article-content :is(h1, h2, h3, h4, h5, h6, blockquote, pre, .highlight, figure, .poem, li, td, th) {
   text-indent: 0;
 }
 
@@ -44,36 +44,10 @@
 }
 
 /* 2. 配色 */
-body[data-palette="mist"] {
-  --brand: 30 62 98;
-  --bg: 241 244 247;
-  --paper: 252 253 254;
-  --ink: 40 50 62;
-  --muted: 100 112 126;
-  --accent: 62 104 140;
-  --line: 218 224 230;
-  --nav-active: 226 236 245;
-  --header-bg: 190 214 235;
-  --code-bg: 232 237 241;
-  --shadow: 30 45 62;
-}
-
-body[data-palette="bamboo"] {
-  --brand: 36 78 52;
-  --bg: 242 245 238;
-  --paper: 252 253 249;
-  --ink: 44 56 48;
-  --muted: 104 116 106;
-  --accent: 74 118 88;
-  --line: 220 226 216;
-  --nav-active: 228 240 229;
-  --header-bg: 196 222 200;
-  --code-bg: 234 238 231;
-  --shadow: 30 50 38;
-}
-
 body[data-palette="sepia"] {
   --brand: 112 56 30;
+  --strong: 31 100 87;
+  --emphasis: 117 61 137;
   --bg: 244 238 226;
   --paper: 252 248 238;
   --ink: 62 50 40;
@@ -86,17 +60,105 @@ body[data-palette="sepia"] {
   --shadow: 70 50 30;
 }
 
+/* standard 明确覆盖分类默认值；enhanced 用于笔记与技术说明。 */
+[data-typography="standard"] .article-content {
+  text-indent: 0;
+}
+
+[data-typography="literary"] .article-content p {
+  margin: 0.75em;
+}
+
+[data-typography="enhanced"] .article-content {
+  --heading-1: var(--brand);
+  --heading-2: var(--strong);
+  --heading-3: var(--emphasis);
+}
+
+[data-typography="enhanced"] .article-content :is(h1, h4) {
+  color: rgb(var(--heading-1));
+}
+[data-typography="enhanced"] .article-content :is(h2, h5) {
+  color: rgb(var(--heading-2));
+}
+[data-typography="enhanced"] .article-content :is(h3, h6) {
+  color: rgb(var(--heading-3));
+}
+
+[data-typography="enhanced"] .article-content strong {
+  color: rgb(var(--strong));
+}
+
+[data-typography="enhanced"] .article-content em {
+  color: rgb(var(--emphasis));
+}
+
+/* 技术博客：中性的白灰底，克制的钴蓝与青色。 */
+body[data-palette="tech"] {
+  --brand: 37 54 75;
+  --strong: 32 79 171;
+  --emphasis: 138 59 146;
+  --bg: 246 247 248;
+  --paper: 255 255 255;
+  --ink: 36 43 52;
+  --muted: 101 109 120;
+  --accent: 37 91 165;
+  --secondary: 28 113 111;
+  --line: 220 225 230;
+  --nav-active: 231 238 247;
+  --header-bg: 223 230 239;
+  --code-bg: 241 244 247;
+  --shadow: 26 39 55;
+}
+
+/* wanderers：象牙纸、深森林绿与旧金，强调色只落在关键位置。 */
+body[data-palette="wanderers"] {
+  --brand: 140 105 40;
+  --strong: 30 91 54;
+  --emphasis: 117 57 131;
+  --bg: 224 233 216;
+  --paper: 245 248 235;
+  --ink: 43 57 46;
+  --muted: 104 111 93;
+  --accent: 57 94 66;
+  --secondary: 140 105 40;
+  --line: 211 211 185;
+  --nav-active: 229 232 211;
+  --header-bg: 183 187 138;
+  --code-bg: 235 236 220;
+  --shadow: 39 57 37;
+}
+
+/* Ink：冷炭黑与暖白，以灰紫、青绿提示层级。 */
 body[data-palette="ink"] {
-  --brand: 236 168 188;
-  --bg: 24 25 29;
-  --paper: 33 35 40;
-  --ink: 222 222 218;
-  --muted: 150 152 158;
-  --accent: 224 150 172;
-  --line: 56 58 64;
-  --nav-active: 52 56 66;
-  --header-bg: 120 70 90;
-  --code-bg: 42 44 50;
+  color-scheme: dark;
+  --brand: 228 216 197;
+  --strong: 117 185 247;
+  --emphasis: 241 172 117;
+  --bg: 23 26 30;
+  --paper: 31 35 40;
+  --ink: 225 225 218;
+  --muted: 155 161 169;
+  --accent: 175 164 218;
+  --secondary: 127 188 177;
+  --line: 58 64 71;
+  --nav-active: 48 52 65;
+  --header-bg: 64 66 92;
+  --code-bg: 39 44 51;
   --shadow: 0 0 0;
   --edge-light: rgb(255 255 255 / 9%);
+}
+
+
+body[data-palette="wanderers"] .page-title,
+body[data-palette="wanderers"] .article-content :is(h1, h2, h3, h4, h5, h6) {
+  color: rgb(var(--brand));
+}
+
+body[data-palette="wanderers"] :is(.home-section h2, .home-section h3, .taxonomy-card h2) {
+  color: rgb(var(--brand));
+}
+
+body[data-palette="wanderers"] .title-end::after {
+  background: rgb(var(--brand) / 60%);
 }

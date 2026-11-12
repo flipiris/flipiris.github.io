@@ -69,6 +69,11 @@ index_generator:
 # 无分类的内容不套默认分类，由主题归入「其他页面」（/misc/）。
 default_category:
 category_map:
+  笔记: notes
+  随笔: notes
+  文章: articles
+  评论: reviews
+  作品: works
 tag_map:
 
 # Metadata elements

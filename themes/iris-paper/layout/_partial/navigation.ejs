@@ -36,22 +36,3 @@ const belongs = label => !!(page.categories && page.categories.toArray && page.c
     </li>
   <% } %>
 </ul>
-
-<% if (page.layout === 'page') {
-  const headings = toc(split_note(page.content || '').body, {list_number: false});
-%>
-  <% if (headings) { %>
-    <section class="page-directory" aria-label="本页目录">
-      <h2>本页目录</h2>
-      <%- headings %>
-    </section>
-  <% } %>
-<% } %>
-
-<% const recent = recent_pages(); %>
-<% if (recent.length) { %>
-  <section class="recent-pages" aria-label="最近新增">
-    <h2>最近新增</h2>
-    <%- partial('_partial/navigation-tree', {items: recent}) %>
-  </section>
-<% } %>

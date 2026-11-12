@@ -6,6 +6,9 @@
   --muted: 112 114 122;
   --accent: 138 80 105;
   --brand: 114 30 52;
+  --secondary: 70 105 116;
+  --strong: 49 85 150;
+  --emphasis: 43 112 82;
   --line: 226 223 220;
   --nav-active: 230 237 243;
   --header-bg: 244 201 203;
@@ -29,12 +32,13 @@
   --nav-padding: calc(var(--space) * 3);
   --nav-blur: 18px;
   --top-nav-blur: calc(var(--nav-blur) + var(--space) * 3);
-  --dropdown-limit: 50dvh;
+  --dropdown-limit: 75dvh;
   --control-size: calc(var(--space) * 11);
   --info-summary-height: calc(var(--space) * 13);
 
   /* 左右栏等宽，正文居中；纸张宽度（含内边距）上限 700px。 */
   --content-width: 1000px;
+  --page-width: 800px;
   --reading-width: 700px;
   --paper-width: var(--reading-width);
   --paper-padding: clamp(24px, 2.5vw, 36px);
@@ -42,7 +46,7 @@
   --page-gutter: var(--layout-gutter);
   --rail-top: calc(var(--nav-top) + var(--top-nav-height) + var(--space) * 4);
   --rail-height: 80vh;
-  --sidebar-height: 70vh;
+  --sidebar-height: 75vh;
   --header-height: calc(var(--space) * 32);
   --page-top: calc(var(--header-height) - var(--space) * 8);
   --paper-shadow: 0 var(--space) calc(var(--space) * 5) rgb(var(--shadow) / 5%);
@@ -60,7 +64,7 @@
   --glass-tint: rgb(var(--header-bg) / 14%);
 }
 
-/* 2. 全站基础，不替自由作品设置版心与媒体尺寸。 */
+/* 2. 全站基础；包括画布在内的 main-content 最宽 1000px。 */
 * {
   box-sizing: border-box;
 }
@@ -83,7 +87,7 @@ html.kind-post::-webkit-scrollbar {
 body {
   /* 在同一元素解析版心与栏位，随页面类型一起改变，四段横向留白等宽。 */
   --frame-max-width: var(--content-width);
-  --frame-width: min(var(--frame-max-width), calc(100vw - 2 * var(--nav-width) - 4 * var(--layout-gutter)));
+  --frame-width: min(var(--content-width), var(--frame-max-width), calc(100vw - 2 * var(--nav-width) - 4 * var(--layout-gutter)));
   --nav-left: calc((100vw - var(--frame-width) - 2 * var(--nav-width)) / 4);
   --nav-axis: calc(var(--nav-left) + var(--nav-width) / 2);
   --content-gap: var(--nav-left);
@@ -105,7 +109,7 @@ body {
 
 /* 阅读区域才需要字距与连字等精细排版，其余界面保持快速渲染。 */
 .article-content,
-.page-header h1 {
+.page-title {
   text-rendering: optimizeLegibility;
 }
 
@@ -140,8 +144,10 @@ button:focus-visible {
 #main-content {
   position: relative;
   flex: 1;
-  width: 100%;
+  width: var(--frame-width);
+  max-width: 1000px;
   min-width: 0;
+  margin-inline: auto;
 }
 
 #main-content:focus {
@@ -208,4 +214,13 @@ body.content-layout {
 
 .icon-fill {
   font-variation-settings: "FILL" 1;
+}
+
+
+.site-layout {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
 }

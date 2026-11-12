@@ -1,6 +1,8 @@
 'use strict';
 
 const {parseDocument, DomUtils} = require('htmlparser2');
+const moment = require('moment-timezone');
+const {publishedDocuments, standalonePages, updateTime} = require('./lib/documents');
 
 // 中日韩文字逐字计数，其余语言按单词计数；不计代码、注释块、标签、样式和脚本。
 function countWords(content) {
@@ -30,16 +32,71 @@ hexo.extend.helper.register('page_stats', function(content) {
 });
 
 hexo.extend.helper.register('site_stats', function() {
-  // 使用当前构建可见的内容，默认构建不包含草稿及未来文章。
-  const posts = this.site.posts.toArray().filter(post => post.published !== false);
-  const pages = this.site.pages.toArray();
-  const documents = posts.concat(pages);
+  const documents = publishedDocuments(this.site);
   let words = 0;
   let updated;
+  let first;
+  let longest;
+  const categories = new Set();
+  const tags = new Set();
+  const counts = new Map();
   for (const document of documents) {
-    words += countWords(document.content || '');
-    const latest = document.updated || document.date;
+    const length = countWords(document.content || '');
+    words += length;
+    if (!longest || length > longest.words) longest = {title: document.title, path: document.path, words: length};
+    const latest = updateTime(document);
     if (latest && (!updated || latest.valueOf() > updated.valueOf())) updated = latest;
+    if (document.date && (!first || document.date.valueOf() < first.valueOf())) first = document.date;
+    const names = document.categories && document.categories.toArray ? document.categories.toArray().map(item => item.name) : [];
+    names.forEach(name => {
+      categories.add(name);
+      counts.set(name, (counts.get(name) || 0) + 1);
+    });
+    if (document.tags && document.tags.toArray) document.tags.toArray().forEach(tag => tags.add(tag.name));
   }
-  return {pages: documents.length, words, updated};
+  const configured = ((this.theme && this.theme.nav_categories) || []).map(item => item.label);
+  const distribution = configured.map(label => ({label, count: counts.get(label) || 0}));
+  distribution.push({label: '其他页面', count: documents.filter(document => {
+    const names = document.categories && document.categories.toArray ? document.categories.toArray().map(item => item.name) : [];
+    return !names.some(name => configured.includes(name));
+  }).length});
+  return {
+    pages: documents.length, words, updated, first, longest, distribution,
+    posts: this.site.posts.toArray().filter(page => page.published !== false).length,
+    standalone: standalonePages(this.site).length,
+    tags: tags.size, categories: categories.size,
+    average: documents.length ? Math.round(words / documents.length) : 0,
+    minutes: Math.ceil(words / 300)
+  };
+});
+
+// 日期按网站时区归日；这是内容快照，不把一次最近更新推算成历史修订次数。
+hexo.extend.helper.register('site_activity', function(now) {
+  const timezone = (this.config && this.config.timezone) || 'Asia/Shanghai';
+  const end = moment.tz(now || new Date(), timezone).startOf('day');
+  const start = end.clone().subtract(364, 'days');
+  const gridStart = start.clone().day(0);
+  const gridEnd = end.clone().day(6);
+  const counts = new Map();
+  for (const document of publishedDocuments(this.site)) {
+    const latest = updateTime(document);
+    if (!latest) continue;
+    const key = moment.tz(latest.valueOf(), timezone).format('YYYY-MM-DD');
+    counts.set(key, (counts.get(key) || 0) + 1);
+  }
+  const cells = [];
+  const months = [];
+  let activeDays = 0;
+  let updates = 0;
+  for (const day = gridStart.clone(); day.isSameOrBefore(gridEnd); day.add(1, 'day')) {
+    const date = day.format('YYYY-MM-DD');
+    const inRange = day.isSameOrAfter(start) && day.isSameOrBefore(end);
+    const count = inRange ? counts.get(date) || 0 : 0;
+    if (count) { activeDays++; updates += count; }
+    const column = Math.floor(cells.length / 7) + 1;
+    if (day.date() === 1 && inRange) months.push({label: day.format('M月'), column});
+    cells.push({date, count, inRange, level: Math.min(count, 4)});
+  }
+  if (!months.length || months[0].column > 2) months.unshift({label: start.format('M月'), column: 1});
+  return {cells, months, weeks: cells.length / 7, activeDays, updates, start: start.format('YYYY.MM.DD'), end: end.format('YYYY.MM.DD')};
 });

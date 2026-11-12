@@ -12,7 +12,7 @@
 - 页面元数据调用的版式与配色预设：`source/css/presets.css`。
 - 字体注册：`source/css/fonts.css`，由 `tools/build-fonts.py` 生成，不要手工编辑。
 
-没有 `main.css`：`layout.ejs` 逐个引入以上文件。CSS 每条声明单独一行，各文件内按区域分节，无需编译。窄屏以 860px 为界：普通页面用 `<link media="(max-width: 860px)">` 按需启用 `narrow.css`，画布模板无条件启用它。更改断点时，同步 `layout.ejs` 的 media 属性与 `source/js/navigation.js` 中的 860px。
+没有 `main.css`：`layout.ejs` 逐个引入以上文件。CSS 每条声明单独一行，各文件内按区域分节，无需编译。窄屏以 860px 为界：普通页面用 `<link media="(max-width: 860px)">` 按需启用 `narrow.css`，canvas 展示模式无条件启用它。更改断点时，同步 `layout.ejs` 的 media 属性与 `source/js/navigation.js` 中的 860px。
 
 ## 图标：Google Material Symbols
 
@@ -51,28 +51,31 @@ python3 -m venv /tmp/ftvenv && /tmp/ftvenv/bin/pip install fonttools brotli   # 
 
 其他渲染优化：界面使用 `text-rendering: optimizeSpeed`，仅正文与标题使用 `optimizeLegibility`；动画只使用 `opacity` / `transform`；过渡只列出具体属性；`will-change` 只在逐段浮现期间设置，结束后释放。
 
-## 三种模板
+## 共享内容结构与选项
 
-`layout.ejs` 按 `page.layout` 得到模板种类 `kind`，写入 `<html class="kind-…">` 与 `<body class="layout-…">`：
+使用选项与写作示例以根目录 `README.md` 的「元数据速查」为准。
 
-- 文章 `post`：`layout/post.ejs`。纸张容器、信息窗（宽屏常驻右栏，窄屏收进顶栏）、阅读进度条、逐段浮现。
-- 页面 `page`：`layout/page.ejs`。无纸张、无信息窗、无进度条；侧栏仍显示「本页目录」。
-- 画布 `canvas`（旧名称 `work` 等价）：`layout/canvas.ejs`。正文原样输出，不加页脚，无论屏幕宽度，菜单都由顶栏收起。作品可使用 `--content-left` 和 `--page-top` 自行避让。
+`layout.ejs` 统一输出站点框架与元数据。所有布局（包括 canvas）的 `main-content` 最大宽度为 1000px，首页与 page 统一使用 `.site-layout` 网格：side-nav 和 main 是相邻列，800px 的 `article.content.page` 与侧栏整体居中；首页大标题独立相对整页居中。article 仍使用 700px 阅读纸张，canvas 可用到 1000px。`page` / `article` 共用 `_partial/content-page.ejs`，基础元素为 `.content-page.page-frame`、`.page-header`、`.page-title`、`.article-content`；`.plain-page` / `.article-page` 是兼容既有样式的布局修饰类。首页、归档、分类、标签、更新与其他页面复用 `page`。正文样式的选择器始终限定在 `.article-content`，页面标题仅用 `.page-title`。
 
-首页、归档、分类、标签索引等生成页使用与页面模板相同的极简框架（归档带纸张）。
+- `page` 默认让侧栏与正文作为一组居中，`alignment: balanced` 保留原来的对称三栏轴线。不提供信息窗口，也不把大纲放进 side-nav。
+- `article` 保留阅读纸张、信息窗和阅读脚本。`layout: canvas` 改为宽幅无纸张且不输出页面标题，元信息仍在顶栏下拉菜单中。旧 `layout: post` / `work` 保留兼容入口。
+- `page_style` 校验排版、配色；笔记默认 enhanced，显式元数据优先。CSS 预设放在 `presets.css`，合法名称放在 `scripts/content-blocks.js`。
+- 完整 HTML 作品由 `_partial/post-content.ejs` 输出到不授予同源权限的 sandbox iframe；`canvas-bridge.js` 与外层 `reading.js` 用限定消息类型及消息来源的 `postMessage` 同步目录与真实阅读进度。`.html` 源文件让 Hexo 跳过 Markdown 解析。
+- canvas 的顶栏、目录与信息下拉菜单局部覆盖为中性灰阶，正文配色不受影响。按钮使用 `data-state`、焦点和悬停表达激活状态。
 
-## 版式与配色预设
+导航、索引与分类：`scripts/navigation-data.js`。分类路径使用 Hexo 的 `category_map`，空分类同样遵守映射；中文旧地址生成跳转页。`folder-categories.js` 在 `before_generate` 中读取原始元数据，经 Hexo `setCategories` 设置目录默认分类；显式分类优先，旧「随笔」归一为「笔记」。
 
-在页面 front-matter 中设置，由 `layout.ejs` 写成 `<body data-typography data-palette>`；名称由 `scripts/content-blocks.js` 校验，未知名称会退回默认并在构建时给出警告。
+分类/标签索引共用 `_partial/taxonomy-cards.ejs`；服务端分页按卡片数量拆分，卡片内只预览配置数量的文章，完整分类/标签列表使用原生分页。侧栏入口和社交地址在主题 `_config.yml`。
 
-- `typography`：`literary` 文学创作（首行缩进 2em，段间不留空）、`poem` 诗歌（整篇以 `fit-content` 取最长诗行宽度，再由 `margin-inline: auto` 居中，诗行左对齐，不使用 padding 凑位置）。
-- `palette`：`rose`（默认）、`mist`、`bamboo`、`sepia`、`ink`（深色）。预设只覆盖 `base.css` 的色卡变量（RGB 通道），所以所有组件自动跟随。
+首页图片、图注与空白正文位于 `source/_data/home.yml`，结构在 `_partial/home.ejs`。站点标识复用 `_partial/site-identity.ejs`，首页移到页眉。概览采用内容容器查询，达到 680px 时双栏；热力图始终压缩到可用宽度，详细统计位于两者下方的 disclosure，不挤入关键数值栏。首页不单列最近更新，完整更新记录仍在 `/updates/`。统计口径及最近更新时间规则见下文。
 
-新增预设：在 `presets.css` 添加 `body[data-palette="名称"]` 或 `[data-typography="名称"]` 规则，并把名称加入 `scripts/content-blocks.js` 顶部的列表；`npm run test:theme` 会检查两处是否一致。
+## 标题强调点
 
-## 侧栏结构
+`_partial/page-title.ejs` 用语义化 `<h1 class="page-title">`，保留标题的正常行内换行，只将末尾一个完整字形放进 `.title-end`。该元素使用 `inline-flex; align-items: center`，`::after` 生成圆点。因此圆点紧跟末字、与末行垂直居中，且不会单独换行或跑到标题区域的最右侧。`Intl.Segmenter` 保证组合 emoji 不被拆开。
 
-自上而下：页面一览、标签索引；带图标的分类（文章、随笔、评论、作品，附文章数），末尾是「其他页面」；最近新增；全站信息。分类由 `_config.yml` 的 `nav_primary` / `nav_categories` 配置，分类尚无文章时仍生成一个空页面。\n\n「其他页面」（`nav_misc`，地址 `/misc/`）收录所有没有导航分类的文章与独立页面，按发布日期倒序，一页列完。因此根目录 `_config.yml` 的 `default_category` 已留空：无分类的内容不再被 Hexo 自动归入 `uncategorized`。给文章写上 `nav_categories` 中的分类，它就从「其他页面」移到该分类。页面模板的「本页目录」位于分类之后。
+## 页眉主题示例
+
+`source/mtf/index.md` 是「其他页面」中的 MtF 展示页。它使用 `layout: page` 与 `header: mtf`；`layout.ejs` 在既有 `header.site-header` 中输出 `_partial/mtf-header.ejs`，用 `source/css/mtf.css` 实现蓝、粉、白色带与圆形图案。页眉留在文档顶部，导航继续浮在上方，正文通过页面专属 `--page-top` 避让。标题、章节入口与内容可分别在该 partial、Markdown 和专属样式中修改。
 
 ## 信息窗
 
@@ -89,30 +92,28 @@ python3 -m venv /tmp/ftvenv && /tmp/ftvenv/bin/pip install fonttools brotli   # 
 `layout/layout.ejs` 按顺序定义：
 
 - `header.site-header`：通栏页眉占位，导航固定在其上方。
-- `nav#top-nav`：站点标识与副标题，点击名称返回首页；窄屏时直接承载顶栏，目录开关在左，副标题在右，文章页右端还有信息与大纲入口。
-- `nav#side-nav`：常驻的宽屏目录，内部 `.side-nav-content` 独立滚动，全站信息位于目录下方。
+- `nav#top-nav`：站点标识与副标题，点击名称返回首页；窄屏时目录开关在左，信息与大纲入口在右。
+- `nav#side-nav`：位于 `.site-layout` 内的宽屏目录，内部 `.side-nav-content` 独立滚动，全站信息位于目录下方。
 - `summary#mobile-nav`：仅窄屏显示的目录开关，位于 `top-nav` 内。
 - `details#mobile-menu`：窄屏左侧滑出的目录，与页面左缘直接连接。
 - `main#main-content`：页面内容。
-- `footer.site-footer`：居中的版权信息。
-
-首页 `layout/index.ejs` 仅保留作品列表；列表由 `layout/_partial/post-list.ejs` 生成。先前的 `intro` 文案仍保留在主题配置中，但首页不再输出它。
+- `footer.site-footer`：位于 `.site-layout` 内，与正文同列的版权信息。
 
 ## 目录层级
 
-宽屏和手机共用 `layout/_partial/navigation.ejs`。站点链接来自主题 `_config.yml` 的 `menu`；`children` 表示下一级链接，可继续嵌套。新增链接时，先创建对应的实际页面。分类入口指向自动生成的 `/categories/`，展示已有分类及文章数量；在文章 front-matter 中用 `categories` 指定分类，没有分类时展示空状态。`scripts/navigation-data.js` 同时生成“最近新增”入口：按发布日期倒序列出最多 5 篇已发布文章或独立页面，更新旧文不会改变排序；草稿和生成的索引页不计入。
+宽屏和手机共用 `layout/_partial/navigation.ejs`。站点入口来自主题 `_config.yml` 的 `nav_primary`、`nav_categories` 与 `nav_misc`。共用的索引和导航数据位于 `scripts/navigation-data.js`，内容页筛选与更新时间排序复用 `scripts/lib/documents.js`。
 
 全站信息由 `scripts/site-stats.js` 生成、`layout/_partial/site-stats.ejs` 展示，宽屏侧栏和手机目录共用同一口径：
 
-- 页面数：当前构建中的已发布文章（含自由作品）加独立页面，不重复计算首页、归档、标签及分页等生成的索引页；草稿不计入。
+- 页面数：当前构建中的已发布文章（含自由作品）加独立内容页（不计 CSS、脚本等资源），不重复计算首页、归档、标签及分页等生成的索引页；草稿不计入。
 - 正文字数：统计渲染后正文，中日韩文字逐字计数，其余语言逐词计数；不计标题元数据、代码及行号、HTML 标签、注释、脚本与样式。
 - 最近更新：取上述内容中最新的更新时间，无更新时间则使用发布日期；空站点不显示此项。
 
 普通构建由 Hexo 排除未来文章与页面；启用 `future` 配置时，它们随构建一同计入。统计逻辑可用 `node --test themes/iris-paper/test/site-stats.test.js` 检查。
 
-普通文章（`layout: post`）在宽屏右侧常驻显示信息窗，由 `layout/_partial/post-info.ejs` 生成，不提供收起操作，也不显示总标题。信息窗宽度由 `--nav-width` 控制。信息包含本页正文字数、预计阅读时间、作者、发布日期、不同日期的更新时间，以及已有标签；本页统计复用全站正文字数口径，阅读时间按每分钟 300 字向上取整，最少显示 1 分钟。大纲从正文标题自动生成，保留标题层级，无标题时显示提示。`source/js/reading.js` 负责当前章节高亮，仅在窄屏使用原生 `details` 作为抽屉。窄屏下同一个信息窗收进顶栏，由右端信息图标向下展开，默认收起。抽屉紧接顶栏、与屏幕同宽，从右侧信息开关处向下展开；无描边，仅保留轻阴影，不占正文空间。窄屏抽屉由 `source/js/navigation.js` 控制：鼠标悬停即滑出，移出后延迟 180ms 收起；点击可固定展开，再次点击收起。触屏使用点击，键盘使用 Enter / 空格与 Esc。两个窄屏抽屉互斥，选择链接或点击外部均会收起；侧栏展开时，未覆盖区域显示毛玻璃遮罩。切换到宽屏时立即恢复常驻窗口，切回窄屏则先收起抽屉。
+普通文章（`layout: article`，兼容 `post`）在宽屏右侧常驻显示信息窗，由 `layout/_partial/post-info.ejs` 生成，不提供收起操作，也不显示总标题。信息窗宽度由 `--nav-width` 控制。信息包含本页正文字数、预计阅读时间、作者、发布日期、不同日期的更新时间，以及已有标签；本页统计复用全站正文字数口径，阅读时间按每分钟 300 字向上取整，最少显示 1 分钟。大纲从正文标题自动生成，保留标题层级，无标题时显示提示。`source/js/reading.js` 负责当前章节高亮，仅在窄屏使用原生 `details` 作为抽屉。窄屏下同一个信息窗收进顶栏，由右端信息图标向下展开，默认收起。抽屉紧接顶栏、与屏幕同宽，从右侧信息开关处向下展开；无描边，仅保留轻阴影，不占正文空间。窄屏抽屉由 `source/js/navigation.js` 控制：鼠标悬停即滑出，移出后延迟 180ms 收起；点击可固定展开，再次点击收起。触屏使用点击，键盘使用 Enter / 空格与 Esc。两个窄屏抽屉互斥，选择链接或点击外部均会收起；侧栏展开时，未覆盖区域显示毛玻璃遮罩。切换到宽屏时立即恢复常驻窗口，切回窄屏则先收起抽屉。
 
-普通独立页和自由作品仍在导航中生成“本页目录”；没有标题时不显示该区块。
+信息窗口仅用于 article / canvas；首页、索引与普通 page 不输出它。side-nav 只放站点导航。
 
 链接的高亮底层向容器内缩 `--hover-inset`，不覆盖边缘。侧栏链接使用 8px 上下内边距、高亮内缩 2px，其余链接保留默认高亮尺寸。窄屏抽屉的每次进场与退场均创建新动画，退场完成后才关闭 `details`，快速反向时从当前画面继续。系统开启“减少动态效果”时直接开合，并禁用平滑滚动。
 
@@ -122,21 +123,8 @@ python3 -m venv /tmp/ftvenv && /tmp/ftvenv/bin/pip install fonttools brotli   # 
 
 ## 自由内容画布
 
-`main` 不设版心，不裁切内容。首页、文章与页面模板通过 `.page-frame` 选择受限宽度。
-
-多媒体作品使用 `layout: canvas`（旧名称 `work` 仍可用），正文直接插入 `main`，不添加文章标题或阅读样式。可在 front-matter 声明作品专属资源：
-
-```yaml
----
-title: 作品名称
-layout: canvas
-styles:
-  - /works/example/style.css
-scripts:
-  - /works/example/main.js
----
-```
-
-资源放在网站 `source/works/example/` 下。作品使用独立类名组织样式；固定顶栏会覆盖画布上缘，作品可使用 `--content-left` 和 `--page-top` 自行避让。完全独立的 HTML 文档使用 Hexo 的 `layout: false`。
+完整 HTML 作品的维护与元数据示例见根目录 README。`docs/scp-cn-4001.md` 记录该作品的素材来源与外部依赖；不要直接编辑生成的 `public/`。
 
 `npm run build` 生成静态网站到 `public/`。不要直接编辑生成文件。
+
+公开布局 ID 为 `article` / `page` / `canvas`；公开配色 ID 为 `rose` / `tech` / `wanderers` / `ink` / `sepia`。增强排版使用独立的 `--strong` / `--emphasis` 文字色，不绘制背景；标题层级复用这组区分明显的色相。

@@ -7,11 +7,11 @@ const {join} = require('node:path');
 const {JSDOM} = require('jsdom');
 const source = readFileSync(join(__dirname, '../source/js/navigation.js'), 'utf8');
 
-function fixture({narrow = true, reduced = false} = {}) {
-  const dom = new JSDOM(`<!doctype html><html style="--motion-base:240ms;--ease-out:linear"><body>
+function fixture({narrow = true, reduced = false, kind = 'post', canvas = false} = {}) {
+  const dom = new JSDOM(`<!doctype html><html style="--motion-base:240ms;--ease-out:linear"><body class="layout-${kind}" data-presentation="${canvas ? 'canvas' : 'paper'}">
     <nav id="side-nav">目录常驻</nav>
     <details id="mobile-menu" class="hover-panel"><summary>目录</summary><div class="panel-body">菜单</div></details>
-    <details class="post-info hover-panel" open><summary>信息</summary><div class="panel-body"><a href="#chapter">章节</a></div></details>
+    ${kind === 'page' ? '' : '<details class="post-info hover-panel" open><summary>信息</summary><div class="panel-body"><a href="#chapter">章节</a></div></details>'}
     <button class="menu-backdrop" hidden></button><main>正文</main>
   </body></html>`, {runScripts: 'outside-only'});
   const {window} = dom;
@@ -144,5 +144,32 @@ test('减少动态效果时直接开合，不等待动画', () => {
   assert.equal(f.menu.open, false);
   assert.equal(f.backdrop.hidden, true);
   assert.equal(f.menu.querySelector('.panel-body').animations, undefined);
+  f.dispose();
+});
+
+
+test('page 不包含信息窗口，窄屏仍可开合站点目录', async () => {
+  const f = fixture({narrow: true, kind: 'page'});
+  assert.equal(f.info, null);
+  f.click(f.menu);
+  await f.settle(f.menu);
+  assert.equal(f.menu.open, true);
+  f.click(f.menu);
+  await f.settle(f.menu);
+  assert.equal(f.menu.open, false);
+  f.dispose();
+});
+
+test('canvas 宽屏使用顶栏状态机，目录与信息互斥', async () => {
+  const f = fixture({narrow: false, canvas: true});
+  assert.equal(f.info.open, false);
+  f.click(f.menu);
+  await f.settle(f.menu);
+  f.click(f.info);
+  assert.equal(f.menu.dataset.state, 'closing');
+  await f.settle(f.menu);
+  await f.settle(f.info);
+  assert.equal(f.info.open, true);
+  assert.equal(f.menu.open, false);
   f.dispose();
 });

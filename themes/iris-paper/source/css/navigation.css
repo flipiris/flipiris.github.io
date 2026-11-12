@@ -61,17 +61,35 @@
 
 .side-nav-panel {
   display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
-  height: var(--sidebar-height);
+  grid-template-rows: minmax(0, 1fr) auto auto;
+  height: auto;
+  max-height: min(var(--sidebar-height), calc(100dvh - var(--rail-top) - var(--layout-gutter)));
   padding: var(--nav-padding);
 }
 
 .side-nav-content {
   min-height: 0;
+  min-width: 0;
+  padding-right: calc(var(--space) * 3);
   overflow-y: auto;
+  scrollbar-gutter: stable;
   overscroll-behavior: contain;
   scrollbar-width: thin;
   scrollbar-color: rgb(var(--accent) / 35%) transparent;
+}
+
+/* 给叠加式滚动条也留出独立轨道；高亮和计数止于内容区域。 */
+:is(.side-nav-content, .mobile-menu-body)::-webkit-scrollbar {
+  width: 6px;
+}
+
+:is(.side-nav-content, .mobile-menu-body)::-webkit-scrollbar-thumb {
+  border-radius: 6px;
+  background: rgb(var(--accent) / 35%);
+}
+
+:is(.side-nav-content, .mobile-menu-body)::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--accent) / 65%);
 }
 
 .nav-tree,
@@ -104,7 +122,7 @@
 :is(.side-nav, .mobile-menu-body) .nav-tree a {
   --hover-inset: calc(var(--space) / 2);
   --hover-opacity: 9%;
-  padding-block: calc(var(--space) * 2);
+  padding-block: calc(var(--space) * 1.25);
 }
 
 /* 高亮保留当前页标记，悬停另加 accent，不改变链接尺寸或文字位置。 */
@@ -178,15 +196,6 @@
   border-left: 1px solid rgb(var(--accent) / 18%);
 }
 
-.page-directory,
-.recent-pages {
-  margin-top: calc(var(--space) * 3);
-  padding-top: calc(var(--space) * 3);
-  border-top: 1px solid rgb(var(--line));
-}
-
-.page-directory h2,
-.recent-pages h2,
 .site-stats h2 {
   margin: 0 calc(var(--space) * 3) calc(var(--space) * 2);
   color: rgb(var(--accent));
@@ -311,4 +320,98 @@
 /* 顶栏里的目录按钮与信息按钮同为 accent。 */
 .mobile-nav {
   color: rgb(var(--accent));
+}
+
+
+.social-links {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 12px 8px 4px;
+  padding-top: 12px;
+  border-top: 1px solid rgb(var(--line));
+}
+
+.social-links :is(a, button) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 7px;
+  border: 1px solid rgb(var(--line));
+  border-radius: 8px;
+  background: transparent;
+  font-size: 13px;
+}
+
+.social-links button:disabled {
+  color: rgb(var(--muted));
+  cursor: default;
+}
+
+
+.nav-tree {
+  gap: 2px;
+}
+.nav-tree a {
+  padding-block: 5px;
+}
+
+
+/* 未激活的抽屉开关轻一些；展开、悬停或键盘聚焦时恢复强调色。 */
+:is(.mobile-nav, .post-info-icon) {
+  color: rgb(var(--accent) / 52%);
+  transition: color var(--motion-fast) ease;
+}
+
+.hover-panel:is([data-state="opening"], [data-state="open"]) > summary,
+.hover-panel:is([data-state="opening"], [data-state="open"]) .post-info-icon,
+.hover-panel > summary:focus-visible,
+.hover-panel > summary:focus-visible .post-info-icon {
+  color: rgb(var(--accent));
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hover-panel > summary:hover,
+  .hover-panel > summary:hover .post-info-icon {
+    color: rgb(var(--accent));
+  }
+}
+
+/* canvas 的导航界面统一使用中性灰阶，不把作品配色染到界面上。 */
+[data-presentation="canvas"] :is(.top-nav, .side-nav, .menu-backdrop) {
+  --paper: 250 250 250;
+  --ink: 45 48 52;
+  --accent: 45 48 52;
+  --brand: 45 48 52;
+  --secondary: 90 94 100;
+  --muted: 110 114 120;
+  --line: 220 222 225;
+  --nav-active: 232 234 237;
+  --shadow: 0 0 0;
+}
+
+[data-presentation="canvas"][data-palette="ink"] :is(.top-nav, .side-nav, .menu-backdrop) {
+  --paper: 29 31 34;
+  --ink: 226 228 231;
+  --accent: 226 228 231;
+  --brand: 226 228 231;
+  --muted: 156 160 166;
+  --line: 60 63 68;
+  --nav-active: 52 55 60;
+}
+
+.post-info > summary {
+  color: rgb(var(--accent) / 52%);
+}
+.post-info > summary .post-info-icon {
+  color: inherit;
+}
+
+
+.social-links svg {
+  display: block;
+  width: 14px;
+  height: 14px;
 }

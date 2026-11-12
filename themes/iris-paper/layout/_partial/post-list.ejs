@@ -1,8 +1,15 @@
+<% const listedDays = new Set(); %>
 <% if (page.posts.length) { %>
   <ul class="post-list">
-    <% page.posts.each(function(post) { %>
-      <li class="post-item">
-        <time datetime="<%= date_xml(post.date) %>"><%= date(post.date, 'YYYY.MM.DD') %></time>
+    <% page.posts.each(function(post) {
+      const byUpdate = typeof dateField !== 'undefined' && dateField === 'updated';
+      const listedDate = byUpdate ? (post.updated || post.date) : post.date;
+      const day = date(listedDate, 'YYYY-MM-DD');
+      const anchor = byUpdate && !listedDays.has(day);
+      listedDays.add(day);
+    %>
+      <li class="post-item"<% if (anchor) { %> id="updated-<%= day %>"<% } %>>
+        <time datetime="<%= date_xml(listedDate) %>"><%= date(listedDate, 'YYYY.MM.DD') %></time>
         <a href="<%- url_for(post.path) %>"><%= post.title %></a>
       </li>
     <% }); %>

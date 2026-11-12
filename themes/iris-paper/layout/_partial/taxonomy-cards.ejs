@@ -1,0 +1,16 @@
+<% const limit = Math.max(1, Number(theme.taxonomy_preview) || 6); %>
+<% if (terms.length) { %>
+<div class="taxonomy-grid">
+  <% terms.forEach(function(term) { const posts = term.posts.sort('-date').toArray(); %>
+  <section class="taxonomy-card">
+    <header class="section-heading"><h2 id="term-<%= term.path.replace(/\//g, '-') %>"><a href="<%- url_for(term.path) %>"><%= term.name %></a></h2><span><%= term.length %> 篇</span></header>
+    <ul class="post-list">
+      <% posts.slice(0, limit).forEach(function(post) { %>
+      <li class="post-item"><time datetime="<%= date_xml(post.date) %>"><%= date(post.date, 'YYYY.MM.DD') %></time><a href="<%- url_for(post.path) %>"><%= post.title %></a></li>
+      <% }); %>
+    </ul>
+    <a class="taxonomy-more" href="<%- url_for(term.path) %>">查看<%= posts.length > limit ? '全部 ' + term.length + ' 篇' : termLabel %> →</a>
+  </section>
+  <% }); %>
+</div>
+<% } else { %><p class="empty-state">暂无<%= termLabel %>。</p><% } %>

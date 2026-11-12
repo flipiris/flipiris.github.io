@@ -59,7 +59,7 @@ test('空注释块被移除但不产生第二页', () => {
 
 test('配色与版式预设：合法值通过，未知值回退默认并只警告一次', () => {
   const {registered, warnings} = helpers();
-  assert.deepEqual({...registered.page_style({palette: 'Mist', typography: 'poem'})}, {palette: 'mist', typography: 'poem'});
+  assert.deepEqual({...registered.page_style({palette: 'Tech', typography: 'poem'})}, {palette: 'tech', typography: 'poem'});
   assert.deepEqual({...registered.page_style({})}, {palette: '', typography: ''});
   assert.deepEqual({...registered.page_style(undefined)}, {palette: '', typography: ''});
   assert.equal(registered.page_style({palette: 'neon'}).palette, '');
@@ -76,4 +76,54 @@ test('预设名称与 presets.css 一一对应', () => {
   // rose 是 base.css 中的默认色卡，不需要覆盖；literary / poem 需要各自的规则。
   for (const name of palettes.filter(item => item !== 'rose')) assert.ok(css.includes(`data-palette="${name}"`), name);
   for (const name of typographies) assert.ok(css.includes(`data-typography="${name}"`), name);
+});
+
+test('笔记默认增强排版，显式 standard / poem 优先，配色与排版独立', () => {
+  const {page_style} = helpers().registered;
+  const categories = {toArray: () => [{name: '笔记'}]};
+  assert.equal(page_style({categories}).typography, 'enhanced');
+  assert.equal(page_style({categories, typography: 'standard'}).typography, 'standard');
+  assert.equal(page_style({categories, typography: 'poem', palette: 'wanderers'}).palette, 'wanderers');
+  assert.equal(page_style({categories: {toArray: () => [{name: '随笔'}]}}).typography, 'enhanced');
+});
+
+test('旧 canvas/work 与 post presentation 共用同一展示选项', () => {
+  const {page_presentation} = helpers().registered;
+  for (const layout of ['canvas', 'work']) assert.equal(page_presentation({layout}), 'canvas');
+  assert.equal(page_presentation({layout: 'post', presentation: 'canvas'}), 'canvas');
+  assert.equal(page_presentation({layout: 'post'}), 'paper');
+});
+
+test('完整 HTML 画布保留正文，注入素材基址与隔离通信脚本；片段不进入 iframe', () => {
+  const {canvas_document} = helpers().registered;
+  assert.equal(canvas_document('<p>片段</p>'), '');
+  const html = '<html><head><title>原作</title></head><body><h1 id="a">标题</h1>    <p>原文</p></body></html>';
+  const document = canvas_document(html, '/works/test/?a=1&b=2', '/js/canvas-bridge.js');
+  assert.ok(document.includes('<base href="/works/test/?a=1&amp;b=2">'));
+  assert.ok(document.includes('<script src="/js/canvas-bridge.js"></script></body>'));
+  assert.ok(document.includes('<h1 id="a">标题</h1>    <p>原文</p>'));
+});
+
+
+test('布局使用 article/page/canvas，旧 post/work 和 presentation 保持可用', () => {
+  const {page_layout, page_presentation, page_style} = helpers().registered;
+  assert.equal(page_layout({layout: 'article'}), 'article');
+  assert.equal(page_layout({layout: 'post'}), 'article');
+  assert.equal(page_layout({layout: 'page'}), 'page');
+  assert.equal(page_layout({layout: 'canvas'}), 'canvas');
+  assert.equal(page_layout({layout: 'work'}), 'canvas');
+  assert.equal(page_presentation({layout: 'article', presentation: 'canvas'}), 'canvas');
+  assert.equal(page_style({palette: 'wanderer'}).palette, 'wanderers');
+  assert.equal(page_style({palette: 'Wanderer'}).palette, 'wanderers');
+  assert.equal(page_style({palette: 'mist'}).palette, '');
+  assert.equal(page_style({palette: 'bamboo'}).palette, '');
+});
+
+test('增强排版仅改变粗体和斜体文字颜色，不绘制背景高亮', () => {
+  const css = readFileSync(join(__dirname, '../source/css/presets.css'), 'utf8');
+  for (const name of ['strong', 'em']) {
+    const rule = css.match(new RegExp('\\[data-typography="enhanced"\\] \\.article-content ' + name + '\\s*\\{([^}]*)\\}'))[1];
+    assert.match(rule, /color:/);
+    assert.doesNotMatch(rule, /background|box-decoration/);
+  }
 });

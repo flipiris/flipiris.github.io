@@ -1,0 +1,7 @@
+<article class="content content-page page-frame <%= contentClass %>">
+  <% if (contentTitle !== false) { %><header class="page-header">
+    <%- partial('_partial/page-title', {title: contentTitle}) %>
+  </header><% } %>
+  <%- contentBody %>
+  <% if (contentFooter) { %><%- partial('_partial/article-footer') %><% } %>
+</article>

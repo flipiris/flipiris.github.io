@@ -1,0 +1,57 @@
+<% const stats = site_stats(); const activity = site_activity(); const homeData = site.data.home || {}; %>
+<figure class="home-image">
+  <img src="<%= homeData.image || 'https://cdn.mer.run/i/2026/05/13/6a04943a86de3.jpg' %>" alt="<%= homeData.image_alt || '' %>" fetchpriority="high">
+  <figcaption class="home-image-caption"><%= homeData.caption || '' %></figcaption>
+</figure>
+<section class="home-intro article-content" aria-label="首页文字">
+  <%- markdown(homeData.text || '') %>
+</section>
+<section class="home-section" aria-labelledby="overview-title">
+  <div class="section-heading"><h2 id="overview-title">全站概览</h2><a href="<%- url_for('/archives/') %>">浏览页面 →</a></div>
+  <div class="home-overview">
+    <section class="activity-section" aria-labelledby="activity-title">
+      <div class="section-heading"><h3 id="activity-title">更新热力图</h3><span>近一年</span></div>
+      <p class="activity-summary"><strong><%= activity.updates %></strong> 个页面的最近更新，落在 <strong><%= activity.activeDays %></strong> 个日期里。</p>
+      <div class="activity-calendar-wrap" role="region" aria-label="近一年页面更新热力图">
+        <div class="activity-calendar" style="--weeks: <%= activity.weeks %>">
+          <div class="activity-months" aria-hidden="true"><% activity.months.forEach(function(month) { %><span style="grid-column: <%= month.column %>"><%= month.label %></span><% }); %></div>
+          <div class="activity-weekdays" aria-hidden="true"><span>日</span><span>二</span><span>四</span><span>六</span></div>
+          <div class="activity-grid">
+            <% activity.cells.forEach(function(cell) { const label = cell.date + '：' + cell.count + ' 个页面最近更新'; %>
+              <% if (cell.count) { %><a class="activity-cell level-<%= cell.level %>" href="<%- url_for('/updates/') %>#updated-<%= cell.date %>" title="<%= label %>" aria-label="<%= label %>"></a>
+              <% } else { %><span class="activity-cell<%= cell.inRange ? ' level-0' : ' outside-range' %>" title="<%= cell.inRange ? label : '' %>"></span><% } %>
+            <% }); %>
+          </div>
+        </div>
+      </div>
+      <div class="activity-footer"><span><%= activity.start %> — <%= activity.end %></span><span class="activity-legend" aria-label="颜色从浅到深表示 0、1、2、3、4 个及以上页面">少 <% for (let i = 0; i < 5; i++) { %><i class="activity-cell level-<%= i %>"></i><% } %> 多</span></div>
+    </section>
+    <section class="overview-stats" aria-label="统计信息">
+      <dl class="stat-grid">
+        <div><dt>已发布页面</dt><dd><%= stats.pages.toLocaleString('zh-CN') %><span>页</span></dd></div>
+        <div><dt>正文字数</dt><dd><%= stats.words.toLocaleString('zh-CN') %><span>字</span></dd></div>
+        <div><dt>内容分类</dt><dd><%= stats.categories %><span>类</span></dd></div>
+        <div><dt>内容标签</dt><dd><%= stats.tags %><span>个</span></dd></div>
+      </dl>
+    </section>
+  </div>
+  <details class="overview-details"><summary>阅读统计与栏目分布</summary>
+  <div class="overview-details-content">
+    <dl class="detail-stats">
+    <div><dt>内容构成</dt><dd><%= stats.posts %> 篇文章与作品 / <%= stats.standalone %> 个独立页面</dd></div>
+    <div><dt>累计阅读时长</dt><dd>约 <%= stats.minutes.toLocaleString('zh-CN') %> 分钟</dd></div>
+    <div><dt>平均篇幅</dt><dd><%= stats.average.toLocaleString('zh-CN') %> 字 / 页</dd></div>
+    <% if (stats.first) { %><div><dt>最早发布</dt><dd><time datetime="<%= date_xml(stats.first) %>"><%= date(stats.first, 'YYYY.MM.DD') %></time></dd></div><% } %>
+    <% if (stats.updated) { %><div><dt>最近更新</dt><dd><time datetime="<%= date_xml(stats.updated) %>"><%= date(stats.updated, 'YYYY.MM.DD') %></time></dd></div><% } %>
+    <% if (stats.longest && stats.longest.words) { %><div><dt>最长的页面</dt><dd><a href="<%- url_for(stats.longest.path) %>"><%= stats.longest.title %></a><small><%= stats.longest.words.toLocaleString('zh-CN') %> 字</small></dd></div><% } %>
+    </dl>
+    <ul class="content-distribution" aria-label="栏目页面数">
+    <% stats.distribution.forEach(function(item) { %>
+      <li><span><%= item.label %></span><meter min="0" max="<%= Math.max(stats.pages, 1) %>" value="<%= item.count %>"><%= item.count %></meter><span><%= item.count %></span></li>
+    <% }); %>
+    </ul>
+  </div>
+  <p class="stat-caption">字数不含代码与注释；阅读时长按每分钟 300 字估算，同页可计入多个分类。</p>
+  </details>
+  <p class="stat-caption overview-caption">统计已发布内容，不含索引和草稿。热力图按每页最近一次更新归日；点击色块查看对应页面。</p>
+</section>

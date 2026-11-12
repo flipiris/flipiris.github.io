@@ -8,6 +8,8 @@
         不以正文高度估算，所以无论文末留白多少，滚到底时一定填满。
         离底部 24px 以内直接吸附为 1，避免触控板惯性停在末端前一点点。
         页面不可滚动（文章很短）时隐藏进度条，而不是显示一条满格的线。 */
+  const canvas = document.querySelector('.canvas-document');
+  let canvasProgress = 0;
   const bars = Array.from(document.querySelectorAll('.read-progress'));
   const SNAP = 24;
   let progressQueued = false;
@@ -15,15 +17,33 @@
   function updateProgress() {
     progressQueued = false;
     const max = root.scrollHeight - window.innerHeight;
-    const idle = max <= SNAP;
-    let value = idle ? 0 : window.scrollY / max;
-    if (!idle && max - window.scrollY <= SNAP) value = 1;
+    const idle = canvas ? canvasProgress === 0 : max <= SNAP;
+    let value = canvas ? canvasProgress : idle ? 0 : window.scrollY / max;
+    if (!canvas && !idle && max - window.scrollY <= SNAP) value = 1;
     value = Math.min(1, Math.max(0, value));
     for (const bar of bars) {
       bar.style.setProperty('--progress', value.toFixed(4));
       bar.classList.toggle('is-idle', idle || value < 0.002);
       bar.classList.toggle('is-complete', value >= 1);
     }
+  }
+
+  // 完整 HTML 画布以 postMessage 同步目录和进度，不开放同源权限。
+  if (canvas && info) {
+    info.querySelectorAll('.toc-link').forEach(link => link.addEventListener('click', event => {
+      event.preventDefault();
+      canvas.contentWindow.postMessage({type: 'iris:canvas-section', id: decodeURIComponent(link.hash.slice(1))}, '*');
+      canvas.focus();
+    }));
+    window.addEventListener('message', event => {
+      if (event.source !== canvas.contentWindow || event.data?.type !== 'iris:canvas-progress') return;
+      canvasProgress = Math.min(1, Math.max(0, Number(event.data.progress) || 0));
+      updateProgress();
+      info.querySelectorAll('.toc-link').forEach(link => {
+        if (decodeURIComponent(link.hash.slice(1)) === event.data.section) link.setAttribute('aria-current', 'location');
+        else link.removeAttribute('aria-current');
+      });
+    });
   }
 
   /* 2. 当前章节高亮。 */

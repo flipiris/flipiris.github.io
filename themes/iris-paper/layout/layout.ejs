@@ -1,10 +1,14 @@
 <%
-// 模板种类：post（文章）、page（页面）、canvas（画布）；其余生成页（首页、归档、分类、标签）为 index。
-const layoutName = page.layout === 'work' ? 'canvas' : (page.layout || '');
-const kind = layoutName === 'canvas' ? 'canvas' : layoutName === 'post' ? 'post' : layoutName === 'page' ? 'page' : 'index';
+// 索引与独立页面统一使用 page 框架。
+const layoutName = page_layout(page);
+const kind = layoutName === 'page' ? 'page' : 'post';
+const presentation = page_presentation(page);
+const home = is_home();
+const hasInfo = kind === 'post';
+const documentTitle = page.title || (is_category() ? page.category : is_tag() ? page.tag : is_archive() ? '页面一览' : config.title);
 const style = page_style(page);
 const cssFiles = ['base', 'fonts', 'navigation', 'pages', 'reading', 'presets'];
-const bodyClass = ['layout-' + kind].concat(kind === 'canvas' ? [] : ['content-layout']).join(' ');
+const bodyClass = ['layout-' + kind, layoutName !== kind ? 'layout-' + layoutName : '', 'content-layout', home ? 'is-home' : ''].join(' ');
 %>
 <!DOCTYPE html>
 <html lang="<%= config.language || 'zh-CN' %>" class="kind-<%= kind %>">
@@ -12,36 +16,40 @@ const bodyClass = ['layout-' + kind].concat(kind === 'canvas' ? [] : ['content-l
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="<%= style.palette === 'ink' ? 'dark' : 'light' %>">
-  <title><%= page.title ? page.title + ' · ' : (is_archive() ? '页面一览 · ' : '') %><%= config.author %></title>
-  <% if (config.description) { %>
-    <meta name="description" content="<%= config.description %>">
+  <title><%= documentTitle %> · <%= config.author %></title>
+  <meta name="author" content="<%= page.author || config.author %>">
+  <link rel="canonical" href="<%= full_url_for(page.path || '/') %>">
+  <% if (page.description || config.description) { %>
+    <meta name="description" content="<%= page.description || config.description %>">
   <% } %>
   <script>document.documentElement.classList.add('js')</script>
   <link rel="preload" href="<%- url_for('/fonts/MaterialSymbolsOutlined.woff2') %>" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="<%- url_for('/fonts/ChillJinshuSongPro_Regular-core.woff2') %>" as="font" type="font/woff2" crossorigin>
-  <% if (kind !== 'canvas') { %>
+  <% if (presentation !== 'canvas') { %>
     <link rel="preload" href="<%- url_for('/fonts/GenRyuMin2TW-M-core.woff2') %>" as="font" type="font/woff2" crossorigin>
   <% } %>
   <% cssFiles.forEach(function(name) { %>
     <link rel="stylesheet" href="<%- url_for('/css/' + name + '.css') %>">
   <% }); %>
   <%# 窄屏样式单独成文件：普通页面按视口宽度启用，画布页面无论宽窄都启用。 %>
-  <link rel="stylesheet" href="<%- url_for('/css/narrow.css') %>"<% if (kind !== 'canvas') { %> media="(max-width: 860px)"<% } %>>
+  <link data-responsive rel="stylesheet" href="<%- url_for('/css/narrow.css') %>"<% if (presentation !== 'canvas') { %> media="(max-width: 860px)"<% } %>>
   <% (page.styles ? [].concat(page.styles) : []).forEach(function(href) { %>
     <link rel="stylesheet" href="<%- url_for(href) %>">
   <% }); %>
   <script src="<%- url_for('/js/navigation.js') %>" defer></script>
-  <% if (kind === 'post') { %>
-    <script src="<%- url_for('/js/reading.js') %>" defer></script>
-  <% } %>
+  <% if (hasInfo) { %><script src="<%- url_for('/js/reading.js') %>" defer></script><% } %>
 </head>
 
-<body class="<%= bodyClass %>"<% if (style.palette) { %> data-palette="<%= style.palette %>"<% } %><% if (style.typography) { %> data-typography="<%= style.typography %>"<% } %>>
+<body class="<%= bodyClass %>" data-layout="<%= layoutName %>" data-presentation="<%= presentation %>" data-alignment="<%= page.alignment === 'balanced' ? 'balanced' : 'centered' %>"<% if (style.palette) { %> data-palette="<%= style.palette %>"<% } %><% if (style.typography) { %> data-typography="<%= style.typography %>"<% } %>>
   <a class="skip-link" href="#main-content">跳转到正文</a>
 
-  <!-- 通栏页眉暂作占位；导航浮在上方，窄屏（及画布）由 top-nav 承载整个顶栏。 -->
-  <header class="site-header">
-    <nav id="top-nav" class="top-nav<%= kind === 'post' ? ' has-post-info' : '' %>" aria-label="站点导航">
+  <!-- 页眉与导航共用站点标识组件；首页将标识移到页眉中央。 -->
+  <header class="site-header<%= page.header === 'mtf' ? ' site-header-mtf' : '' %>">
+    <% if (page.header === 'mtf') { %>
+      <%- partial('_partial/mtf-header') %>
+    <% } %>
+    <% if (home) { %><%- partial('_partial/site-identity', {hero: true}) %><% } %>
+    <nav id="top-nav" class="top-nav<%= hasInfo ? ' has-post-info' : '' %>" aria-label="站点导航">
       <details id="mobile-menu" class="mobile-menu hover-panel" data-panel-mode="narrow">
         <summary id="mobile-nav" class="mobile-nav" aria-label="网站目录" aria-controls="mobile-menu-content">
           <%- partial('_partial/icon', {name: 'side_navigation'}) %>
@@ -51,39 +59,37 @@ const bodyClass = ['layout-' + kind].concat(kind === 'canvas' ? [] : ['content-l
             <%- partial('_partial/navigation') %>
           </nav>
           <%- partial('_partial/site-stats') %>
+          <%- partial('_partial/social-links') %>
         </div>
       </details>
-      <div class="site-identity">
-        <a class="home-link" href="<%- url_for('/') %>"><%= config.title %></a>
-        <span class="subtitle"><%= config.subtitle %></span>
-      </div>
-      <% if (kind === 'post') { %>
-        <%- partial('_partial/post-info') %>
-        <div class="read-progress read-progress-header" aria-hidden="true"><span></span></div>
-      <% } %>
+      <% if (home) { %><span class="home-top-label">首页</span><% } %>
+      <% if (!home) { %><%- partial('_partial/site-identity', {hero: false}) %><% } %>
+      <% if (hasInfo) { %><%- partial('_partial/post-info', {infoContent: page.content}) %><% } %>
+      <% if (kind === 'post') { %><div class="read-progress read-progress-header" aria-hidden="true"><span></span></div><% } %>
     </nav>
+
+  </header>
+
+  <button class="menu-backdrop" type="button" aria-label="关闭目录" tabindex="-1" hidden></button>
+
+  <!-- page 共用一个真实的侧栏 + 正文网格；首页不另设定位规则。 -->
+  <div class="site-layout">
     <nav id="side-nav" class="side-nav" aria-label="网站目录">
       <div class="side-nav-panel">
         <div class="side-nav-content">
           <%- partial('_partial/navigation') %>
         </div>
         <%- partial('_partial/site-stats') %>
+        <%- partial('_partial/social-links') %>
       </div>
     </nav>
-  </header>
-
-  <button class="menu-backdrop" type="button" aria-label="关闭目录" tabindex="-1" hidden></button>
-
-  <!-- main 不设版心；各模板自行选择 .page-frame。 -->
-  <main id="main-content" tabindex="-1">
-    <%- body %>
-  </main>
-
-  <% if (kind !== 'canvas') { %>
+    <main id="main-content" tabindex="-1">
+      <%- body %>
+    </main>
     <footer class="site-footer page-frame">
       <small>© <%= date(new Date(), 'YYYY') %> <%= config.title %></small>
     </footer>
-  <% } %>
+  </div>
 
   <% (page.scripts ? [].concat(page.scripts) : []).forEach(function(script) { %>
     <script src="<%- url_for(script) %>" defer></script>

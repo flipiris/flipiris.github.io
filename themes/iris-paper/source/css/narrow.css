@@ -17,7 +17,7 @@
 
 body {
   --nav-left: calc(var(--space) * 3);
-  --frame-width: min(var(--frame-max-width), calc(100vw - 2 * var(--page-gutter)));
+  --frame-width: min(var(--content-width), var(--frame-max-width), calc(100vw - 2 * var(--page-gutter)));
   --content-left: var(--page-gutter);
 }
 
@@ -95,6 +95,10 @@ html {
   max-height: calc(100dvh - var(--top-nav-height));
   padding: var(--nav-padding);
   overflow-y: auto;
+  padding-right: calc(var(--nav-padding) + var(--space) * 3);
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--accent) / 35%) transparent;
   overscroll-behavior: contain;
   border: 0;
   border-radius: 0 var(--drawer-radius) var(--drawer-radius) 0;
@@ -150,7 +154,7 @@ body.nav-open {
 
 .post-info-body {
   position: absolute;
-  top: calc(100% + 1px);
+  top: 100%;
   right: 0;
   left: 0;
   width: 100%;
@@ -175,6 +179,69 @@ body.nav-open {
 
 /* 6. 列表。 */
 .post-item {
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space);
+  grid-template-columns: 78px minmax(0, 1fr);
+  gap: 10px;
+}
+
+
+.post-info-icon {
+  color: inherit;
+}
+.post-info summary {
+  color: rgb(var(--accent) / 52%);
+}
+
+[data-presentation="canvas"] .top-nav {
+  background: rgb(var(--paper) / 22%);
+  box-shadow: inset 0 -1px 0 rgb(var(--ink) / 8%), 0 4px 16px rgb(0 0 0 / 4%);
+}
+
+[data-presentation="canvas"] :is(.home-link, .subtitle) {
+  color: rgb(var(--ink) / 80%);
+}
+
+[data-presentation="canvas"] :is(.mobile-nav, .post-info summary) {
+  color: rgb(var(--ink) / 48%);
+}
+
+[data-presentation="canvas"] .hover-panel:is([data-state="opening"], [data-state="open"]) > summary,
+[data-presentation="canvas"] .hover-panel > summary:focus-visible,
+[data-presentation="canvas"] .hover-panel > summary:hover {
+  color: rgb(var(--ink));
+}
+
+[data-presentation="canvas"] .post-info-icon {
+  color: inherit;
+}
+
+[data-presentation="canvas"] .hover-panel:is([data-state="opening"], [data-state="open"]) .post-info-icon,
+[data-presentation="canvas"] .hover-panel > summary:focus-visible .post-info-icon,
+[data-presentation="canvas"] .hover-panel > summary:hover .post-info-icon {
+  color: inherit;
+}
+
+[data-presentation="canvas"] :is(.top-nav, .side-nav, .mobile-menu-body, .post-info-body) {
+  -webkit-backdrop-filter: blur(28px) saturate(0%);
+  backdrop-filter: blur(28px) saturate(0%);
+}
+
+[data-presentation="canvas"] :is(.side-nav, .mobile-menu-body, .post-info-body) {
+  background: rgb(var(--paper) / 90%);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 8%);
+}
+
+[data-presentation="canvas"] .top-nav:has(.hover-panel[open]) {
+  box-shadow: inset 0 -1px 0 rgb(var(--ink) / 8%);
+}
+
+
+
+.mobile-menu-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-menu-body > .social-links {
+  flex: none;
+  margin-top: auto;
 }

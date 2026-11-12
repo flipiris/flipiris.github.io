@@ -1,5 +1,7 @@
 (() => {
   const narrowScreen = window.matchMedia('(max-width: 860px)');
+  const isNarrow = () => narrowScreen.matches || document.body.dataset.presentation === 'canvas';
+  const isCompact = () => isNarrow();
   const hoverPointer = window.matchMedia('(hover: hover) and (pointer: fine)');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const backdrop = document.querySelector('.menu-backdrop');
@@ -89,7 +91,7 @@
   }
 
   function close(record, restoreFocus = false) {
-    if (!narrowScreen.matches) return;
+    if (!isCompact(record)) return;
     clearTimeout(record.closeTimer);
     record.hoverOpened = false;
     record.pinned = false;
@@ -99,7 +101,7 @@
   }
 
   function open(record, hoverOpened) {
-    if (!narrowScreen.matches) return;
+    if (!isCompact(record)) return;
     panels.forEach(other => {
       if (other !== record) close(other);
     });
@@ -112,7 +114,7 @@
   panels.forEach(record => {
     record.summary.addEventListener('click', event => {
       event.preventDefault();
-      if (!narrowScreen.matches) return;
+      if (!isCompact(record)) return;
       if (record.targetOpen && record.hoverOpened) {
         clearTimeout(record.closeTimer);
         record.hoverOpened = false;
@@ -122,29 +124,28 @@
     });
 
     record.panel.addEventListener('pointerenter', event => {
-      if (!narrowScreen.matches || !hoverPointer.matches || event.pointerType !== 'mouse') return;
+      if (!isCompact(record) || !hoverPointer.matches || event.pointerType !== 'mouse') return;
       clearTimeout(record.closeTimer);
       if (!record.targetOpen) open(record, true);
     });
 
     record.panel.addEventListener('pointerleave', event => {
-      if (!narrowScreen.matches || event.pointerType !== 'mouse' || record.pinned) return;
+      if (!isCompact(record) || event.pointerType !== 'mouse' || record.pinned) return;
       record.closeTimer = setTimeout(() => {
         if (!record.panel.matches(':focus-within')) close(record);
       }, 180);
     });
 
     record.panel.addEventListener('focusout', event => {
-      if (narrowScreen.matches && !record.pinned && !record.panel.contains(event.relatedTarget) && !record.panel.matches(':hover')) close(record);
+      if (isCompact(record) && !record.pinned && !record.panel.contains(event.relatedTarget) && !record.panel.matches(':hover')) close(record);
     });
 
     record.panel.addEventListener('click', event => {
-      if (narrowScreen.matches && event.target.closest('a')) close(record);
+      if (isCompact(record) && event.target.closest('a')) close(record);
     });
   });
 
   document.addEventListener('pointerdown', event => {
-    if (!narrowScreen.matches) return;
     panels.forEach(record => {
       if (!record.panel.contains(event.target)) close(record);
     });
@@ -153,8 +154,8 @@
   backdrop.addEventListener('click', () => panels.filter(record => record.sidebar).forEach(record => close(record, true)));
 
   document.addEventListener('keydown', event => {
-    if (event.key !== 'Escape' || !narrowScreen.matches) return;
-    const opened = panels.find(record => record.targetOpen || record.state === 'closing');
+    if (event.key !== 'Escape') return;
+    const opened = panels.find(record => isCompact(record) && (record.targetOpen || record.state === 'closing'));
     if (opened) {
       event.preventDefault();
       close(opened, true);
@@ -169,15 +170,16 @@
       record.hoverOpened = false;
       record.pinned = false;
       record.targetOpen = false;
-      record.state = narrowScreen.matches ? 'closed' : 'wide';
+      record.state = isCompact(record) ? 'closed' : 'wide';
       record.panel.dataset.state = record.state;
-      // 宽屏信息窗常驻展开；侧栏本身是静态 nav，不参与抽屉状态。
-      record.panel.open = !narrowScreen.matches && !record.sidebar;
+      // 文章宽屏信息窗常驻；canvas 收进顶栏。侧栏本身是静态 nav。
+      record.panel.open = !isCompact(record) && !record.sidebar;
     });
     shade(false, true);
   }
 
   narrowScreen.addEventListener('change', syncLayout);
+  document.addEventListener('appearance:layout', syncLayout);
   hoverPointer.addEventListener('change', () => panels.filter(record => record.hoverOpened).forEach(record => close(record)));
   reducedMotion.addEventListener('change', () => {
     if (reducedMotion.matches) {

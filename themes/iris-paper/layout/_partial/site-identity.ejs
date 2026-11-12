@@ -1,0 +1,4 @@
+<div class="site-identity<%= hero ? ' site-identity-hero' : '' %>">
+  <% if (hero) { %><h1 class="page-title"><a class="home-link" href="<%- url_for('/') %>"><%= config.title %></a></h1><% } else { %><a class="home-link" href="<%- url_for('/') %>"><%= config.title %></a><% } %>
+  <span class="subtitle"><%= config.subtitle %></span>
+</div>

@@ -2,7 +2,7 @@
 title: {{ title }}
 date: {{ date }}
 layout: canvas
-# palette: mist
+# palette: ink
 # styles:
 #   - /works/example/style.css
 # scripts:

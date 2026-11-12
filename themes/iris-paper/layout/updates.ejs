@@ -1,0 +1,4 @@
+<%- partial('page', {
+  pageTitle: '最近更新',
+  pageBody: '<p class="index-description">按最近修改时间排列，包含文章、作品与独立页面。</p>' + partial('_partial/post-list', {dateField: 'updated'})
+}) %>
