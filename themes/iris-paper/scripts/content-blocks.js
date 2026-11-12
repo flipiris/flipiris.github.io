@@ -1,8 +1,7 @@
 'use strict';
 
 const {parseDocument, DomUtils} = require('htmlparser2');
-
-// 页面元数据可调用的预设；名称对应 source/css/presets.css。
+const {escapeHTML} = require('hexo-util');
 const PALETTES = ['rose', 'tech', 'wanderers', 'sepia', 'ink'];
 const TYPOGRAPHIES = ['standard', 'enhanced', 'literary', 'poem'];
 
@@ -11,10 +10,6 @@ const NOTE_CLASS = /(?:^|\s)note(?:\s|$)/;
 function isNote(node) {
   return node.type === 'tag' && node.name === 'div' && NOTE_CLASS.test(node.attribs.class || '');
 }
-
-// 把正文里的 <div class="note"> 取出，放进信息窗第二页。
-// 返回 {body, note}：body 不含注释块，note 是块内部的 HTML（没有注释块时为空串）。
-// 用原文的下标截取，保留作者写下的实体与标记，不经过二次序列化。
 function splitNote(content) {
   const source = String(content || '');
   if (!source.includes('note')) return {body: source, note: ''};
@@ -40,9 +35,12 @@ function splitNote(content) {
   return {body, note: parts.join('\n')};
 }
 
-hexo.extend.helper.register('split_note', splitNote);
-
-// 校验 front-matter 中的 palette / typography；未知名称退回默认并给出一次提示。
+const notes = new Map();
+hexo.extend.filter.register('before_generate', () => notes.clear());
+hexo.extend.helper.register('split_note', function(content = '') {
+  if (!notes.has(content)) notes.set(content, splitNote(content));
+  return notes.get(content);
+});
 const warned = new Set();
 function pick(kind, value, allowed) {
   if (!value) return '';
@@ -59,29 +57,23 @@ function pick(kind, value, allowed) {
 hexo.extend.helper.register('page_style', function(page) {
   const data = page || {};
   return {
-    palette: pick('palette', String(data.palette || '').trim().toLowerCase().replace(/^wanderer$/, 'wanderers'), PALETTES),
-    typography: pick('typography', data.typography, TYPOGRAPHIES) || (!data.typography && data.categories && data.categories.toArray && data.categories.toArray().some(item => ['笔记', '随笔'].includes(item.name)) ? 'enhanced' : '')
+    palette: pick('palette', data.palette, PALETTES),
+    typography: pick('typography', data.typography, TYPOGRAPHIES) || (!data.typography && data.categories && data.categories.toArray && data.categories.toArray().some(item => item.name === '笔记') ? 'enhanced' : '')
   };
 });
 
-module.exports = {splitNote};
-
-
 function pageLayout(page) {
-  if (['canvas', 'work'].includes(page.layout) || page.presentation === 'canvas') return 'canvas';
-  return ['article', 'post'].includes(page.layout) ? 'article' : 'page';
+  return ['article', 'canvas'].includes(page.layout) ? page.layout : 'page';
 }
 hexo.extend.helper.register('page_layout', pageLayout);
-hexo.extend.helper.register('page_presentation', function(page) {
-  return pageLayout(page) === 'canvas' ? 'canvas' : 'paper';
-});
 
 hexo.extend.helper.register('canvas_document', function(content, base, bridge) {
   const html = String(content || '');
   if (!/<html[\s>]/i.test(html)) return '';
-  // srcdoc 内相对链接默认跟随外层页面；可显式给出作品素材目录。
-  const escaped = String(base || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  const escaped = escapeHTML(String(base || ''));
   const prepared = escaped ? html.replace(/<head([^>]*)>/i, '<head$1><base href="' + escaped + '">') : html;
-  const script = '<script src="' + String(bridge || '/js/canvas-bridge.js').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;') + '"></script>';
+  const script = '<script src="' + escapeHTML(String(bridge || '/js/canvas-bridge.js')) + '"></script>';
   return prepared.replace(/<\/body>/i, script + '</body>');
 });
+
+module.exports = {splitNote};

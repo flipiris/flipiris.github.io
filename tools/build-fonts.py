@@ -1,20 +1,5 @@
 #!/usr/bin/env python3
-"""把 fonts-src/ 里的完整字体切成三档 WOFF2，输出到主题的 source/fonts/。
-
-用法：
-  python3 -m venv /tmp/ftvenv && /tmp/ftvenv/bin/pip install fonttools brotli
-  /tmp/ftvenv/bin/python tools/build-fonts.py          # 全部重建并生成 fonts.css
-  /tmp/ftvenv/bin/python tools/build-fonts.py GenRyu    # 只重建名称含 GenRyu 的字体
-  /tmp/ftvenv/bin/python tools/build-fonts.py --css     # 只重新生成 fonts.css
-
-每个字体生成：
-  <名称>-core.woff2    一级常用字 + 标点 + 拉丁字母（几乎所有页面只需要这一档）
-  <名称>-site.woff2    站内文章与模板实际用到、但不在 core 里的字（通常只有几十个字，几十 KB）
-  <名称>-uXXXX.woff2   其余字形按码位每 4096 个分一块（U+4000–4FFF 为 u4000，依此类推），兜底用
-fonts.css 用 unicode-range 声明各档；新增文章含有新的生僻字后，运行
-  /tmp/ftvenv/bin/python tools/build-fonts.py --site
-即可只重建 site 档并刷新 fonts.css。
-"""
+"""Build WOFF2 subsets and their unicode-range stylesheet; see README.md."""
 import sys
 from pathlib import Path
 from fontTools import subset
@@ -44,11 +29,7 @@ def decode_range(codec, lead, trail):
     return chars
 
 
-# GB2312：一级字 B0A1–D7F9，二级字 D8A1–F7FE。
 gb_level1 = decode_range("gb2312", (0xB0, 0xD8), (0xA1, 0xFF))
-gb_level2 = decode_range("gb2312", (0xD8, 0xF8), (0xA1, 0xFF))
-# Big5：常用字 A440–C67E，次常用字 C940–F9D5。
-big5 = decode_range("big5", (0xA4, 0xFA), (0x40, 0xFF))
 
 symbols = set(range(0x20, 0x7F))                    # 基本拉丁
 symbols |= set(range(0xA0, 0x100))                  # 拉丁补充
@@ -119,14 +100,15 @@ def site_chars():
 
 
 def blocks_of(path):
-    cmap = set(TTFont(str(path), lazy=True).getBestCmap().keys())
+    with TTFont(str(path), lazy=True) as font:
+        cmap = set(font.getBestCmap())
     rest = {}
     for c in cmap - core_set:
         rest.setdefault(c // BLOCK * BLOCK, set()).add(c)
     return cmap, rest
 
 
-def write_css():
+def write_css(characters):
     """后声明的字体优先：先写各码位块，最后写 core，让常用字总是命中 core。"""
     lines = ["/* 由 tools/build-fonts.py 生成；不要手工编辑。 */",
              "@font-face {",
@@ -146,7 +128,7 @@ def write_css():
                       f"  unicode-range: U+{start:X}-{start + BLOCK - 1:X};", "}", ""]
     for family, weight, stem in FACES:
         path = SRC / (stem + (".woff" if stem.endswith("Regular") else ".otf"))
-        extra = merge(site_chars() & set(TTFont(str(path), lazy=True).getBestCmap()) - core_set, 0)
+        extra = merge(characters & blocks_of(path)[0] - core_set, 0)
         if extra:
             lines += ["@font-face {", f'  font-family: "{family}";', "  font-style: normal;",
                       f"  font-weight: {weight};", "  font-display: swap;",
@@ -162,23 +144,25 @@ def write_css():
     print("fonts.css", len(text) // 1024, "KB")
 
 
-def main():
-    args = sys.argv[1:]
+def main(args=None, characters=None):
+    args = sys.argv[1:] if args is None else args
+    if characters is None:
+        characters = site_chars()
     if args == ["--css"]:
-        write_css()
+        write_css(characters)
         return
     if args == ["--site"]:
         for name in FONTS:
             path = SRC / name
-            cmap = set(TTFont(str(path), lazy=True).getBestCmap())
-            chars = site_chars() & cmap - core_set
+            cmap = blocks_of(path)[0]
+            chars = characters & cmap - core_set
             target = OUT / f"{path.stem}-site.woff2"
             if chars:
                 write(path, chars, target)
                 print(f"{target.name:46} {len(chars):6d} 字  {target.stat().st_size / 1024:8.0f} KB", flush=True)
             elif target.exists():
                 target.unlink()
-        write_css()
+        write_css(characters)
         return
     OUT.mkdir(parents=True, exist_ok=True)
     for name in FONTS:
@@ -192,12 +176,7 @@ def main():
             write(path, chars, target)
             print(f"{target.name:46} {len(chars):6d} 字  {target.stat().st_size / 1024:8.0f} KB", flush=True)
     if not args:
-        main_site()
-
-
-def main_site():
-    sys.argv = [sys.argv[0], "--site"]
-    main()
+        main(["--site"], characters)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,102 @@
+diff --git a/themes/iris-paper/README.md b/themes/iris-paper/README.md
+index fa6d5e7..8974de9 100644
+--- a/themes/iris-paper/README.md
++++ b/themes/iris-paper/README.md
+@@ -71,7 +71,7 @@ python3 -m venv /tmp/ftvenv && /tmp/ftvenv/bin/pip install fonttools brotli   #
+ 
+ ## 标题强调点
+ 
+-`_partial/page-title.ejs` 用语义化 `<h1 class="page-title">`，保留标题的正常行内换行，只将末尾一个完整字形放进 `.title-end`。该元素使用 `inline-flex; align-items: center`，`::after` 生成圆点。因此圆点紧跟末字、与末行垂直居中，且不会单独换行或跑到标题区域的最右侧。`Intl.Segmenter` 保证组合 emoji 不被拆开。
++`_partial/page-title.ejs` 只输出语义化的 `<h1 class="page-title">`，标题保持单一文本节点。圆点由 `.page-header .page-title::after` 生成：`inline-block`、`vertical-align: bottom`，用 `margin-bottom: 0.5em`（行高 1.5 的一半减去圆点半径）与末行垂直居中，随末行排版。
+ 
+ ## 页眉主题示例
+ 
+diff --git a/themes/iris-paper/layout/_partial/page-title.ejs b/themes/iris-paper/layout/_partial/page-title.ejs
+index f17e261..016fd3a 100644
+--- a/themes/iris-paper/layout/_partial/page-title.ejs
++++ b/themes/iris-paper/layout/_partial/page-title.ejs
+@@ -1,2 +1 @@
+-<% const characters = Array.from(new Intl.Segmenter('zh', {granularity: 'grapheme'}).segment(String(title || '').trimEnd()), item => item.segment); const last = characters.pop() || ''; %>
+-<h1 class="page-title"><%= characters.join('') %><span class="title-end"><%= last %></span></h1>
++<h1 class="page-title"><%= String(title || '').trimEnd() %></h1>
+diff --git a/themes/iris-paper/source/css/pages.css b/themes/iris-paper/source/css/pages.css
+index d72010d..9b573fb 100644
+--- a/themes/iris-paper/source/css/pages.css
++++ b/themes/iris-paper/source/css/pages.css
+@@ -47,20 +47,14 @@
+   overflow-wrap: anywhere;
+ }
+ 
+-/* 只把最后一个字与圆点组合：随末行排版，点与这一行垂直居中。 */
+-.title-end {
+-  display: inline-flex;
+-  align-items: center;
+-  white-space: nowrap;
+-}
+-
+-.title-end::after {
+-  flex: 0 0 0.5em;
++.page-header .page-title::after {
++  display: inline-block;
+   width: 0.5em;
+   height: 0.5em;
+-  margin-left: 0.25em;
++  margin: 0.5em 0.25em;
+   border-radius: 50%;
+   background: rgb(var(--accent) / 50%);
++  vertical-align: bottom;
+   content: "";
+ }
+ 
+diff --git a/themes/iris-paper/source/css/presets.css b/themes/iris-paper/source/css/presets.css
+index 8253da3..40f4ab7 100644
+--- a/themes/iris-paper/source/css/presets.css
++++ b/themes/iris-paper/source/css/presets.css
+@@ -159,6 +159,6 @@ body[data-palette="wanderers"] :is(.home-section h2, .home-section h3, .taxonomy
+   color: rgb(var(--brand));
+ }
+ 
+-body[data-palette="wanderers"] .title-end::after {
++body[data-palette="wanderers"] .page-header .page-title::after {
+   background: rgb(var(--brand) / 60%);
+ }
+diff --git a/themes/iris-paper/test/page-layout.test.js b/themes/iris-paper/test/page-layout.test.js
+index 0e8aa06..fd7d033 100644
+--- a/themes/iris-paper/test/page-layout.test.js
++++ b/themes/iris-paper/test/page-layout.test.js
+@@ -9,21 +9,16 @@ const {JSDOM} = require('jsdom');
+ 
+ const template = readFileSync(join(__dirname, '../layout/_partial/page-title.ejs'), 'utf8');
+ 
+-test('标题只将最后一个字与圆点组合，前文正常换行，保留原始标题', () => {
++test('标题输出为单一文本节点，保留原始标题并转义', () => {
+   const title = '耳光响亮，和解草草：《章鱼噼的原罪》的叙事塌陷';
+   const doc = new JSDOM(ejs.render(template, {title})).window.document;
+   const h1 = doc.querySelector('.page-title');
+   assert.equal(h1.tagName, 'H1');
+   assert.equal(h1.textContent, title);
+-  assert.equal(h1.querySelector('.title-end').textContent, '陷');
+-  assert.equal(h1.firstChild.nodeType, 3);
+-});
+-
+-test('标题保持转义，并把组合 emoji 当作一个完整字形', () => {
+-  const doc = new JSDOM(ejs.render(template, {title: '<你好> 🏳️‍⚧️'})).window.document;
+-  assert.equal(doc.querySelector('h1').textContent, '<你好> 🏳️‍⚧️');
+-  assert.equal(doc.querySelector('.title-end').textContent, '🏳️‍⚧️');
+-  assert.equal(doc.querySelector('你好'), null);
++  assert.equal(h1.children.length, 0);
++  const escaped = new JSDOM(ejs.render(template, {title: '<你好> 🏳️‍⚧️'})).window.document;
++  assert.equal(escaped.querySelector('h1').textContent, '<你好> 🏳️‍⚧️');
++  assert.equal(escaped.querySelector('你好'), null);
+ });
+ 
+ test('首页、归档、分类、标签、其他页面与最近更新复用 page 模板', () => {
+@@ -33,7 +28,7 @@ test('首页、归档、分类、标签、其他页面与最近更新复用 page
+     assert.doesNotMatch(source, /archive-page/);
+   }
+   const css = readFileSync(join(__dirname, '../source/css/pages.css'), 'utf8');
+-  assert.match(css, /\.title-end\s*\{[^}]*display: inline-flex;[^}]*align-items: center;/);
++  assert.match(css, /\.page-header \.page-title::after\s*\{[^}]*display: inline-block;[^}]*vertical-align: bottom;/);
+ });
+ 
+ test('文学段落外边距保留作者原来的 0.75em，所有 main 使用 1000px 上限，page 宽度为 800px', () => {

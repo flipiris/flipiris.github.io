@@ -1,21 +1,17 @@
-/* 主题页使用既有 site-header 区域，导航仍保留在原来的位置。 */
-body:has(.site-header-mtf) {
-  --page-top: 480px;
+body:has(.mtf-banner) {
   --accent: 132 78 109;
   --brand: 102 49 82;
   --bg: 248 247 247;
 }
 
-.site-header-mtf {
+.mtf-banner {
+  position: relative;
+  border-radius: var(--nav-radius);
   height: 460px;
   overflow: clip;
   background: linear-gradient(110deg, rgb(246 244 246 / 92%) 20%, rgb(248 247 247 / 25%) 100%), linear-gradient(180deg, #b3deed 0% 20%, #efc1d2 20% 40%, #fffafa 40% 60%, #efc1d2 60% 80%, #b3deed 80% 100%);
 }
 
-.site-header-mtf .top-nav,
-.site-header-mtf .side-nav {
-  overflow: visible;
-}
 
 .mtf-header-art {
   position: absolute;
@@ -164,11 +160,10 @@ body:has(.site-header-mtf) {
 }
 
 @media (max-width: 860px) {
-  body:has(.site-header-mtf) {
-    --page-top: 440px;
-  }
+  body:has(.mtf-banner) {
+    }
 
-  .site-header-mtf {
+  .mtf-banner {
     height: 420px;
     overflow: visible;
   }

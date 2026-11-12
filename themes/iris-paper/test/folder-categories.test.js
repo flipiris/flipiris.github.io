@@ -6,25 +6,25 @@ const {join} = require('node:path');
 const {runInNewContext} = require('node:vm');
 let generate;
 const context = {module: {exports: {}}, require, hexo: {
-  theme: {config: {folder_categories: {notes: '笔记', reading: '阅读'}}},
+  config: {}, theme: {config: {sections: [{folder: 'notes', label: '笔记'}, {folder: 'reading', label: '阅读'}]}},
   extend: {filter: {register(name, fn) { assert.equal(name, 'before_generate'); generate = fn; }}}
 }};
 runInNewContext(readFileSync(join(__dirname, '../scripts/folder-categories.js'), 'utf8'), context);
 const {folderCategories} = context.module.exports;
-const map = {notes: '笔记', reading: '阅读'};
+const sections = [{folder: 'notes', label: '笔记'}, {folder: 'reading', label: '阅读'}];
 const list = value => JSON.parse(JSON.stringify(value));
 
 test('递归目录默认生成分类链，根目录与独立页没有凭空分类', () => {
-  assert.deepEqual(list(folderCategories('_posts/notes/reading/book.md', {}, map)), ['笔记', '阅读']);
-  assert.deepEqual(list(folderCategories('_posts/notes/未映射/book.md', {}, map)), ['笔记', '未映射']);
-  assert.deepEqual(list(folderCategories('_posts/book.md', {}, map)), []);
-  assert.deepEqual(list(folderCategories('about/index.md', {}, map)), []);
+  assert.deepEqual(list(folderCategories('_posts/notes/reading/book.md', sections)), ['笔记', '阅读']);
+  assert.deepEqual(list(folderCategories('_posts/notes/未映射/book.md', sections)), ['笔记', '未映射']);
+  assert.deepEqual(list(folderCategories('_posts/book.md', sections)), []);
+  assert.deepEqual(list(folderCategories('about/index.md', sections)), []);
 });
 
-test('显式分类优先，保留多分类层级；旧随笔归一为笔记', () => {
-  assert.deepEqual(list(folderCategories('_posts/notes/a.md', {categories: ['评论']}, map)), ['评论']);
-  assert.deepEqual(list(folderCategories('_posts/a.md', {categories: [['随笔', '阅读'], ['评论']]}, map)), [['笔记', '阅读'], ['评论']]);
-  assert.deepEqual(list(folderCategories('_posts/notes/a.md', {category: '作品'}, map)), ['作品']);
+test('不读取 front-matter 分类，文件夹变化即改变归属', () => {
+  assert.deepEqual(list(folderCategories('_posts/notes/a.md', sections)), ['笔记']);
+  assert.deepEqual(list(folderCategories('_posts/reading/a.md', sections)), ['阅读']);
+  assert.deepEqual(list(folderCategories('_posts/a.md', sections)), []);
 });
 
 test('通过 Hexo setCategories 更新关系，不写入只读 categories getter', async () => {
@@ -34,4 +34,5 @@ test('通过 Hexo setCategories 更新关系，不写入只读 categories getter
   context.hexo.model = () => ({toArray: () => [post]});
   await generate();
   assert.deepEqual(list(received), ['笔记', '阅读']);
+  assert.equal(context.hexo.config.category_map['笔记'], 'notes');
 });

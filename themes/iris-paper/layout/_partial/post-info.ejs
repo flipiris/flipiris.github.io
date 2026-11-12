@@ -4,7 +4,7 @@ const headings = toc(parts.body, {list_number: false});
 const stats = page_stats(parts.body);
 const hasNote = !!parts.note;
 %>
-<details class="page-info post-info hover-panel" data-panel-mode="narrow" open>
+<details class="post-info hover-panel" open>
   <summary aria-label="信息与大纲">
     <span class="post-info-icon"><%- partial('_partial/icon', {name: 'info'}) %></span>
   </summary>

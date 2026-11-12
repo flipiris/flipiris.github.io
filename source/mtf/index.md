@@ -3,10 +3,19 @@ title: MtF · 自在生长
 layout: page
 date: 2026-11-12 01:00:00
 updated: 2026-11-12 01:00:00
-header: mtf
 styles:
-  - /css/mtf.css
+  - /mtf/style.css
 ---
+<div class="mtf-banner">
+<div class="mtf-header-art" aria-hidden="true"><div class="mtf-orbit"></div><div class="mtf-sun"></div></div>
+<div class="mtf-hero">
+  <p class="mtf-eyebrow">MtF / 自在生长</p>
+  <p class="mtf-hero-title">成为自己，<br>不必赶路。</p>
+  <p class="mtf-hero-description">让每一种认同与表达，都有舒展的空间。</p>
+  <a class="mtf-hero-link" href="#identity">向下探索 <span aria-hidden="true">↓</span></a>
+</div>
+</div>
+
 <div class="mtf-page">
 <p class="mtf-lead">关于认同、表达，以及平凡而具体的日常。</p>
 

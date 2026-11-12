@@ -1,4 +1,4 @@
-<article class="content content-page page-frame <%= contentClass %>">
+<article class="content-page<%= contentClass ? ' ' + contentClass : '' %>">
   <% if (contentTitle !== false) { %><header class="page-header">
     <%- partial('_partial/page-title', {title: contentTitle}) %>
   </header><% } %>

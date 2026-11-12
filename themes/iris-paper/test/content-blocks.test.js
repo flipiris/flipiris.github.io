@@ -5,19 +5,21 @@ const assert = require('node:assert/strict');
 const {readFileSync} = require('node:fs');
 const {join} = require('node:path');
 const {runInNewContext} = require('node:vm');
+const {JSDOM} = require('jsdom');
 
 function helpers() {
   const registered = {};
   const warnings = [];
+  let regenerate;
   runInNewContext(readFileSync(join(__dirname, '../scripts/content-blocks.js'), 'utf8'), {
     require,
     module: {exports: {}},
     hexo: {
       log: {warn: message => warnings.push(message)},
-      extend: {helper: {register: (name, fn) => { registered[name] = fn; }}}
+      extend: {filter: {register(name, fn) { regenerate = fn; }}, helper: {register: (name, fn) => { registered[name] = fn; }}}
     }
   });
-  return {registered, warnings};
+  return {registered, warnings, regenerate};
 }
 
 test('没有注释块时正文原样返回，信息窗不出现第二页', () => {
@@ -84,14 +86,7 @@ test('笔记默认增强排版，显式 standard / poem 优先，配色与排版
   assert.equal(page_style({categories}).typography, 'enhanced');
   assert.equal(page_style({categories, typography: 'standard'}).typography, 'standard');
   assert.equal(page_style({categories, typography: 'poem', palette: 'wanderers'}).palette, 'wanderers');
-  assert.equal(page_style({categories: {toArray: () => [{name: '随笔'}]}}).typography, 'enhanced');
-});
-
-test('旧 canvas/work 与 post presentation 共用同一展示选项', () => {
-  const {page_presentation} = helpers().registered;
-  for (const layout of ['canvas', 'work']) assert.equal(page_presentation({layout}), 'canvas');
-  assert.equal(page_presentation({layout: 'post', presentation: 'canvas'}), 'canvas');
-  assert.equal(page_presentation({layout: 'post'}), 'paper');
+  assert.equal(page_style({categories: {toArray: () => [{name: '随笔'}]}}).typography, '');
 });
 
 test('完整 HTML 画布保留正文，注入素材基址与隔离通信脚本；片段不进入 iframe', () => {
@@ -99,24 +94,17 @@ test('完整 HTML 画布保留正文，注入素材基址与隔离通信脚本�
   assert.equal(canvas_document('<p>片段</p>'), '');
   const html = '<html><head><title>原作</title></head><body><h1 id="a">标题</h1>    <p>原文</p></body></html>';
   const document = canvas_document(html, '/works/test/?a=1&b=2', '/js/canvas-bridge.js');
-  assert.ok(document.includes('<base href="/works/test/?a=1&amp;b=2">'));
-  assert.ok(document.includes('<script src="/js/canvas-bridge.js"></script></body>'));
+  const parsed = new JSDOM(document).window.document;
+  assert.equal(parsed.querySelector('base').getAttribute('href'), '/works/test/?a=1&b=2');
+  assert.equal(parsed.querySelector('script').getAttribute('src'), '/js/canvas-bridge.js');
   assert.ok(document.includes('<h1 id="a">标题</h1>    <p>原文</p>'));
 });
 
 
-test('布局使用 article/page/canvas，旧 post/work 和 presentation 保持可用', () => {
-  const {page_layout, page_presentation, page_style} = helpers().registered;
-  assert.equal(page_layout({layout: 'article'}), 'article');
-  assert.equal(page_layout({layout: 'post'}), 'article');
-  assert.equal(page_layout({layout: 'page'}), 'page');
-  assert.equal(page_layout({layout: 'canvas'}), 'canvas');
-  assert.equal(page_layout({layout: 'work'}), 'canvas');
-  assert.equal(page_presentation({layout: 'article', presentation: 'canvas'}), 'canvas');
-  assert.equal(page_style({palette: 'wanderer'}).palette, 'wanderers');
-  assert.equal(page_style({palette: 'Wanderer'}).palette, 'wanderers');
-  assert.equal(page_style({palette: 'mist'}).palette, '');
-  assert.equal(page_style({palette: 'bamboo'}).palette, '');
+test('布局只使用 article/page/canvas，索引回到 page', () => {
+  const {page_layout} = helpers().registered;
+  for (const layout of ['article', 'canvas', 'page']) assert.equal(page_layout({layout}), layout);
+  for (const layout of ['index', 'category', 'misc', 'updates']) assert.equal(page_layout({layout}), 'page');
 });
 
 test('增强排版仅改变粗体和斜体文字颜色，不绘制背景高亮', () => {
@@ -126,4 +114,15 @@ test('增强排版仅改变粗体和斜体文字颜色，不绘制背景高亮',
     assert.match(rule, /color:/);
     assert.doesNotMatch(rule, /background|box-decoration/);
   }
+});
+
+test('同一轮渲染复用注释解析，下次生成清空缓存', () => {
+  const {registered, regenerate} = helpers();
+  const source = '<p>正文</p><div class="note">注释</div>';
+  const first = registered.split_note(source);
+  assert.equal(registered.split_note(source), first);
+  regenerate();
+  const next = registered.split_note(source);
+  assert.notEqual(next, first);
+  assert.deepEqual({...next}, {...first});
 });

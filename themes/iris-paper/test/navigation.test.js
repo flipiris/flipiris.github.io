@@ -8,9 +8,8 @@ const {JSDOM} = require('jsdom');
 const source = readFileSync(join(__dirname, '../source/js/navigation.js'), 'utf8');
 
 function fixture({narrow = true, reduced = false, kind = 'post', canvas = false} = {}) {
-  const dom = new JSDOM(`<!doctype html><html style="--motion-base:240ms;--ease-out:linear"><body class="layout-${kind}" data-presentation="${canvas ? 'canvas' : 'paper'}">
-    <nav id="side-nav">目录常驻</nav>
-    <details id="mobile-menu" class="hover-panel"><summary>目录</summary><div class="panel-body">菜单</div></details>
+  const dom = new JSDOM(`<!doctype html><html style="--motion-base:240ms;--ease-out:linear"><body class="layout-${kind}" data-layout="${canvas ? 'canvas' : kind === 'page' ? 'page' : 'article'}">
+    <details id="site-menu" class="hover-panel"><summary>目录</summary><div class="panel-body">菜单</div></details>
     ${kind === 'page' ? '' : '<details class="post-info hover-panel" open><summary>信息</summary><div class="panel-body"><a href="#chapter">章节</a></div></details>'}
     <button class="menu-backdrop" hidden></button><main>正文</main>
   </body></html>`, {runScripts: 'outside-only'});
@@ -36,12 +35,22 @@ function fixture({narrow = true, reduced = false, kind = 'post', canvas = false}
     (this.animations ||= []).push(animation);
     return animation;
   };
+  const timers = new Map();
+  let timerId = 0;
+  window.setTimeout = callback => { timers.set(++timerId, callback); return timerId; };
+  window.clearTimeout = id => timers.delete(id);
   window.eval(source);
   const document = window.document;
   const info = document.querySelector('.post-info');
-  const menu = document.querySelector('#mobile-menu');
+  const menu = document.querySelector('#site-menu');
   return {
     window, document, info, menu,
+    pointer(panel, type, pointerType = 'mouse') {
+      const event = new window.Event(type);
+      Object.defineProperty(event, 'pointerType', {value: pointerType});
+      panel.dispatchEvent(event);
+    },
+    runTimers() { for (const callback of timers.values()) callback(); timers.clear(); },
     backdrop: document.querySelector('.menu-backdrop'),
     click: panel => panel.querySelector('summary').click(),
     animation: panel => panel.querySelector('.panel-body').animations.at(-1),
@@ -60,7 +69,7 @@ function fixture({narrow = true, reduced = false, kind = 'post', canvas = false}
 
 test('宽屏侧栏静态常驻，信息窗不因点击、Esc 或外部点击收起', () => {
   const f = fixture({narrow: false});
-  assert.equal(f.document.querySelector('#side-nav').tagName, 'NAV');
+  assert.equal(f.menu.open, true);
   assert.equal(f.info.open, true);
   f.click(f.info);
   f.document.dispatchEvent(new f.window.KeyboardEvent('keydown', {key: 'Escape'}));
@@ -131,7 +140,7 @@ test('退场中切回宽屏立即恢复信息窗，且清除遮罩', async () =>
   await Promise.resolve();
   assert.equal(f.info.open, true);
   assert.equal(f.info.dataset.state, 'wide');
-  assert.equal(f.menu.open, false);
+  assert.equal(f.menu.open, true);
   assert.equal(f.backdrop.hidden, true);
   f.dispose();
 });
@@ -171,5 +180,38 @@ test('canvas 宽屏使用顶栏状态机，目录与信息互斥', async () => {
   await f.settle(f.info);
   assert.equal(f.info.open, true);
   assert.equal(f.menu.open, false);
+  f.dispose();
+});
+
+test('鼠标悬停展开、移出延迟收起；点击固定展开后不会误收起', async () => {
+  const f = fixture({narrow: false, canvas: true});
+  f.pointer(f.menu, 'pointerenter');
+  await f.settle(f.menu);
+  assert.equal(f.menu.open, true);
+  f.pointer(f.menu, 'pointerleave');
+  assert.equal(f.menu.dataset.state, 'open');
+  f.runTimers();
+  await f.settle(f.menu);
+  assert.equal(f.menu.open, false);
+  f.pointer(f.menu, 'pointerenter');
+  await f.settle(f.menu);
+  f.click(f.menu);
+  f.pointer(f.menu, 'pointerleave');
+  f.runTimers();
+  assert.equal(f.menu.dataset.state, 'open');
+  assert.equal(f.menu.querySelector('summary').getAttribute('aria-expanded'), 'true');
+  f.dispose();
+});
+
+test('触屏不模拟悬停，Esc 关闭后焦点回到开关', async () => {
+  const f = fixture();
+  f.pointer(f.menu, 'pointerenter', 'touch');
+  assert.equal(f.menu.open, false);
+  f.click(f.menu);
+  await f.settle(f.menu);
+  f.document.dispatchEvent(new f.window.KeyboardEvent('keydown', {key: 'Escape'}));
+  await f.settle(f.menu);
+  assert.equal(f.menu.open, false);
+  assert.equal(f.document.activeElement, f.menu.querySelector('summary'));
   f.dispose();
 });

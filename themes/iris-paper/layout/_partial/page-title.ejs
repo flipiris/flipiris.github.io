@@ -1,2 +1,1 @@
-<% const characters = Array.from(new Intl.Segmenter('zh', {granularity: 'grapheme'}).segment(String(title || '').trimEnd()), item => item.segment); const last = characters.pop() || ''; %>
-<h1 class="page-title"><%= characters.join('') %><span class="title-end"><%= last %></span></h1>
+<h1 class="page-title"><%= String(title || '').trimEnd() %></h1>

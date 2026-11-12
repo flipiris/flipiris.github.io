@@ -1,23 +1,21 @@
 'use strict';
 
 const {posix} = require('node:path');
-const {parse} = require('hexo-front-matter');
 
-function folderCategories(source, metadata, mapping) {
-  const explicit = metadata.categories || metadata.category;
-  const rename = value => Array.isArray(value) ? value.map(rename) : value === '随笔' ? '笔记' : value;
-  if (explicit && (!Array.isArray(explicit) || explicit.length)) return [].concat(rename(explicit));
+function folderCategories(source, sections) {
   const path = String(source || '').replace(/\\/g, '/');
   if (!path.startsWith('_posts/')) return [];
-  const directories = posix.dirname(path.slice('_posts/'.length));
-  return directories === '.' ? [] : directories.split('/').map(name => mapping[name] || name);
+  const directory = posix.dirname(path.slice('_posts/'.length));
+  const labels = new Map(sections.map(item => [item.folder, item.label]));
+  return directory === '.' ? [] : directory.split('/').map(name => labels.get(name) || name);
 }
 
-// 使用 Hexo 自己的分类关系 API；raw 区分作者显式元数据与目录默认值。
 hexo.extend.filter.register('before_generate', async function() {
-  const mapping = (hexo.theme.config && hexo.theme.config.folder_categories) || {};
+  const sections = hexo.theme.config.sections || [];
+  hexo.config.category_map = Object.fromEntries(sections.map(item => [item.label, item.folder]));
   for (const post of hexo.model('Post').toArray()) {
-    await post.setCategories(folderCategories(post.source, parse(post.raw || ''), mapping));
+    await post.setCategories(folderCategories(post.source, sections));
   }
 });
+
 module.exports = {folderCategories};

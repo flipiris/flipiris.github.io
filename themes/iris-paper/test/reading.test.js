@@ -19,10 +19,10 @@ function fixture({reduced = false, withNote = true, height = 4000} = {}) {
         <button role="tab" aria-selected="true">信息</button>
         <button role="tab" aria-selected="false" tabindex="-1">注释</button></div>` : ''}
       <div class="info-pages" data-page="1">
-        <section id="info-page-1"></section>${withNote ? '<section id="info-page-2" class="info-note">注</section>' : ''}
+        <section class="info-page" id="info-page-1"></section>${withNote ? '<section id="info-page-2" class="info-page info-note">注</section>' : ''}
       </div>
     </details>
-    <article class="article-page"><div class="article-content"><p id="a">一</p><p id="b">二</p><p id="c">三</p></div></article>
+    <article class="content-page"><div class="article-content"><p id="a">一</p><p id="b">二</p><p id="c">三</p></div></article>
   </body></html>`, {runScripts: 'outside-only', pretendToBeVisual: true});
   const {window} = dom;
   window.matchMedia = query => Object.assign(new window.EventTarget(), {matches: query.includes('reduced-motion') ? reduced : false});
@@ -78,6 +78,8 @@ test('信息窗页签切换第二页，方向键移动焦点，选中状态同�
   assert.equal(second.getAttribute('aria-selected'), 'true');
   assert.equal(first.getAttribute('aria-selected'), 'false');
   assert.equal(first.tabIndex, -1);
+  assert.equal(f.document.querySelector('#info-page-1').hidden, true);
+  assert.equal(f.document.querySelector('#info-page-2').hidden, false);
   second.dispatchEvent(new f.window.KeyboardEvent('keydown', {key: 'ArrowLeft', bubbles: true}));
   assert.equal(info.dataset.page, '1');
   assert.equal(f.document.activeElement, first);

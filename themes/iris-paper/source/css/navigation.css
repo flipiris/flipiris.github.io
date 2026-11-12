@@ -1,28 +1,3 @@
-/* 1. 通栏页眉仅预留位置，固定导航共用同一条中心轴。 */
-.site-header {
-  position: absolute;
-  inset: 0 0 auto;
-  height: var(--header-height);
-}
-
-.top-nav,
-.side-nav {
-  position: fixed;
-  z-index: 3;
-  left: calc(var(--nav-axis) - var(--nav-width) / 2);
-  width: var(--nav-width);
-}
-
-.top-nav {
-  display: grid;
-  align-content: center;
-  justify-items: center;
-  top: var(--nav-top);
-  height: var(--top-nav-height);
-  min-width: 0;
-  padding-inline: var(--nav-padding);
-}
-
 .site-identity {
   display: grid;
   justify-items: end;
@@ -47,11 +22,7 @@
   line-height: 1.8;
 }
 
-/* 宽屏目录常驻，无开关；与站点标识共用位置轴线。 */
-.side-nav {
-  top: var(--rail-top);
-  min-width: 0;
-  border: 0;
+.site-menu {
   border-radius: var(--nav-radius);
   background: rgb(var(--paper) / 84%);
   box-shadow: var(--float-shadow);
@@ -59,37 +30,16 @@
   backdrop-filter: blur(var(--nav-blur)) saturate(140%);
 }
 
-.side-nav-panel {
-  display: grid;
-  grid-template-rows: minmax(0, 1fr) auto auto;
-  height: auto;
-  max-height: min(var(--sidebar-height), calc(100dvh - var(--rail-top) - var(--layout-gutter)));
+.site-menu > summary {
+  display: none;
+}
+
+.site-menu-body {
+  max-height: calc(100dvh - var(--rail-top) - var(--layout-gutter));
   padding: var(--nav-padding);
-}
-
-.side-nav-content {
-  min-height: 0;
-  min-width: 0;
-  padding-right: calc(var(--space) * 3);
   overflow-y: auto;
-  scrollbar-gutter: stable;
   overscroll-behavior: contain;
-  scrollbar-width: thin;
-  scrollbar-color: rgb(var(--accent) / 35%) transparent;
-}
-
-/* 给叠加式滚动条也留出独立轨道；高亮和计数止于内容区域。 */
-:is(.side-nav-content, .mobile-menu-body)::-webkit-scrollbar {
-  width: 6px;
-}
-
-:is(.side-nav-content, .mobile-menu-body)::-webkit-scrollbar-thumb {
-  border-radius: 6px;
-  background: rgb(var(--accent) / 35%);
-}
-
-:is(.side-nav-content, .mobile-menu-body)::-webkit-scrollbar-thumb:hover {
-  background: rgb(var(--accent) / 65%);
+  border-radius: inherit;
 }
 
 .nav-tree,
@@ -103,6 +53,10 @@
   list-style: none;
 }
 
+.nav-tree {
+  gap: 2px;
+}
+
 .nav-tree a,
 .toc-link {
   position: relative;
@@ -110,7 +64,7 @@
   max-width: 100%;
   min-width: 0;
   overflow: hidden;
-  padding: calc(var(--space) * 1.5) calc(var(--space) * 3);
+  padding: 5px 12px;
   border-radius: calc(var(--space) * 2);
   font-size: 14px;
   line-height: 1.6;
@@ -118,14 +72,11 @@
   transition: color var(--motion-fast) ease;
 }
 
-/* 侧栏链接高亮更舒展，仍留在点击区域内，不触及浮窗边缘。 */
-:is(.side-nav, .mobile-menu-body) .nav-tree a {
+.site-menu-body .nav-tree a {
   --hover-inset: calc(var(--space) / 2);
   --hover-opacity: 9%;
-  padding-block: calc(var(--space) * 1.25);
 }
 
-/* 高亮保留当前页标记，悬停另加 accent，不改变链接尺寸或文字位置。 */
 .nav-tree a::before,
 .toc-link::before {
   position: absolute;
@@ -159,7 +110,6 @@
   color: rgb(var(--accent));
 }
 
-/* 侧栏分组：页面一览 / 标签索引，然后是带图标的分类。 */
 .nav-categories {
   margin-top: calc(var(--space) * 2);
   padding-top: calc(var(--space) * 2);
@@ -203,7 +153,6 @@
   font-weight: 400;
 }
 
-/* 2. 全站信息停靠侧栏底部；目录过长时仍可独立滚动。 */
 .site-stats {
   margin-top: calc(var(--space) * 3);
   padding-top: calc(var(--space) * 3);
@@ -240,7 +189,6 @@
   font-weight: 700;
 }
 
-/* 3. 高亮是容器内缩一圈的独立底层，不改变文字、边框或点击区域。 */
 :is(.nav-tree a, .toc-link, .hover-panel > summary, .post-tags a, .pagination a) {
   position: relative;
   isolation: isolate;
@@ -294,17 +242,12 @@
   outline-offset: calc(-1 * var(--hover-inset) - 2px);
 }
 
-/* 显隐动画由 navigation.js 每次创建，并在退场完成后才关闭 details。 */
 .menu-backdrop {
   display: none;
 }
 
-.mobile-menu {
-  display: none;
-}
-
 .mobile-nav {
-  display: grid;
+  display: none;
   place-items: center;
   width: var(--control-size);
   height: var(--control-size);
@@ -316,12 +259,6 @@
 .post-info-icon .icon {
   font-size: 24px;
 }
-
-/* 顶栏里的目录按钮与信息按钮同为 accent。 */
-.mobile-nav {
-  color: rgb(var(--accent));
-}
-
 
 .social-links {
   display: flex;
@@ -350,16 +287,6 @@
   cursor: default;
 }
 
-
-.nav-tree {
-  gap: 2px;
-}
-.nav-tree a {
-  padding-block: 5px;
-}
-
-
-/* 未激活的抽屉开关轻一些；展开、悬停或键盘聚焦时恢复强调色。 */
 :is(.mobile-nav, .post-info-icon) {
   color: rgb(var(--accent) / 52%);
   transition: color var(--motion-fast) ease;
@@ -379,8 +306,7 @@
   }
 }
 
-/* canvas 的导航界面统一使用中性灰阶，不把作品配色染到界面上。 */
-[data-presentation="canvas"] :is(.top-nav, .side-nav, .menu-backdrop) {
+[data-layout="canvas"] :is(.top-nav, .site-menu, .post-info, .menu-backdrop) {
   --paper: 250 250 250;
   --ink: 45 48 52;
   --accent: 45 48 52;
@@ -392,7 +318,7 @@
   --shadow: 0 0 0;
 }
 
-[data-presentation="canvas"][data-palette="ink"] :is(.top-nav, .side-nav, .menu-backdrop) {
+[data-layout="canvas"][data-palette="ink"] :is(.top-nav, .site-menu, .post-info, .menu-backdrop) {
   --paper: 29 31 34;
   --ink: 226 228 231;
   --accent: 226 228 231;
@@ -405,10 +331,10 @@
 .post-info > summary {
   color: rgb(var(--accent) / 52%);
 }
+
 .post-info > summary .post-info-icon {
   color: inherit;
 }
-
 
 .social-links svg {
   display: block;

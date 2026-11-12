@@ -1,4 +1,4 @@
-<% const parts = split_note(page.content); const canvas = page_presentation(page) === 'canvas'; const document = canvas ? canvas_document(page.content, page.canvas_base ? url_for(page.canvas_base) : '', url_for('/js/canvas-bridge.js')) : ''; %>
+<% const parts = split_note(page.content); const canvas = page_layout(page) === 'canvas'; const document = canvas ? canvas_document(page.content, page.canvas_base ? url_for(page.canvas_base) : '', url_for('/js/canvas-bridge.js')) : ''; %>
 <div class="article-content">
   <% if (document) { %>
     <iframe class="canvas-document" title="<%= page.title %> · 作品正文" srcdoc="<%= document %>" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation allow-downloads" loading="eager"></iframe>

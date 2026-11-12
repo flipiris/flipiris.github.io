@@ -1,23 +1,23 @@
-/* 1. 色卡只存 RGB 通道数组；在使用处通过 rgb(var(--色名) / 透明度) 取色。 */
 :root {
   --bg: 247 246 242;
   --paper: 255 254 250;
   --ink: 52 56 62;
-  --muted: 112 114 122;
+  --muted: 106 109 117;
   --accent: 138 80 105;
   --brand: 114 30 52;
+  --heading-1: 114 30 52;
+  --heading-2: 128 80 30;
+  --heading-3: 112 61 132;
+  --strong: 39 82 153;
+  --emphasis: 28 103 76;
   --secondary: 70 105 116;
-  --strong: 49 85 150;
-  --emphasis: 43 112 82;
   --line: 226 223 220;
   --nav-active: 230 237 243;
   --header-bg: 244 201 203;
   --code-bg: 238 239 239;
   --shadow: 40 48 58;
 
-  /* 网络字体尚未加载（或加载失败）时，浏览器按顺序使用后面的本机字体，
-     页面先以本机宋体呈现，字体到位后再替换。要增删本机字体只改 --local-cjk。 */
-  --local-cjk: "Songti SC", "STSong", "Source Han Serif SC", "Noto Serif CJK SC", "Noto Serif SC", "Songti TC", "SimSun", "PMingLiU";
+  --local-cjk: "Songti SC", "STSong", "Source Han Serif SC", "Noto Serif SC", "Songti TC", "SimSun", "PMingLiU";
   --UI-font: "Times New Roman", "ChillJinshuSongPro", var(--local-cjk), serif;
   --serif: "Times New Roman", "GenRyuMin2TW", var(--local-cjk), Georgia, serif;
 
@@ -30,23 +30,17 @@
   --nav-radius: calc(var(--space) * 2);
   --drawer-radius: calc(var(--space) * 2);
   --nav-padding: calc(var(--space) * 3);
-  --nav-blur: 18px;
+  --nav-blur: 15px;
   --top-nav-blur: calc(var(--nav-blur) + var(--space) * 3);
-  --dropdown-limit: 75dvh;
   --control-size: calc(var(--space) * 11);
-  --info-summary-height: calc(var(--space) * 13);
 
-  /* 左右栏等宽，正文居中；纸张宽度（含内边距）上限 700px。 */
   --content-width: 1000px;
   --page-width: 800px;
   --reading-width: 700px;
-  --paper-width: var(--reading-width);
   --paper-padding: clamp(24px, 2.5vw, 36px);
   --paper-radius: 3px;
   --page-gutter: var(--layout-gutter);
   --rail-top: calc(var(--nav-top) + var(--top-nav-height) + var(--space) * 4);
-  --rail-height: 80vh;
-  --sidebar-height: 75vh;
   --header-height: calc(var(--space) * 32);
   --page-top: calc(var(--header-height) - var(--space) * 8);
   --paper-shadow: 0 var(--space) calc(var(--space) * 5) rgb(var(--shadow) / 5%);
@@ -56,16 +50,17 @@
   --hover-inset: var(--space);
   --footer-height: calc(var(--space) * 20);
 
-  --motion-fast: 140ms;
-  --motion-base: 220ms;
-  --motion-reveal: 560ms;
-  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-fast: 150ms;
+  --motion-base: 250ms;
+  --motion-reveal: 500ms;
+  --ease-out: cubic-bezier(0.25, 1, 0.35, 1);
   --edge-light: rgb(255 255 255 / 55%);
-  --glass-tint: rgb(var(--header-bg) / 14%);
+  --glass-tint: rgb(var(--header-bg) / 15%);
 }
 
-/* 2. 全站基础；包括画布在内的 main-content 最宽 1000px。 */
 * {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--accent) / 40%) transparent;
   box-sizing: border-box;
 }
 
@@ -75,24 +70,15 @@ html {
   text-size-adjust: 100%;
 }
 
-/* 文章页隐藏滚动条，改由阅读进度条指示位置；滚动本身不受影响。 */
-html.kind-post {
+html:has(body:not([data-layout="page"])) {
   scrollbar-width: none;
 }
 
-html.kind-post::-webkit-scrollbar {
+html:has(body:not([data-layout="page"]))::-webkit-scrollbar {
   display: none;
 }
 
 body {
-  /* 在同一元素解析版心与栏位，随页面类型一起改变，四段横向留白等宽。 */
-  --frame-max-width: var(--content-width);
-  --frame-width: min(var(--content-width), var(--frame-max-width), calc(100vw - 2 * var(--nav-width) - 4 * var(--layout-gutter)));
-  --nav-left: calc((100vw - var(--frame-width) - 2 * var(--nav-width)) / 4);
-  --nav-axis: calc(var(--nav-left) + var(--nav-width) / 2);
-  --content-gap: var(--nav-left);
-  --content-left: calc(var(--nav-left) + var(--nav-width) + var(--content-gap));
-
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
@@ -107,7 +93,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* 阅读区域才需要字距与连字等精细排版，其余界面保持快速渲染。 */
 .article-content,
 .page-title {
   text-rendering: optimizeLegibility;
@@ -141,23 +126,6 @@ button:focus-visible {
   background: rgb(var(--accent) / 20%);
 }
 
-#main-content {
-  position: relative;
-  flex: 1;
-  width: var(--frame-width);
-  max-width: 1000px;
-  min-width: 0;
-  margin-inline: auto;
-}
-
-#main-content:focus {
-  outline: none;
-}
-
-body.content-layout {
-  --frame-max-width: var(--paper-width);
-}
-
 .skip-link {
   position: fixed;
   z-index: 10;
@@ -173,7 +141,6 @@ body.content-layout {
   top: calc(var(--space) * 2);
 }
 
-/* 3. 减少动态效果，包括目录定位。 */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -188,7 +155,6 @@ body.content-layout {
   }
 }
 
-/* 4. Material Symbols：连字图标，图标名即内容。 */
 .icon {
   display: inline-block;
   flex: none;
@@ -212,15 +178,16 @@ body.content-layout {
   user-select: none;
 }
 
-.icon-fill {
-  font-variation-settings: "FILL" 1;
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
 
+*::-webkit-scrollbar-thumb {
+  border-radius: 6px;
+  background: rgb(var(--accent) / 40%);
+}
 
-.site-layout {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  width: 100%;
-  min-width: 0;
+*::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--accent) / 65%);
 }

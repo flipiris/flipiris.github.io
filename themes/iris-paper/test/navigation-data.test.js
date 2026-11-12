@@ -14,7 +14,7 @@ function fixture() {
     require: createRequire(join(__dirname, '../scripts/navigation-data.js')),
     hexo: {
       theme: {config: {
-        nav_categories: [{label: '作品'}, {label: '随笔'}],
+        sections: [{label: '作品'}, {label: '随笔'}],
         nav_misc: {label: '其他页面', icon: 'folder_open', path: '/misc/'}
       }},
       config: {category_dir: 'categories', tag_dir: 'tags', filename_case: 0},
@@ -59,7 +59,7 @@ test('侧栏分类按主题配置排列，带文章数；没有文章的分类�
     config: {category_dir: 'categories', filename_case: 0},
     theme: {
       nav_primary: [{label: '页面一览', path: '/archives/'}, {label: '标签索引', path: '/tags/'}],
-      nav_categories: [{label: '文章', icon: 'article'}, {label: '评论', icon: 'forum'}]
+      sections: [{label: '文章', icon: 'article'}, {label: '评论', icon: 'forum'}]
     },
     site: {categories: {findOne: query => query.name === '文章' ? found : null}}
   });
@@ -92,7 +92,7 @@ test('其他页面收录没有导航分类的文章与独立页，按发布日�
   ];
   const pages = [{title: '关于', path: 'about/', date: new Date(2026, 0, 1), categories: none}];
   const locals = {posts: {toArray: () => posts}, pages: {toArray: () => pages}};
-  const theme = {nav_categories: [{label: '作品'}, {label: '随笔'}], nav_misc: {label: '其他页面', icon: 'folder_open', path: '/misc/'}};
+  const theme = {sections: [{label: '作品'}, {label: '随笔'}], nav_misc: {label: '其他页面', icon: 'folder_open', path: '/misc/'}};
   const index = generators['misc-index'].call({}, locals);
   assert.equal(index.path, 'misc/index.html');
   assert.equal(index.layout, 'misc');
@@ -136,7 +136,7 @@ test('没有文章的导航分类也遵守 category_map', () => {
   const {helpers} = fixture();
   const result = helpers.nav_sections.call({
     config: {category_dir: 'categories', category_map: {笔记: 'notes'}},
-    theme: {nav_categories: [{label: '笔记', icon: 'edit_note'}]},
+    theme: {sections: [{label: '笔记', icon: 'edit_note'}]},
     site: {categories: {findOne: () => null}}
   });
   assert.equal(result.categories[0].path, 'categories/notes/');

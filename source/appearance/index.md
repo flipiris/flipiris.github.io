@@ -4,8 +4,10 @@ layout: article
 date: 2026-11-12
 palette: rose
 typography: standard
+styles:
+  - /appearance/style.css
 scripts:
-  - /js/appearance.js
+  - /appearance/script.js
 ---
 <form class="appearance-controls" aria-label="外观预览">
   <label>配色<select name="palette" aria-label="配色"><option value="rose">rose</option><option value="tech">tech</option><option value="wanderers">wanderers</option><option value="ink">ink</option><option value="sepia">sepia</option></select></label>

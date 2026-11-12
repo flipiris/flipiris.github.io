@@ -21,7 +21,7 @@
   addEventListener('load', schedule);
   addEventListener('message', event => {
     if (event.source !== parent || event.data?.type !== 'iris:canvas-section') return;
-    document.getElementById(String(event.data.id))?.scrollIntoView({behavior: 'smooth'});
+    document.getElementById(String(event.data.id))?.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'});
   });
   report();
 })();

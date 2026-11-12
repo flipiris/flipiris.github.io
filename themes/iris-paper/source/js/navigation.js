@@ -1,7 +1,6 @@
 (() => {
   const narrowScreen = window.matchMedia('(max-width: 860px)');
-  const isNarrow = () => narrowScreen.matches || document.body.dataset.presentation === 'canvas';
-  const isCompact = () => isNarrow();
+  const isCompact = () => narrowScreen.matches || document.body.dataset.layout === 'canvas';
   const hoverPointer = window.matchMedia('(hover: hover) and (pointer: fine)');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const backdrop = document.querySelector('.menu-backdrop');
@@ -10,11 +9,9 @@
     panel,
     summary: panel.querySelector('summary'),
     body: panel.querySelector('.panel-body'),
-    sidebar: panel.id === 'mobile-menu',
-    state: 'closed',
+    sidebar: panel.id === 'site-menu',
     targetOpen: false,
-    hoverOpened: false,
-    pinned: false,
+    mode: '',
     animation: undefined,
     closeTimer: undefined
   }));
@@ -52,8 +49,6 @@
   }
 
   function transition(record, opening) {
-    // details 关闭后会立即隐藏正文，不能靠 [open] 的单次 CSS 动画完成退场。
-    // 每次开合创建新动画；快速反向时从当前画面继续，不复用已结束的动画。
     const end = {opacity: 1, transform: 'none', clipPath: 'inset(0)'};
     const start = record.sidebar
       ? {opacity: 0, transform: 'translateX(-100%)', clipPath: 'inset(0)'}
@@ -66,15 +61,14 @@
     }
     record.animation = undefined;
     record.targetOpen = opening;
-    record.state = opening ? 'opening' : 'closing';
-    record.panel.dataset.state = record.state;
+    record.summary.setAttribute('aria-expanded', String(opening));
+    record.panel.dataset.state = opening ? 'opening' : 'closing';
     record.panel.open = true;
     if (record.sidebar) shade(opening);
 
     const finish = () => {
       record.panel.open = opening;
-      record.state = opening ? 'open' : 'closed';
-      record.panel.dataset.state = record.state;
+      record.panel.dataset.state = opening ? 'open' : 'closed';
     };
     if (reducedMotion.matches) {
       finish();
@@ -91,57 +85,54 @@
   }
 
   function close(record, restoreFocus = false) {
-    if (!isCompact(record)) return;
+    if (!isCompact()) return;
     clearTimeout(record.closeTimer);
-    record.hoverOpened = false;
-    record.pinned = false;
+    record.mode = '';
     if (restoreFocus) record.summary.focus({preventScroll: true});
-    if (record.state === 'closed' || record.state === 'closing') return;
+    if (record.panel.dataset.state === 'closed' || record.panel.dataset.state === 'closing') return;
     transition(record, false);
   }
 
   function open(record, hoverOpened) {
-    if (!isCompact(record)) return;
+    if (!isCompact()) return;
     panels.forEach(other => {
       if (other !== record) close(other);
     });
     clearTimeout(record.closeTimer);
-    record.hoverOpened = hoverOpened;
-    record.pinned = !hoverOpened;
+    record.mode = hoverOpened ? 'hover' : 'click';
     transition(record, true);
   }
 
   panels.forEach(record => {
     record.summary.addEventListener('click', event => {
       event.preventDefault();
-      if (!isCompact(record)) return;
-      if (record.targetOpen && record.hoverOpened) {
+      if (!isCompact()) return;
+      if (record.targetOpen && record.mode === 'hover') {
         clearTimeout(record.closeTimer);
-        record.hoverOpened = false;
-        record.pinned = true;
+        record.mode = 'click';
       } else if (record.targetOpen) close(record);
       else open(record, false);
     });
 
     record.panel.addEventListener('pointerenter', event => {
-      if (!isCompact(record) || !hoverPointer.matches || event.pointerType !== 'mouse') return;
+      if (!isCompact() || !hoverPointer.matches || event.pointerType !== 'mouse') return;
       clearTimeout(record.closeTimer);
       if (!record.targetOpen) open(record, true);
     });
 
     record.panel.addEventListener('pointerleave', event => {
-      if (!isCompact(record) || event.pointerType !== 'mouse' || record.pinned) return;
+      if (!isCompact() || event.pointerType !== 'mouse' || record.mode === 'click') return;
       record.closeTimer = setTimeout(() => {
         if (!record.panel.matches(':focus-within')) close(record);
       }, 180);
     });
 
     record.panel.addEventListener('focusout', event => {
-      if (isCompact(record) && !record.pinned && !record.panel.contains(event.relatedTarget) && !record.panel.matches(':hover')) close(record);
+      if (isCompact() && record.mode !== 'click' && !record.panel.contains(event.relatedTarget) && !record.panel.matches(':hover')) close(record);
     });
 
     record.panel.addEventListener('click', event => {
-      if (isCompact(record) && event.target.closest('a')) close(record);
+      if (isCompact() && event.target.closest('a')) close(record);
     });
   });
 
@@ -155,7 +146,7 @@
 
   document.addEventListener('keydown', event => {
     if (event.key !== 'Escape') return;
-    const opened = panels.find(record => isCompact(record) && (record.targetOpen || record.state === 'closing'));
+    const opened = panels.find(record => isCompact() && (record.targetOpen || record.panel.dataset.state === 'closing'));
     if (opened) {
       event.preventDefault();
       close(opened, true);
@@ -167,20 +158,18 @@
       clearTimeout(record.closeTimer);
       record.animation?.cancel();
       record.animation = undefined;
-      record.hoverOpened = false;
-      record.pinned = false;
+      record.mode = '';
       record.targetOpen = false;
-      record.state = isCompact(record) ? 'closed' : 'wide';
-      record.panel.dataset.state = record.state;
-      // 文章宽屏信息窗常驻；canvas 收进顶栏。侧栏本身是静态 nav。
-      record.panel.open = !isCompact(record) && !record.sidebar;
+      record.panel.dataset.state = isCompact() ? 'closed' : 'wide';
+      record.panel.open = !isCompact();
+      record.summary.setAttribute('aria-expanded', String(record.panel.open));
     });
     shade(false, true);
   }
 
   narrowScreen.addEventListener('change', syncLayout);
   document.addEventListener('appearance:layout', syncLayout);
-  hoverPointer.addEventListener('change', () => panels.filter(record => record.hoverOpened).forEach(record => close(record)));
+  hoverPointer.addEventListener('change', () => panels.filter(record => record.mode === 'hover').forEach(record => close(record)));
   reducedMotion.addEventListener('change', () => {
     if (reducedMotion.matches) {
       panels.forEach(record => record.animation?.finish());

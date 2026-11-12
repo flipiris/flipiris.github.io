@@ -9,17 +9,19 @@ nav_primary:
   - label: 标签索引
     path: /tags/
 
-# 侧栏第二组：带图标的分类。label 必须与文章 front-matter 里的 categories 一致；
-# icon 是 Material Symbols 的图标名，需包含在 source/fonts/MaterialSymbolsOutlined.woff2 中。
-# 分类还没有文章时，仍会生成一个空的分类页面。
-nav_categories:
-  - label: 笔记
+# 目录即分类；顺序也决定导航顺序。子目录可继续在这里声明。
+sections:
+  - folder: notes
+    label: 笔记
     icon: edit_note
-  - label: 文章
+  - folder: articles
+    label: 文章
     icon: article
-  - label: 评论
+  - folder: reviews
+    label: 评论
     icon: forum
-  - label: 作品
+  - folder: works
+    label: 作品
     icon: palette
 
 # 侧栏分类末尾的归档入口：收录没有上述任何分类的文章与独立页面。
@@ -36,11 +38,3 @@ social:
 # 分类/标签索引：每页卡片数、每张卡片预览文章数。
 taxonomy_per_page: 8
 taxonomy_preview: 6
-
-# 仅在文章未写 categories 时，根据 _posts 下的目录设置分类链。
-# 子目录可继续映射；没有映射的目录直接采用目录名。
-folder_categories:
-  notes: 笔记
-  articles: 文章
-  reviews: 评论
-  works: 作品

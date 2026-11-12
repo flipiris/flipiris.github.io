@@ -1,8 +1,3 @@
-/* 字体
-   - "Sarasa Gothic SC" 的样式表已移到 index.html 的 <link>, 与本文件并行加载
-   - 原先两个 data: URL 的 @import 直接内联为 @font-face, 省掉一次 CSS 请求 */
-
-/* ZSFT-hk (JetBrains Mono) */
 @font-face {
     font-family: "ZSFT-hk";
     src: url("https://fontsapi.zeoseven.com/hk/main.woff2") format("woff2"),
@@ -12,7 +7,6 @@
     font-display: swap;
 }
 
-/* ZSFT-gc (Alata) */
 @font-face {
     font-family: "ZSFT-gc";
     src: url("https://fontsapi.zeoseven.com/gc/main.woff2") format("woff2"),
@@ -26,9 +20,6 @@
     --font-sans-serif: "Sarasa Gothic SC", "微软雅黑", sans-serif;
     --font-mono: "ZSFT-hk", "JetBrains Mono", "Consolas", "Sarasa Gothic SC", "微软雅黑", monospace;
     --font-deco: "ZSFT-gc", "Alata", "Futura PT", "Century Gothic", "Sarasa Gothic SC", "微软雅黑", sans-serif;
-}
-
-:root {
     --font-size: 16px;
     --line-height: 1.75;
     --title-font-size: 2rem;
@@ -69,24 +60,19 @@
     --icon-search: url("data:image/svg+xml;charset=utf-8;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmkgYmktc2VhcmNoIiB2aWV3Qm94PSIwIDAgMTYgMTYiPgogIDxwYXRoIGQ9Ik0xMS43NDIgMTAuMzQ0YTYuNSA2LjUgMCAxIDAtMS4zOTcgMS4zOThoLS4wMDFjLjAzLjA0LjA2Mi4wNzguMDk4LjExNWwzLjg1IDMuODVhMSAxIDAgMCAwIDEuNDE1LTEuNDE0bC0zLjg1LTMuODVhMS4wMDcgMS4wMDcgMCAwIDAtLjExNS0uMXpNMTIgNi41YTUuNSA1LjUgMCAxIDEtMTEgMCA1LjUgNS41IDAgMCAxIDExIDB6Ii8+Cjwvc3ZnPg==");
 }
 
-/* 全局样式 */
-
 * {
     box-sizing: border-box;
 }
 
 html {
     font-size: var(--font-size);
-    /* 全站平滑滚动会与滚动驱动的动画互相干扰, 且页面内没有需要平滑跳转的锚点 */
     font-family: var(--font-sans-serif);
     font-weight: normal;
     color: var(--color-text-layer-1);
     line-height: var(--line-height);
     min-height: 100vh;
-    width: 100vw;
-    overflow-x: hidden;
-    /* 页面底色: #content-container 已改为透明, 由根元素提供黑色底
-       (JS 在入场时先置为 transparent, 2 秒后再置回深色, 实现淡入) */
+    width: 100%;
+    overflow-x: clip;
     background-color: var(--color-dark-layer-1);
 }
 
@@ -94,8 +80,8 @@ html,
 body {
     margin: 0px;
     padding: 0px;
-    width: 100vw;
-    overflow-x: hidden;
+    width: 100%;
+    overflow-x: clip;
 }
 
 a {
@@ -107,17 +93,15 @@ a {
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
 }
 
-trae-preview,
-main-content {
+main#story-content {
     display: contents;
 }
-
-/* 工具类 */
 
 .icon {
     background-color: transparent;
@@ -127,8 +111,6 @@ main-content {
     background-size: contain;
 }
 
-/* 侧边栏 */
-
 #side-bar {
     position: fixed;
     top: 0px;
@@ -137,7 +119,6 @@ main-content {
     height: 100vh;
     overflow-y: auto;
     background-color: var(--color-dark-layer-2);
-    padding: 1rem;
     z-index: 1000;
     transition: left var(--transition-duration) ease-in-out, opacity var(--transition-duration) ease-in-out;
     opacity: 0;
@@ -165,18 +146,10 @@ main-content {
 }
 
 #content-container {
-    /* 背景色改由根元素提供, 否则不透明的容器会盖住 #bg-deco 装饰层 */
     background-color: transparent;
-    /* translate: unset unset; */
-    /* transition: translate var(--transition-duration) ease-in-out; */
-    /* animation: fade-in 2s ease-in-out; */
-    width: 100vw;
-    overflow-x: hidden;
+    width: 100%;
+    overflow-x: clip;
 }
-
-/* #side-bar.open~#content-container {
-    translate: var(--sidebar-width) 0px;
-} */
 
 #side-bar .side-block {
     margin-bottom: 1rem;
@@ -232,8 +205,6 @@ main-content {
     text-align: center;
 }
 
-/* 桌面端导航栏 */
-
 #desktop-navbar {
     position: fixed;
     bottom: 0px;
@@ -285,7 +256,6 @@ main-content {
     color: var(--color-text-layer-2);
     cursor: pointer;
     font-size: 0.9rem;
-    /* 原先 transition: all; 悬停只改变 color */
     transition: color var(--transition-duration-fast) ease-in-out;
     display: inline-flex;
     height: auto;
@@ -336,15 +306,12 @@ main-content {
     z-index: -1;
     pointer-events: none;
     opacity: 0;
-    /* 只过渡真正会变化的属性, 避免 transition: all 插值所有属性 */
     transition: opacity var(--transition-duration) ease-in-out,
         transform var(--transition-duration) ease-in-out;
     transform: translateY(1rem);
     grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
     grid-auto-flow: row;
-    /* 关闭态跳过内容渲染: 7 个面板共约 200 个链接此前始终参与布局与合成 */
     content-visibility: hidden;
-    /* 关闭态不做背景模糊: opacity 为 0 时模糊不可见, 却仍在参与合成 */
     backdrop-filter: none;
 }
 
@@ -406,7 +373,6 @@ main-content {
     width: 1.5rem;
     height: 1.5rem;
     transform: translateY(-0.15rem);
-    /* 悬停只改变 opacity */
     transition: opacity var(--transition-duration-fast) ease-in-out;
     filter: var(--darkmode-filter);
 }
@@ -475,8 +441,6 @@ main-content {
 
 }
 
-/* 移动端导航栏 */
-
 div#mobile-navbar {
     display: none;
 }
@@ -538,7 +502,6 @@ div#mobile-navbar>ul>li {
     transform: translateY(-0.15rem);
     user-select: none;
     white-space: nowrap;
-    /* 选中态只改变 color 与 font-weight */
     transition: color var(--transition-duration-fast) ease-in-out,
         font-weight var(--transition-duration-fast) ease-in-out;
 }
@@ -573,7 +536,6 @@ div#mobile-navbar-list {
     margin: 0;
     justify-content: space-around;
     backdrop-filter: blur(0.5rem);
-    /* 原先是 transition: all; 实际只有侧栏展开时的 transform 会变化 */
     transition: transform var(--transition-duration) ease-in-out;
 }
 
@@ -623,9 +585,6 @@ div#mobile-navbar-list>ul>li.selected>ul {
 
 div#mobile-navbar-list>ul>li>ul>li a {
     opacity: 0;
-}
-
-div#mobile-navbar-list>ul>li>ul>li a {
     animation: topnav-item-fade-in 0.15s ease-in-out forwards 1s;
 }
 
@@ -639,18 +598,13 @@ div#mobile-navbar-list>ul>li>ul>li a {
         transform: translateY(-0.15rem);
         pointer-events: none;
     }
+
     100% {
         opacity: 1;
         transform: translateY(0);
         pointer-events: auto;
     }
 }
-
-
-
-/* 背景排版 */
-
-/* 页面布局 */
 
 section.fullscreen {
     height: 100vh;
@@ -700,28 +654,85 @@ section.page-flow div {
     grid-column-end: column-2-end;
 }
 
-section.page-flow div.s-1 {grid-column-start: column-1-start;}
-section.page-flow div.s-2 {grid-column-start: column-2-start;}
-section.page-flow div.s-3 {grid-column-start: column-3-start;}
-section.page-flow div.s-4 {grid-column-start: column-4-start;}
-section.page-flow div.s-5 {grid-column-start: column-5-start;}
-section.page-flow div.s-6 {grid-column-start: column-5-end;}
-section.page-flow div.s-7 {grid-column-start: column-4-end;}
-section.page-flow div.s-8 {grid-column-start: column-3-end;}
-section.page-flow div.s-9 {grid-column-start: column-2-end;}
-section.page-flow div.s-10 {grid-column-start: column-1-end;}
+section.page-flow div.s-1 {
+    grid-column-start: column-1-start;
+}
 
-section.page-flow div.e-1 {grid-column-end: column-1-start;}
-section.page-flow div.e-2 {grid-column-end: column-2-start;}
-section.page-flow div.e-3 {grid-column-end: column-3-start;}
-section.page-flow div.e-4 {grid-column-end: column-4-start;}
-section.page-flow div.e-5 {grid-column-end: column-5-start;}
-section.page-flow div.e-6 {grid-column-end: column-5-end;}
-section.page-flow div.e-7 {grid-column-end: column-4-end;}
-section.page-flow div.e-8 {grid-column-end: column-3-end;}
-section.page-flow div.e-9 {grid-column-end: column-2-end;}
-section.page-flow div.e-10 {grid-column-end: column-1-end;}
+section.page-flow div.s-2 {
+    grid-column-start: column-2-start;
+}
 
+section.page-flow div.s-3 {
+    grid-column-start: column-3-start;
+}
+
+section.page-flow div.s-4 {
+    grid-column-start: column-4-start;
+}
+
+section.page-flow div.s-5 {
+    grid-column-start: column-5-start;
+}
+
+section.page-flow div.s-6 {
+    grid-column-start: column-5-end;
+}
+
+section.page-flow div.s-7 {
+    grid-column-start: column-4-end;
+}
+
+section.page-flow div.s-8 {
+    grid-column-start: column-3-end;
+}
+
+section.page-flow div.s-9 {
+    grid-column-start: column-2-end;
+}
+
+section.page-flow div.s-10 {
+    grid-column-start: column-1-end;
+}
+
+section.page-flow div.e-1 {
+    grid-column-end: column-1-start;
+}
+
+section.page-flow div.e-2 {
+    grid-column-end: column-2-start;
+}
+
+section.page-flow div.e-3 {
+    grid-column-end: column-3-start;
+}
+
+section.page-flow div.e-4 {
+    grid-column-end: column-4-start;
+}
+
+section.page-flow div.e-5 {
+    grid-column-end: column-5-start;
+}
+
+section.page-flow div.e-6 {
+    grid-column-end: column-5-end;
+}
+
+section.page-flow div.e-7 {
+    grid-column-end: column-4-end;
+}
+
+section.page-flow div.e-8 {
+    grid-column-end: column-3-end;
+}
+
+section.page-flow div.e-9 {
+    grid-column-end: column-2-end;
+}
+
+section.page-flow div.e-10 {
+    grid-column-end: column-1-end;
+}
 
 div.page-content.bg-image {
     background-size: cover;
@@ -729,8 +740,6 @@ div.page-content.bg-image {
     background-repeat: no-repeat;
     background-attachment: fixed;
 }
-
-/* 页面元素 */
 
 div.page-content p {
     font-size: 1rem;
@@ -782,9 +791,6 @@ div.modal>em p {
 div.modal.rec div.modal-heading p:nth-child(2) {
     background-color: var(--color-dark-layer-2);
     padding: 0.5rem 1rem;
-}
-
-div.modal.rec div.modal-heading p:nth-child(2) {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
@@ -826,6 +832,7 @@ span.permission-level {
     div.modal.rec div.modal-heading p:nth-child(2) {
         flex-wrap: wrap;
     }
+
     div.modal.rec div.modal-heading p:nth-child(2) :is(span.file-type, span.file-number, span.file-date) {
         margin: 0.5rem 0;
         width: 100%;
@@ -842,7 +849,7 @@ div.modal>p.name {
     color: var(--color-light-layer-1);
 }
 
-p.name::before, 
+p.name::before,
 p.name::after {
     content: "";
     flex: 1 1 auto;
@@ -895,8 +902,6 @@ div.log-lines {
 .modal span.rt {
     font-size: 0.75rem;
 }
-
-/* 底栏 */
 
 #footer {
     background-color: var(--color-dark-layer-2);
@@ -969,8 +974,6 @@ div.log-lines {
     }
 }
 
-/* 杂项 */
-
 ::selection {
     background-color: var(--color-dark-layer-3);
     color: var(--color-text-layer-1);
@@ -989,13 +992,12 @@ div.log-lines {
     background-color: var(--color-light-layer-4);
 }
 
-/* 动画 */
-
 @keyframes nav-fade-in {
     0% {
         opacity: 0;
         transform: translateY(3rem);
     }
+
     100% {
         opacity: 1;
         transform: translateY(0);
@@ -1007,6 +1009,7 @@ div.log-lines {
         opacity: 0;
         transform: translateY(3rem) scale(0.55);
     }
+
     100% {
         opacity: 1;
         transform: translateY(0) scale(0.55);
@@ -1018,6 +1021,7 @@ div.log-lines {
         opacity: 0;
         transform: translateY(1.5rem);
     }
+
     100% {
         opacity: 1;
         transform: translateY(0);
@@ -1029,6 +1033,7 @@ div.log-lines {
         opacity: 0;
         transform: translateY(-3rem);
     }
+
     100% {
         opacity: 1;
         transform: translateY(0);
@@ -1039,15 +1044,11 @@ div#mobile-navbar {
     display: none;
 }
 
-
-/* Intro */
-
 .gt-intro {
     background-image: url("https://mrpasserbyglyn.github.io/cxyc/illustrations/cxyc-headbg.webp");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    /* 首屏背景原本由 JS 通过 data-bg 注入为固定背景，这里改为 CSS 直接声明，保持观感一致 */
     background-attachment: fixed;
     display: flex;
     flex-direction: column;
@@ -1081,8 +1082,6 @@ div#mobile-navbar {
     letter-spacing: 0.45rem;
     margin-left: 1rem;
 }
-
-/* Overlay */
 
 div#overlay {
     user-select: none;
@@ -1220,11 +1219,6 @@ div#overlay-cover {
     }
 }
 
-/* 背景 */
-
-/* 整页装饰背景此前挂在 #content-container 上, 其中 3 层是 background-attachment: fixed,
-   每帧都要重绘整页背景。改由独立的 fixed 装饰层承载: 它本来就固定在视口坐标系内,
-   观感一致, 但可被提升为独立合成层, 不再逐帧重绘。 */
 #bg-deco {
     position: fixed;
     inset: 0;
@@ -1242,7 +1236,7 @@ section.dark {
     background-color: var(--color-dark-layer-1);
 }
 
-section.dark::before, 
+section.dark::before,
 section.dark+section::before {
     content: "";
     position: relative;
@@ -1255,8 +1249,6 @@ section.dark+section::before {
 section.dark::before {
     transform: translateY(-6rem) rotate(180deg);
 }
-
-/* 标题 */
 
 section.title {
     display: flex;
@@ -1345,9 +1337,6 @@ section.title>p:nth-child(3) {
 section.title>p.quote-by {
     transition-delay: 1s;
     transform: translateX(4rem);
-}
-
-section.title>p.quote-by {
     margin-top: 1rem;
     margin-left: 2rem;
     font-size: 0.8rem;
@@ -1357,15 +1346,13 @@ section.title>p.quote-by {
     font-style: italic;
 }
 
-section.section-fade-in div.title p, 
-section.section-fade-in div.title h1 span.rt, 
-section.section-fade-in div.title h1 span.ruby, 
+section.section-fade-in div.title p,
+section.section-fade-in div.title h1 span.rt,
+section.section-fade-in div.title h1 span.ruby,
 section.section-fade-in>p {
     transform: translateX(0rem);
     opacity: 1;
 }
-
-/* overlay-number animation */
 
 @media screen and (max-width: 1100px) and (min-width: 800px) {
     div#overlay-number:not(.final-record) {
@@ -1382,6 +1369,7 @@ section.section-fade-in>p {
         transform: translate(0, 0);
         opacity: 1;
     }
+
     40% {
         left: 2rem;
         right: unset;
@@ -1389,6 +1377,7 @@ section.section-fade-in>p {
         transform: translate(-4rem, 0);
         opacity: 0;
     }
+
     41% {
         left: unset;
         right: 2rem;
@@ -1396,6 +1385,7 @@ section.section-fade-in>p {
         transform: translate(-4rem, 0);
         opacity: 0;
     }
+
     100% {
         left: unset;
         right: 2rem;
@@ -1413,6 +1403,7 @@ section.section-fade-in>p {
         transform: translate(0, 0);
         opacity: 1;
     }
+
     40% {
         left: unset;
         right: 2rem;
@@ -1420,6 +1411,7 @@ section.section-fade-in>p {
         transform: translate(4rem, 0);
         opacity: 0;
     }
+
     41% {
         left: 2rem;
         right: unset;
@@ -1427,6 +1419,7 @@ section.section-fade-in>p {
         transform: translate(4rem, 0);
         opacity: 0;
     }
+
     100% {
         left: 2rem;
         right: unset;
@@ -1441,6 +1434,7 @@ section.section-fade-in>p {
         transform: translate(-2rem, 0);
         opacity: 0;
     }
+
     100% {
         transform: translate(0, 0);
         opacity: 1;
@@ -1452,6 +1446,7 @@ section.section-fade-in>p {
         transform: translate(0, 0);
         opacity: 1;
     }
+
     100% {
         transform: translate(-2rem, 0);
         opacity: 0;
@@ -1463,6 +1458,7 @@ section.section-fade-in>p {
         transform: translate(0, 0);
         opacity: 0;
     }
+
     100% {
         transform: translate(0, 0);
         opacity: 1;
@@ -1474,15 +1470,12 @@ section.section-fade-in>p {
         transform: translate(0, 0);
         opacity: 1;
     }
+
     100% {
         transform: translate(0, 0);
         opacity: 0;
     }
 }
-
-
-
-/* Final Record */
 
 div#overlay-number.final-record {
     text-align: center;
@@ -1562,7 +1555,6 @@ section#final-record {
     margin-top: 25vh;
     padding-top: 45vh;
     background-image: linear-gradient(0deg, transparent 0%, #5c0000c4 15%, #5c0000c4 85%, transparent 100%);
-    /* 此前通过 section 的通用规则继承了 fixed, 这里显式声明以保持原有观感 */
     background-attachment: fixed;
 }
 
@@ -1587,6 +1579,7 @@ section#final-record .modal.rec {
         transform: translate(0, 15vh);
         opacity: 0;
     }
+
     100% {
         transform: translate(0, 0);
         opacity: 1;
@@ -1598,6 +1591,7 @@ section#final-record .modal.rec {
         transform: translate(0, 0);
         opacity: 1;
     }
+
     100% {
         transform: translate(0, 0);
         opacity: 0;
@@ -1679,9 +1673,6 @@ div.endscreen {
 
 div.endscreen img {
     width: 20rem;
-    /* 必须显式声明 height: auto。.endscreen 是纵向 flex 容器, 图片作为 flex item 时
-       height 若取自初始值, Chrome 会把主轴尺寸解析为 SVG 的固有高度 449px,
-       而不是按 20rem 宽度与固有宽高比换算出的高度, 结果被纵向拉伸约 4.3 倍。 */
     height: auto;
 }
 
@@ -1690,21 +1681,24 @@ section#end {
     height: 100vh;
 }
 
-
 section.fullscreen.gaze-into .illustration p {
     color: #ccc;
     text-align: center;
 }
+
 section.fullscreen.gaze-into .illustration {
     background: #000;
 }
+
 section.fullscreen.gaze-into {
     background-image: unset;
     background-color: #000;
 }
+
 section.fullscreen.gaze-into .illustration img {
     margin-top: 0;
 }
+
 section.fullscreen:has(.illustration) {
     height: auto;
 }
@@ -1721,7 +1715,6 @@ section.fullscreen:has(.illustration) {
     font-style: italic;
 }
 
-/* <picture> 默认 inline，会让子 img 的百分比宽度解析不稳，显式块级化 */
 .illustration picture {
     display: block;
 }
@@ -1763,8 +1756,6 @@ section {
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
-    /* 不使用 background-attachment: fixed —— 它作用于全部 59 个 section, 会在每帧强制重绘背景。
-       真正依赖"视差"观感的只有 .gt-intro 与 #final-record, 它们单独声明即可。 */
     background-attachment: scroll;
 }
 
@@ -1787,9 +1778,6 @@ div#source-code pre {
     overflow-x: scroll;
 }
 
-/* 尊重系统的"减少动态效果"设置: 关闭入场动画与位移动画。
-   使用 animation-duration 归零而非 animation: none, 以保留 forwards 的终态
-   (例如导航栏依赖 forwards 把 opacity 从 0 变为 1)。 */
 @media (prefers-reduced-motion: reduce) {
     html {
         scroll-behavior: auto;

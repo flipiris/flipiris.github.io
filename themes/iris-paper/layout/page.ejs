@@ -1,5 +1,5 @@
 <%- partial('_partial/content-page', {
-  contentClass: 'page plain-page' + (typeof pageClass !== 'undefined' ? ' ' + pageClass : ''),
+  contentClass: typeof pageClass !== 'undefined' ? pageClass : '',
   contentTitle: typeof pageTitle !== 'undefined' ? pageTitle : page.title,
   contentBody: typeof pageBody !== 'undefined' ? pageBody : '<div class="article-content">' + (page.content || '') + '</div>',
   contentFooter: false

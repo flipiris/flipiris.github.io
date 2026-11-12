@@ -1,4 +1,4 @@
 <%- partial('_partial/content-page', {
-  contentClass: (page_presentation(page) === 'canvas' ? 'canvas' : 'article') + ' article-page', contentTitle: page_presentation(page) === 'canvas' ? false : page.title,
+  contentClass: '', contentTitle: page_layout(page) === 'canvas' ? false : page.title,
   contentBody: partial('_partial/post-content'), contentFooter: true
 }) %>

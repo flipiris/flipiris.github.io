@@ -11,7 +11,7 @@ function helpers() {
   const registered = {};
   runInNewContext(readFileSync(join(__dirname, '../scripts/site-stats.js'), 'utf8'), {
     require: createRequire(join(__dirname, '../scripts/site-stats.js')),
-    hexo: {extend: {helper: {register(name, callback) {
+    hexo: {extend: {filter: {register() {}}, helper: {register(name, callback) {
       registered[name] = callback;
     }}}}
   });
@@ -80,7 +80,7 @@ test('注释块不计入正文字数', () => {
 
 test('详细统计保留正文口径，列出标签、分类、平均字数和最长页面', () => {
   const result = helpers().site_stats.call({
-    theme: {nav_categories: [{label: '作品'}, {label: '随笔'}]},
+    theme: {sections: [{label: '作品'}, {label: '随笔'}]},
     site: {
       posts: {toArray: () => [
         {title: '长文', path: 'long/', content: '<p>一二三四</p>', categories: {toArray: () => [{name: '作品'}, {name: '随笔'}]}, tags: {toArray: () => [{name: '原创'}]}},

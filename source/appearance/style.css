@@ -1,0 +1,49 @@
+.appearance-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid rgb(var(--line));
+  border-radius: 8px;
+  background: rgb(var(--bg));
+  font-family: var(--UI-font);
+  font-size: 14px;
+  text-align: left;
+  text-indent: 0;
+  letter-spacing: 0;
+}
+
+.appearance-controls label {
+  display: grid;
+  gap: 6px;
+}
+
+.appearance-controls :is(select, button) {
+  width: 100%;
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid rgb(var(--line));
+  border-radius: 5px;
+  background: rgb(var(--paper));
+  color: rgb(var(--ink));
+  font: inherit;
+}
+
+.appearance-controls button {
+  width: fit-content;
+  padding-inline: 16px;
+}
+
+#appearance-status {
+  margin-block: 12px;
+  color: rgb(var(--muted));
+  font-size: 13px;
+  text-indent: 0;
+}
+
+@media (max-width: 480px) {
+  .appearance-controls {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 14px;
+  }
+}
