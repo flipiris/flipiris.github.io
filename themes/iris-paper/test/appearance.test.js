@@ -6,7 +6,7 @@ const {readFileSync} = require('node:fs');
 const {join} = require('node:path');
 const {JSDOM} = require('jsdom');
 
-const page = readFileSync(join(__dirname, '../../../source/appearance/index.md'), 'utf8');
+const page = readFileSync(join(__dirname, '../../../source/_posts/appearance-lab.md'), 'utf8');
 const form = page.slice(page.indexOf('<form'), page.indexOf('</form>') + 7);
 const source = readFileSync(join(__dirname, '../../../source/attachments/appearance/script.js'), 'utf8');
 
