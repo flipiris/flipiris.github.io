@@ -44,13 +44,14 @@
 .read-progress-rail {
   inset: 0;
   height: auto;
-  border-radius: inherit;
+  border-radius: var(--nav-radius);
   background: linear-gradient(rgb(var(--accent) / 9%), rgb(var(--accent) / 9%)) top / 100% 2px no-repeat;
   z-index: 1;
 }
 
 .read-progress-rail > span {
   height: 2px;
+  border-radius: 0;
 }
 
 .post-info {
@@ -85,7 +86,7 @@
   padding: 14px 12px 16px;
   overflow-y: auto;
   overscroll-behavior: contain;
-  border-radius: inherit;
+  border-radius: var(--nav-radius);
 }
 
 .post-stats {

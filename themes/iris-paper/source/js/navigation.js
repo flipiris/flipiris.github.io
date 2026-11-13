@@ -4,6 +4,9 @@
   const hoverPointer = window.matchMedia('(hover: hover) and (pointer: fine)');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const backdrop = document.querySelector('.menu-backdrop');
+  const tools = document.querySelector('.site-tools');
+  const toolsSlot = document.querySelector('#site-tools-slot');
+  const topNav = document.querySelector('.top-nav');
   let backdropAnimation;
   const panels = Array.from(document.querySelectorAll('.hover-panel'), panel => ({
     panel,
@@ -153,7 +156,10 @@
     }
   });
 
+  document.addEventListener('site:search', () => panels.forEach(record => close(record)));
+
   function syncLayout() {
+    if (tools) (isCompact() ? topNav : toolsSlot).append(tools);
     panels.forEach(record => {
       clearTimeout(record.closeTimer);
       record.animation?.cancel();

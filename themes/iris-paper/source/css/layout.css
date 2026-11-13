@@ -152,7 +152,19 @@ body[data-layout="canvas"][data-canvas="document"] .canvas-document {
 
 body[data-layout="canvas"][data-canvas="document"] .site-footer {
   flex: none;
-  padding-block: 16px;
+  padding-block: 4px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+body[data-layout="canvas"][data-canvas="document"] .site-footer small {
+  font-size: 12px;
+}
+
+@media (max-width: 860px) {
+  body[data-layout="canvas"][data-canvas="document"] .site-footer {
+    display: none;
+  }
 }
 
 [data-layout="canvas"] .top-nav {

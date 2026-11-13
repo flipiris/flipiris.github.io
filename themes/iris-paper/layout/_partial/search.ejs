@@ -1,0 +1,13 @@
+<dialog id="site-search" class="site-search" aria-labelledby="search-title" data-index="<%- url_for('/search.json') %>">
+  <div class="search-heading">
+    <h2 id="search-title">搜索本站</h2>
+    <button class="tool-button" id="search-close" type="button" aria-label="关闭搜索" title="关闭搜索"><%- partial('_partial/icon', {name: 'close'}) %></button>
+  </div>
+  <form class="search-form" role="search">
+    <label class="search-label" for="search-input">标题、标签或正文</label>
+    <input id="search-input" type="search" placeholder="输入关键词…" autocomplete="off" enterkeyhint="search">
+  </form>
+  <p id="search-status" role="status" aria-live="polite">输入关键词，搜索标题、标签或正文。</p>
+  <button id="search-retry" type="button" hidden>重新加载</button>
+  <ol id="search-results" class="search-results" aria-label="搜索结果"></ol>
+</dialog>

@@ -141,3 +141,19 @@ test('没有文章的导航分类也遵守 category_map', () => {
   });
   assert.equal(result.categories[0].path, 'categories/notes/');
 });
+
+test('nav: false 只隐藏入口，不改变分类和 misc 归属；默认仍显示新分类', () => {
+  const {helpers} = fixture();
+  const theme = {
+    sections: [{label: '文章'}, {label: '开发', nav: false}],
+    nav_misc: {label: '其他页面', path: '/misc/'}
+  };
+  const site = {
+    categories: {findOne: () => null},
+    posts: {toArray: () => [{path: 'dev/', categories: {toArray: () => [{name: '开发'}]}}]},
+    pages: {toArray: () => []}
+  };
+  const nav = helpers.nav_sections.call({theme, site, config: {category_dir: 'categories'}});
+  assert.deepEqual(Array.from(nav.categories, item => item.label), ['文章']);
+  assert.equal(nav.misc.count, 0);
+});

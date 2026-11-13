@@ -37,7 +37,7 @@ hexo.extend.helper.register('nav_sections', function() {
   return {
     misc: misc ? {label: misc.label, icon: misc.icon, path: misc.path, count: miscPages(this.site, theme).length} : null,
     primary: (theme.nav_primary || []).map(item => ({label: item.label, path: item.path})),
-    categories: (theme.sections || []).map(item => {
+    categories: (theme.sections || []).filter(item => item.nav !== false).map(item => {
       const found = categories.findOne ? categories.findOne({name: item.label}) : null;
       return {
         label: item.label,

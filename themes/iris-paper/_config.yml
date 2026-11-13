@@ -1,4 +1,4 @@
-# 侧栏第一组：不带图标的固定入口。
+# 侧栏索引入口：不带图标，按两列排列。
 nav_primary:
   - label: 最近更新
     path: /updates/
@@ -10,6 +10,7 @@ nav_primary:
     path: /tags/
 
 # 目录即分类；顺序也决定导航顺序。子目录可继续在这里声明。
+# 某项加 nav: false 可隐藏菜单入口，分类、网址与索引照常保留。
 sections:
   - folder: notes
     label: 笔记
@@ -27,7 +28,7 @@ sections:
     label: 开发
     icon: code
 
-# 侧栏分类末尾的归档入口：收录没有上述任何分类的文章与独立页面。
+# 侧栏分类末尾的归档入口：收录没有上述任何分类的文章与独立页面（不受 nav 影响）。
 nav_misc:
   label: 其他页面
   icon: folder_open
@@ -36,7 +37,9 @@ nav_misc:
 # 留空时显示禁用按钮；填写完整个人主页链接后启用。
 social:
   github: 'https://github.com/flipiris'
+  wikidot: 'https://scp-wiki-cn.wikidot.com/flipiris/'
   x: 'https://x.com/flipiris'
+  bangumi: 'https://bgm.tv/user/flipiris'
 
 # 分类/标签索引：每页卡片数、每张卡片预览文章数。
 taxonomy_per_page: 10

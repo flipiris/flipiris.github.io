@@ -6,7 +6,7 @@ const home = is_home();
 const hasInfo = layoutName !== 'page';
 const documentTitle = page.title || (is_category() ? page.category : is_tag() ? page.tag : is_archive() ? '页面一览' : config.title);
 const style = page_style(page);
-const cssFiles = ['base', 'fonts', 'layout', 'navigation', 'pages', 'prose', 'info', 'presets'];
+const cssFiles = ['base', 'fonts', 'layout', 'navigation', 'pages', 'prose', 'info', 'presets', 'tools'];
 %>
 <!DOCTYPE html>
 <html lang="<%= config.language || 'zh-CN' %>">
@@ -21,6 +21,7 @@ const cssFiles = ['base', 'fonts', 'layout', 'navigation', 'pages', 'prose', 'in
     <meta name="description" content="<%= page.description || config.description %>">
   <% } %>
   <script>document.documentElement.classList.add('js')</script>
+  <script src="<%- url_for('/js/theme.js') %>"></script>
   <link rel="preload" href="<%- url_for('/fonts/MaterialSymbolsRounded.woff2') %>" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="<%- url_for('/fonts/ChillJinshuSongPro_Regular-core.woff2') %>" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="<%- url_for('/fonts/GenRyuMin2TW-M-core.woff2') %>" as="font" type="font/woff2" crossorigin>
@@ -37,6 +38,7 @@ const cssFiles = ['base', 'fonts', 'layout', 'navigation', 'pages', 'prose', 'in
     <link rel="stylesheet" href="<%- url_for(href) %>">
   <% }); %>
   <script src="<%- url_for('/js/navigation.js') %>" defer></script>
+  <script src="<%- url_for('/js/site-tools.js') %>" defer></script>
   <% if (hasInfo) { %><script src="<%- url_for('/js/reading.js') %>" defer></script><% } %>
 </head>
 
@@ -55,6 +57,7 @@ const cssFiles = ['base', 'fonts', 'layout', 'navigation', 'pages', 'prose', 'in
       <details id="site-menu" class="site-menu hover-panel" open>
         <summary id="mobile-nav" class="mobile-nav" aria-label="网站目录" aria-controls="site-menu-content"><%- partial('_partial/icon', {name: 'side_navigation'}) %></summary>
         <div id="site-menu-content" class="site-menu-body panel-body">
+          <div id="site-tools-slot"><%- partial('_partial/site-tools') %></div>
           <nav aria-label="网站目录"><%- partial('_partial/navigation') %></nav>
           <%- partial('_partial/site-stats') %>
           <%- partial('_partial/social-links') %>
@@ -66,6 +69,7 @@ const cssFiles = ['base', 'fonts', 'layout', 'navigation', 'pages', 'prose', 'in
     <footer class="site-footer"><small>© <%= date(new Date(), 'YYYY') %> <%= config.title %></small></footer>
   </div>
   <button class="menu-backdrop" type="button" aria-label="关闭目录" tabindex="-1" hidden></button>
+  <%- partial('_partial/search') %>
   <% (page.scripts ? [].concat(page.scripts) : []).forEach(function(script) { %>
     <script src="<%- url_for(script) %>" defer></script>
   <% }); %>

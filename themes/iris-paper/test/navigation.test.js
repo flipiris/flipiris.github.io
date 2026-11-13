@@ -9,9 +9,9 @@ const source = readFileSync(join(__dirname, '../source/js/navigation.js'), 'utf8
 
 function fixture({narrow = true, reduced = false, kind = 'post', canvas = false, canvasDocument = false} = {}) {
   const dom = new JSDOM(`<!doctype html><html style="--motion-base:240ms;--ease-out:linear"><body class="layout-${kind}" data-layout="${canvas ? 'canvas' : kind === 'page' ? 'page' : 'article'}"${canvasDocument ? ' data-canvas="document"' : ''}>
-    <details id="site-menu" class="hover-panel"><summary>目录</summary><div class="panel-body">菜单</div></details>
+    <details id="site-menu" class="hover-panel"><summary>目录</summary><div class="panel-body"><div id="site-tools-slot"><div class="site-tools"><button>搜索</button></div></div>菜单</div></details>
     ${kind === 'page' ? '' : '<details class="post-info hover-panel" open><summary>信息</summary><div class="panel-body"><a href="#chapter">章节</a></div></details>'}
-    <button class="menu-backdrop" hidden></button><main>正文</main>
+    <nav class="top-nav"></nav><button class="menu-backdrop" hidden></button><main>正文</main>
   </body></html>`, {runScripts: 'outside-only'});
   const {window} = dom;
   const media = new Map();
@@ -226,5 +226,30 @@ test('触屏不模拟悬停，Esc 关闭后焦点回到开关', async () => {
   await f.settle(f.menu);
   assert.equal(f.menu.open, false);
   assert.equal(f.document.activeElement, f.menu.querySelector('summary'));
+  f.dispose();
+});
+
+test('工具只有一组，随断点在菜单顶部与顶栏之间移动，完整画布保持顶栏工具', () => {
+  const f = fixture({narrow: false});
+  const tools = f.document.querySelector('.site-tools');
+  assert.equal(tools.parentElement.id, 'site-tools-slot');
+  f.resize(true);
+  assert.equal(tools.parentElement.className, 'top-nav');
+  assert.equal(f.menu.open, false);
+  f.resize(false);
+  assert.equal(tools.parentElement.id, 'site-tools-slot');
+  assert.equal(f.document.querySelectorAll('.site-tools').length, 1);
+  f.dispose();
+  const canvas = fixture({narrow: false, canvas: true, canvasDocument: true});
+  assert.equal(canvas.document.querySelector('.site-tools').parentElement.className, 'top-nav');
+  canvas.dispose();
+});
+
+test('打开搜索会关闭窄屏抽屉及遮罩', () => {
+  const f = fixture({reduced: true});
+  f.click(f.menu);
+  f.document.dispatchEvent(new f.window.Event('site:search'));
+  assert.equal(f.menu.open, false);
+  assert.equal(f.backdrop.hidden, true);
   f.dispose();
 });

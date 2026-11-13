@@ -34,7 +34,7 @@ html {
   left: 0;
   width: 100%;
   height: var(--top-nav-height);
-  padding: 0 calc(var(--nav-left) + var(--control-size) + var(--nav-gap));
+  padding: 0 var(--nav-left) 0 calc(var(--nav-left) + var(--control-size) + var(--nav-gap));
   border: 0;
   background: linear-gradient(var(--glass-tint), var(--glass-tint)), rgb(var(--paper) / 38%);
   box-shadow:
@@ -45,8 +45,32 @@ html {
   backdrop-filter: blur(var(--top-nav-blur)) saturate(180%);
 }
 
-.site-identity {
-  display: contents;
+body:has(.post-info) .top-nav {
+  padding-right: calc(var(--nav-left) + var(--control-size) + var(--nav-gap));
+}
+
+.top-nav > .site-identity {
+  display: grid;
+  min-width: 0;
+  justify-items: start;
+}
+
+.top-nav .home-link {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.top-nav .subtitle {
+  display: none;
+}
+
+.top-nav > .site-tools {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  margin: 0;
 }
 
 .home-link {
@@ -108,8 +132,7 @@ body[data-layout="page"][data-alignment="centered"] .site-layout {
   box-shadow: var(--drawer-shadow);
 }
 
-.site-menu-body > .social-links {
-  margin-top: auto;
+.site-menu-body > * {
   flex: none;
 }
 

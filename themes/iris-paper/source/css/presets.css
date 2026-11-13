@@ -122,7 +122,9 @@ body[data-palette="wanderers"] {
 }
 
 :root:has(body[data-palette="ink"]),
-body[data-palette="ink"] {
+body[data-palette="ink"],
+:root[data-mode="dark"],
+:root[data-mode="dark"] body {
   color-scheme: dark;
   --brand: 228 216 197;
   --heading-1: 228 216 197;
