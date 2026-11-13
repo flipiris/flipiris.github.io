@@ -20,6 +20,7 @@
   --local-cjk: "Songti SC", "STSong", "Source Han Serif SC", "Noto Serif SC", "Songti TC", "SimSun", "PMingLiU";
   --UI-font: "Times New Roman", "ChillJinshuSongPro", var(--local-cjk), serif;
   --serif: "Times New Roman", "GenRyuMin2TW", var(--local-cjk), Georgia, serif;
+  --mono-font: "Maple Mono NF CN", "JetBrains Mono", "Consolas", monospace;
 
   --space: 4px;
   --layout-gutter: clamp(16px, 2vw, 24px);
@@ -161,10 +162,10 @@ button:focus-visible {
   width: 1em;
   height: 1em;
   overflow: hidden;
-  font-family: "Material Symbols Outlined";
+  font-family: "Material Symbols Rounded";
   font-size: 20px;
   font-style: normal;
-  font-weight: 300;
+  font-weight: 500;
   font-variation-settings: "FILL" 0;
   line-height: 1;
   letter-spacing: normal;

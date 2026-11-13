@@ -112,11 +112,11 @@ def write_css(characters):
     """后声明的字体优先：先写各码位块，最后写 core，让常用字总是命中 core。"""
     lines = ["/* 由 tools/build-fonts.py 生成；不要手工编辑。 */",
              "@font-face {",
-             '  font-family: "Material Symbols Outlined";',
+             '  font-family: "Material Symbols Rounded";',
              "  font-style: normal;",
              "  font-weight: 100 700;",
              "  font-display: block;",
-             '  src: url("../fonts/MaterialSymbolsOutlined.woff2") format("woff2");',
+             '  src: url("../fonts/MaterialSymbolsRounded.woff2") format("woff2");',
              "}", ""]
     face_blocks = {stem: sorted(blocks_of(SRC / (stem + (".woff" if stem.endswith("Regular") else ".otf")))[1])
                    for _, _, stem in FACES}

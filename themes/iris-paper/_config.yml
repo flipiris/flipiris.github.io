@@ -23,6 +23,9 @@ sections:
   - folder: works
     label: 作品
     icon: palette
+  - folder: dev
+    label: 开发
+    icon: code
 
 # 侧栏分类末尾的归档入口：收录没有上述任何分类的文章与独立页面。
 nav_misc:

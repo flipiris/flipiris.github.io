@@ -13,8 +13,8 @@ scripts:
 <form class="appearance-controls" aria-label="外观预览">
   <label>配色<select name="palette" aria-label="配色"><option value="rose">rose</option><option value="tech">tech</option><option value="wanderers">wanderers</option><option value="ink">ink</option><option value="sepia">sepia</option></select></label>
   <label>布局<select name="layout" aria-label="布局"><option value="article">article</option><option value="page">page</option><option value="canvas">canvas</option></select></label>
-  <label>排版<select name="typography" aria-label="排版"><option value="standard">标准</option><option value="enhanced">增强 · 彩色强调</option><option value="literary">文学 · 首行缩进</option><option value="poem">诗歌 · 居中诗行</option></select></label>
-  <label>页面对齐<select name="alignment" aria-label="页面对齐"><option value="centered">侧栏与正文整体居中</option><option value="balanced">旧版 · 左右对称留白</option></select></label>
+  <label>排版<select name="typography" aria-label="排版"><option value="standard">标准</option><option value="enhanced">高亮</option><option value="literary">缩进</option><option value="poem">诗行</option></select></label>
+  <label>对齐<select name="alignment" aria-label="页面对齐"><option value="centered">居中</option><option value="balanced">平衡</option></select></label>
   <button type="reset">恢复默认</button>
 </form>
 <p id="appearance-status" role="status" aria-live="polite"></p>

@@ -34,7 +34,7 @@
 .article-content h4,
 .article-content h5,
 .article-content h6 {
-  color: rgb(var(--ink) / 90%);
+  color: rgb(var(--ink) / 85%);
   letter-spacing: 0.05em;
   margin-top: 1.5em;
   margin-bottom: 1.25em;
@@ -43,12 +43,12 @@
 }
 
 .article-content h1 {
-  font-size: 1.7em;
+  font-size: 1.6em;
   font-weight: 900;
 }
 
 .article-content h2 {
-  font-size: 1.5em;
+  font-size: 1.45em;
 }
 
 .article-content h3 {
@@ -56,15 +56,15 @@
 }
 
 .article-content h4 {
-  font-size: 1.15em;
+  font-size: 1.2em;
 }
 
 .article-content h5 {
-  font-size: 1.05em;
+  font-size: 1.1em;
 }
 
 .article-content h6 {
-  font-size: 1em;
+  font-size: 1.05em;
 }
 
 .article-content :is(ul, ol) {
@@ -103,7 +103,7 @@
 }
 
 hr {
-  margin: 1.5rem 0.5rem;
+  margin: 1.5em 0.75em;
   border: 0;
   border-top: 1px solid rgb(var(--line));
 }
@@ -118,11 +118,11 @@ hr {
 .article-content video {
   max-width: 85%;
   height: auto;
-  margin: 1.5rem auto;
+  margin: 1.5em auto;
 }
 
 .article-content figure {
-  margin: 1.5rem auto;
+  margin: 1.5em auto;
   text-align: center;
 }
 
@@ -130,13 +130,14 @@ hr {
   display: block;
   max-width: 100%;
   margin: 0 auto;
-  border-radius: 2px;
+  border-radius: 5px;
+  box-shadow: 2px 2px 5px rgb(var(--shadow)/30%);
 }
 
 .article-content figcaption {
   margin-top: 12px;
   color: rgb(var(--muted));
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.7;
   text-align: center;
 }
@@ -150,9 +151,9 @@ hr {
   margin: 20px 0;
   padding: 16px 20px;
   overflow-x: auto;
-  border-radius: 8px;
+  border-radius: 5px;
   background: rgb(var(--code-bg));
-  font-family: monospace;
+  font-family: var(--mono-font), monospace;
   font-size: 14px;
   line-height: 1.6;
   text-indent: 0;
@@ -169,25 +170,32 @@ hr {
 }
 
 .article-content blockquote {
-  margin-left: 0;
-  padding: 20px;
+  border-radius: 5px;
+  margin: auto;
+  padding: 1em 1.5em;
   padding-block: var(--space);
-  background: rgb(var(--accent) / 4%);
-  color: rgb(var(--muted));
+  background: rgb(var(--accent) / 10%);
+  color: rgb(var(--ink)/85%);
   text-indent: 0;
 }
 
 .article-content .poem {
-  width: fit-content;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) fit-content(100%) minmax(0, 1fr);
+  width: 85%;
   max-width: 100%;
-  margin: 2rem auto;
-  padding: 1.25rem clamp(1rem, 3vw, 2rem);
-  border: 1px solid rgb(var(--accent) / 28%);
-  border-radius: 10px;
-  background: rgb(var(--accent) / 4%);
+  margin: 1.5em auto;
+  padding: 1.5em clamp(1em, 3vw, 2em);
+  border-radius: 5px;
+  background: rgb(var(--accent) / 10%);
   line-height: 1.95;
   text-align: left;
   text-indent: 0;
+}
+
+.article-content .poem > * {
+  grid-column: 2;
+  min-width: 0;
 }
 
 .article-content .poem p {

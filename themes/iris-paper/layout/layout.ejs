@@ -21,9 +21,11 @@ const cssFiles = ['base', 'fonts', 'layout', 'navigation', 'pages', 'prose', 'in
     <meta name="description" content="<%= page.description || config.description %>">
   <% } %>
   <script>document.documentElement.classList.add('js')</script>
-  <link rel="preload" href="<%- url_for('/fonts/MaterialSymbolsOutlined.woff2') %>" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="<%- url_for('/fonts/MaterialSymbolsRounded.woff2') %>" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="<%- url_for('/fonts/ChillJinshuSongPro_Regular-core.woff2') %>" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="<%- url_for('/fonts/GenRyuMin2TW-M-core.woff2') %>" as="font" type="font/woff2" crossorigin>
+  <link href="https://fontsapi.zeoseven.com/442/main/result.css" onload="this.rel='stylesheet'" rel="preload" as="style" crossorigin />
+  <noscript><link rel="stylesheet" href="https://fontsapi.zeoseven.com/442/main/result.css" /></noscript>
   <% cssFiles.forEach(function(name) { %>
     <link rel="stylesheet" href="<%- url_for('/css/' + name + '.css') %>">
   <% }); %>
