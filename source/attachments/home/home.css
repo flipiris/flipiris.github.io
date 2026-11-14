@@ -111,6 +111,31 @@ body.is-home {
   margin-top: 28px;
 }
 
+.friend-links {
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid rgb(var(--line));
+  list-style: none;
+}
+
+.friend-links a {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  padding-block: 16px;
+}
+
+.friend-name {
+  color: rgb(var(--accent));
+  font-size: 17px;
+}
+
+.friend-description {
+  color: rgb(var(--muted));
+  font-size: 14px;
+}
+
 .section-heading h3 {
   margin: 0;
   font-size: 17px;

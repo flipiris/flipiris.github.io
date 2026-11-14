@@ -41,6 +41,12 @@ social:
   x: 'https://x.com/flipiris'
   bangumi: 'https://bgm.tv/user/flipiris'
 
+# 首页全站概览下方的友链；留空时不显示该区块。
+friend_links:
+  - name: 团子
+    url: https://blog.anriri.pp.ua/
+    description: 大河の一滴。
+
 # 分类/标签索引：每页卡片数、每张卡片预览文章数。
 taxonomy_per_page: 10
 taxonomy_preview: 5

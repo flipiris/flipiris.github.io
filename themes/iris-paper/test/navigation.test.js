@@ -6,11 +6,12 @@ const {readFileSync} = require('node:fs');
 const {join} = require('node:path');
 const {JSDOM} = require('jsdom');
 const source = readFileSync(join(__dirname, '../source/js/navigation.js'), 'utf8');
+const compactCSS = readFileSync(join(__dirname, '../source/css/compact.css'), 'utf8');
 
-function fixture({narrow = true, reduced = false, kind = 'post', canvas = false, canvasDocument = false} = {}) {
-  const dom = new JSDOM(`<!doctype html><html style="--motion-base:240ms;--ease-out:linear"><body class="layout-${kind}" data-layout="${canvas ? 'canvas' : kind === 'page' ? 'page' : 'article'}"${canvasDocument ? ' data-canvas="document"' : ''}>
-    <div id="site-menu" class="hover-panel"><button class="panel-toggle">目录</button><div class="panel-body"><div id="site-tools-slot"><div class="site-tools"><button>搜索</button></div></div>菜单</div></div>
-    ${kind === 'page' ? '' : '<div class="post-info hover-panel"><button class="panel-toggle">信息</button><div class="panel-body"><a href="#chapter">章节</a></div></div>'}
+function fixture({narrow = true, reduced = false, kind = 'post', canvas = false, canvasDocument = false, styles = false, initialize = true} = {}) {
+  const dom = new JSDOM(`<!doctype html><html class="js" style="--motion-base:240ms;--ease-out:linear"><head>${styles && (narrow || canvasDocument) ? `<style>${compactCSS}</style>` : ''}</head><body class="layout-${kind}" data-layout="${canvas ? 'canvas' : kind === 'page' ? 'page' : 'article'}"${canvasDocument ? ' data-canvas="document"' : ''}>
+    <div id="site-menu" class="site-menu hover-panel"><button class="panel-toggle">目录</button><div class="site-menu-body panel-body"><div id="site-tools-slot"><div class="site-tools"><button>搜索</button></div></div>菜单</div></div>
+    ${kind === 'page' ? '' : '<div class="post-info hover-panel"><button class="panel-toggle">信息</button><div class="post-info-body panel-body"><a href="#chapter">章节</a></div></div>'}
     <nav class="top-nav"></nav><button class="menu-backdrop" hidden></button><main>正文</main>
   </body></html>`, {runScripts: 'outside-only'});
   const {window} = dom;
@@ -39,12 +40,13 @@ function fixture({narrow = true, reduced = false, kind = 'post', canvas = false,
   let timerId = 0;
   window.setTimeout = callback => { timers.set(++timerId, callback); return timerId; };
   window.clearTimeout = id => timers.delete(id);
-  window.eval(source);
+  if (initialize) window.eval(source);
   const document = window.document;
   const info = document.querySelector('.post-info');
   const menu = document.querySelector('#site-menu');
   return {
     window, document, info, menu,
+    initialize: () => window.eval(source),
     pointer(panel, type, pointerType = 'mouse') {
       const event = new window.Event(type);
       Object.defineProperty(event, 'pointerType', {value: pointerType});
@@ -66,6 +68,51 @@ function fixture({narrow = true, reduced = false, kind = 'post', canvas = false,
     dispose: () => window.close()
   };
 }
+
+test('compact 首屏在导航脚本执行前收起面板，初始化后保留开合动画', async () => {
+  for (const options of [{narrow: true}, {narrow: false, canvas: true, canvasDocument: true}]) {
+    const f = fixture({...options, styles: true, initialize: false});
+    const display = panel => f.window.getComputedStyle(panel.querySelector('.panel-body')).display;
+    for (const panel of [f.menu, f.info]) {
+      assert.equal(panel.hasAttribute('data-state'), false);
+      assert.equal(display(panel), 'none');
+    }
+    f.initialize();
+    for (const panel of [f.menu, f.info]) {
+      assert.equal(display(panel), 'none');
+      f.click(panel);
+      assert.notEqual(display(panel), 'none');
+      await f.settle(panel);
+      f.click(panel);
+      assert.notEqual(display(panel), 'none');
+      await f.settle(panel);
+      assert.equal(display(panel), 'none');
+    }
+    f.dispose();
+  }
+});
+
+test('无 JavaScript 的 compact 布局仍显示目录与信息', () => {
+  for (const options of [{narrow: true}, {narrow: false, canvas: true, canvasDocument: true}]) {
+    const f = fixture({...options, styles: true, initialize: false});
+    f.document.documentElement.classList.remove('js');
+    for (const panel of [f.menu, f.info]) {
+      assert.notEqual(f.window.getComputedStyle(panel.querySelector('.panel-body')).display, 'none');
+    }
+    f.dispose();
+  }
+});
+
+test('普通宽屏首屏不隐藏常驻侧栏和信息窗', () => {
+  const f = fixture({narrow: false, styles: true, initialize: false});
+  for (const panel of [f.menu, f.info]) {
+    assert.notEqual(f.window.getComputedStyle(panel.querySelector('.panel-body')).display, 'none');
+  }
+  f.initialize();
+  assert.equal(f.menu.dataset.state, 'wide');
+  assert.equal(f.info.dataset.state, 'wide');
+  f.dispose();
+});
 
 test('抽屉在窄屏同步可访问状态，宽屏移除折叠语义', async () => {
   const f = fixture();

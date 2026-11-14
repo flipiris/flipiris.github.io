@@ -152,10 +152,6 @@ body[data-layout="page"][data-alignment="centered"] .site-layout {
   display: grid;
 }
 
-.js .panel-body[hidden] {
-  display: none;
-}
-
 .js .site-menu-body {
   position: fixed;
   top: var(--top-nav-height);
@@ -247,4 +243,9 @@ body.nav-open {
 .post-item {
   grid-template-columns: 78px minmax(0, 1fr);
   gap: 10px;
+}
+
+.js .hover-panel:not([data-state]) > .panel-body,
+.js .panel-body[hidden] {
+  display: none;
 }

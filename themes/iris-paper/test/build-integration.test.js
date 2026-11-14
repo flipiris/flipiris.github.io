@@ -89,6 +89,15 @@ test('真实构建：目录子分类、英文路径、两层分页、增强排�
     assert.equal(home.querySelector('#recent-title'), null);
     assert.ok(home.querySelector('.home-overview + .overview-details'));
     assert.equal(home.querySelector('.overview-stats .detail-stats'), null);
+    const friends = home.querySelector('.home-section + .home-friends');
+    assert.equal(friends.querySelector('#friends-title').textContent, '友链');
+    const friend = friends.querySelector('.friend-links a');
+    assert.equal(friend.getAttribute('href'), 'https://blog.anriri.pp.ua/');
+    assert.equal(friend.querySelector('.friend-name').textContent, '团子');
+    assert.equal(friend.querySelector('.friend-description').textContent, '大河の一滴。');
+    assert.equal(friend.target, '_blank');
+    assert.ok(friend.relList.contains('noopener'));
+    assert.equal(about.querySelector('.home-friends'), null);
     const note = await document('book-0');
     assert.equal(note.body.dataset.typography, 'enhanced');
     const sidebar = note.querySelector('.site-menu-body');

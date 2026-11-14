@@ -53,3 +53,13 @@
   </details>
   <p class="stat-caption overview-caption">统计已发布内容，不含索引和草稿。热力图按每页最近一次更新归日；点击色块查看对应页面。</p>
 </section>
+<% const friends = theme.friend_links || []; if (friends.length) { %>
+<section class="home-section home-friends" aria-labelledby="friends-title">
+  <div class="section-heading"><h2 id="friends-title">友链</h2></div>
+  <ul class="friend-links">
+    <% friends.forEach(function(friend) { %>
+    <li><a href="<%= url_for(friend.url) %>" target="_blank" rel="noopener noreferrer"><span class="friend-name"><%= friend.name %></span><% if (friend.description) { %><span class="friend-description"><%= friend.description %></span><% } %></a></li>
+    <% }); %>
+  </ul>
+</section>
+<% } %>
