@@ -2,6 +2,13 @@
   text-indent: 0;
 }
 
+/* Keep the grain behind the content and let each palette supply its paper colour. */
+body:is([data-typography="literary"], [data-typography="poem"]) .content-page {
+  background-image: url("../images/paper-grain.svg");
+  background-size: 240px 240px;
+  background-repeat: repeat;
+}
+
 [data-typography="literary"] .article-content {
   text-indent: 2em;
 }

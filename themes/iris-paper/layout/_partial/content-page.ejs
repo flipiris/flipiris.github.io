@@ -1,7 +1,13 @@
-<article class="content-page<%= contentClass ? ' ' + contentClass : '' %>">
+<% const warning = content_warning(page); %>
+<article class="content-page<%= contentClass ? ' ' + contentClass : '' %><%= warning.enabled ? ' is-content-locked' : '' %>">
+  <% if (warning.enabled) { %>
+    <%- partial('_partial/content-warning', {warning}) %>
+    <div id="content-warning-body" class="content-warning-body" tabindex="-1" inert aria-hidden="true">
+  <% } %>
   <% if (contentTitle !== false) { %><header class="page-header">
     <%- partial('_partial/page-title', {title: contentTitle}) %>
   </header><% } %>
   <%- contentBody %>
   <% if (contentFooter) { %><%- partial('_partial/article-footer') %><% } %>
+  <% if (warning.enabled) { %></div><% } %>
 </article>

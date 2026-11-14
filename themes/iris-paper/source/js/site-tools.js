@@ -89,6 +89,7 @@
     if (dialog.open) return;
     document.dispatchEvent(new Event('site:search'));
     dialog.showModal();
+    searchButton.setAttribute('aria-expanded', 'true');
     document.body.classList.add('search-open');
     input.focus();
     if (documents) render();
@@ -105,6 +106,7 @@
   });
   dialog.addEventListener('close', () => {
     document.body.classList.remove('search-open');
+    searchButton.setAttribute('aria-expanded', 'false');
     searchButton.focus({preventScroll: true});
   });
   dialog.addEventListener('click', event => {

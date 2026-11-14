@@ -9,7 +9,7 @@ const source = readFileSync(join(__dirname, '../source/js/reading.js'), 'utf8');
 
 let scrollHeight = 4000;
 
-function fixture({reduced = false, withNote = true, height = 4000} = {}) {
+function fixture({reduced = false, withNote = true, height = 4000, locked = false} = {}) {
   scrollHeight = height;
   const dom = new JSDOM(`<!doctype html><html><body>
     <div class="read-progress read-progress-header"><span></span></div>
@@ -22,7 +22,7 @@ function fixture({reduced = false, withNote = true, height = 4000} = {}) {
         <section class="info-page" id="info-page-1"></section>${withNote ? '<section id="info-page-2" class="info-page info-note">注</section>' : ''}
       </div>
     </details>
-    <article class="content-page"><div class="article-content"><p id="a">一</p><p id="b">二</p><p id="c">三</p></div></article>
+    <article class="content-page${locked ? ' is-content-locked' : ''}"><div class="article-content"><p id="a">一</p><p id="b">二</p><p id="c">三</p></div></article>
   </body></html>`, {runScripts: 'outside-only', pretendToBeVisual: true});
   const {window} = dom;
   window.matchMedia = query => Object.assign(new window.EventTarget(), {matches: query.includes('reduced-motion') ? reduced : false});
@@ -66,6 +66,19 @@ test('减少动态效果时不挂起任何段落，也不隐藏正文', () => {
   const f = fixture({reduced: true});
   assert.equal(f.observers.length, 0);
   assert.equal(f.document.querySelectorAll('.reveal').length, 0);
+  f.window.close();
+});
+
+test('内容警告确认后才启动逐段浮现，再次确认不重复创建观察器', () => {
+  const f = fixture({locked: true});
+  assert.equal(f.observers.length, 0);
+  assert.equal(f.document.querySelectorAll('.reveal').length, 0);
+  f.document.querySelector('.content-page').classList.remove('is-content-locked');
+  f.document.dispatchEvent(new f.window.Event('content:continue'));
+  assert.equal(f.observers.length, 1);
+  assert.equal(f.observers[0].targets.size, 2);
+  f.document.dispatchEvent(new f.window.Event('content:continue'));
+  assert.equal(f.observers.length, 1);
   f.window.close();
 });
 

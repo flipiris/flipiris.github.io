@@ -61,11 +61,11 @@ body.is-home {
 
 .home-intro > .home-profile {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 1em;
+  max-width: 80%;
   padding: 1.5em;
   margin: 1.5em auto;
-  max-width: 80%;
 }
 
 .home-profile > img {
@@ -85,6 +85,18 @@ body.is-home {
 
 .home-profile > div > :last-child {
   margin-bottom: 0;
+}
+
+@container (max-width: 480px) {
+  .home-intro > .home-profile {
+    max-width: 100%;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .home-profile > img {
+    width: clamp(48px, 14cqi, 64px);
+  }
 }
 
 @container (min-width: 640px) {

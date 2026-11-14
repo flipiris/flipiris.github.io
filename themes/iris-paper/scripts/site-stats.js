@@ -3,10 +3,11 @@
 const {parseDocument, DomUtils} = require('htmlparser2');
 const moment = require('moment-timezone');
 const {publishedDocuments, standalonePages, updateTime} = require('./lib/documents');
+const {isWarning} = require('./lib/content-warning');
 function countWords(content) {
   const document = parseDocument(content);
   const excluded = DomUtils.findAll(node =>
-    ['pre', 'code', 'script', 'style'].includes(node.name)
+    ['pre', 'code', 'script', 'style'].includes(node.name) || isWarning(node)
     || (node.name === 'figure' && /(?:^|\s)highlight(?:\s|$)/.test(node.attribs.class || ''))
     || (node.name === 'div' && /(?:^|\s)note(?:\s|$)/.test(node.attribs.class || '')),
   document.children);

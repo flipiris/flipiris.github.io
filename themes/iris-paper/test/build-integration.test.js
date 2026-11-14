@@ -24,7 +24,12 @@ test('真实构建：目录子分类、英文路径、两层分页、增强排�
     await fs.copyFile(path.join(root, 'package.json'), path.join(base, 'package.json'));
     await write('_config.yml', `title: Test\nauthor: Writer\nurl: https://example.org\ntheme: iris-paper\npermalink: :title/\ndefault_category: ''\nper_page: 3\npretty_urls:\n  trailing_index: false\n  trailing_html: false\ntheme_config:\n  taxonomy_per_page: 2\n  taxonomy_preview: 2\n  sections:\n    - {folder: notes, label: 笔记, icon: edit_note}\n    - {folder: reading, label: 阅读, icon: article, nav: false}\n    - {folder: works, label: 作品, icon: palette}\n`);
     await write('source/_data/home.md', '![轻鸢](/photo.jpg "清晨的山")\n\n# 关于\n\n<blockquote class="home-profile">\n<img src="/avatar.png" alt="头像">\n<div>\n\n**首页介绍**。\n\n[链接](/about/)\n\n</div>\n</blockquote>');
-    for (let i = 0; i < 7; i++) await write(`source/_posts/notes/reading/book-${i}.md`, `---\ntitle: 笔记${i}\ndate: 2020-01-01\npermalink: book-${i}/\ntags: [标签${i}]\n---\n# 正文标题\n\n**强调** 与 *语气*。`);
+    const workNotes = [];
+    for (const name of ['九尾猫漫游录', '入水愿', '调笑令']) {
+      const source = await fs.readFile(path.join(root, `source/_posts/works/${name}.md`), 'utf8');
+      workNotes.push(source.match(/<div class="note">[\s\S]*?<\/div>/)[0]);
+    }
+    for (let i = 0; i < 7; i++) await write(`source/_posts/notes/reading/book-${i}.md`, `---\ntitle: 笔记${i}\nlayout: article\ndate: 2020-01-01\npermalink: book-${i}/\ntags: [标签${i}]\n---\n# 正文标题\n\n**强调** 与 *语气*。\n\n${workNotes[i] || ''}`);
     await write('source/_posts/notes/explicit.md', '---\ntitle: 显式分类\ndate: 2020-01-01\npermalink: explicit/\ncategories: [作品]\ntypography: standard\n---\n正文');
     await write('source/_posts/works/canvas.html', '---\ntitle: 画布元数据\nauthor: Author\ndate: 2020-01-01\nlayout: canvas\npermalink: canvas/\ncanvas_base: /attachments/test/\ndisableNunjucks: true\n---\n<html><head><title>内部标题</title></head><body>    <p id="story">实际正文</p></body></html>');
     await write('source/about/index.md', '---\ntitle: 关于\nlayout: page\ndate: 2020-01-01\n---\n## 页面章节\n\n独立页正文');
@@ -87,12 +92,27 @@ test('真实构建：目录子分类、英文路径、两层分页、增强排�
     assert.equal(note.body.dataset.typography, 'enhanced');
     const sidebar = note.querySelector('.site-menu-body');
     assert.equal(sidebar.lastElementChild.className, 'social-links');
-    assert.equal(sidebar.querySelectorAll('.social-links svg').length, 2);
+    assert.equal(sidebar.querySelectorAll('.social-links svg').length, 0);
     assert.equal(sidebar.querySelectorAll('.social-links :is(a[href], button:disabled)').length, 4);
     assert.ok(sidebar.querySelector('.social-links a[aria-label="SCP 基金会"]'));
     assert.ok(sidebar.querySelector('.social-links a[aria-label="Bangumi"]'));
-    assert.equal(sidebar.querySelectorAll('.social-links .social-icon').length, 2);
+    assert.equal(sidebar.querySelectorAll('.social-links .social-icon').length, 4);
     assert.equal(sidebar.querySelectorAll('.social-links img').length, 0);
+    for (const name of ['github', 'x']) {
+      assert.match(sidebar.querySelector(`.social-icon-${name}`).getAttribute('style'), new RegExp(`/icons/${name}\\.svg`));
+      assert.match(await fs.readFile(path.join(base, `public/icons/${name}.svg`), 'utf8'), /<svg[^>]*viewBox="0 0 24 24"/);
+    }
+    const noteLinks = [
+      'https://mp.weixin.qq.com/s/cmQB6jYGgx6OFtm_1n0Oyg',
+      'https://scp-wiki-cn.wikidot.com/drowning-to-life',
+      'https://scp-wiki-cn.wikidot.com/gudianaiqing-gushiji#toc2'
+    ];
+    for (let i = 0; i < noteLinks.length; i++) {
+      const work = await document(`book-${i}`);
+      assert.equal(work.querySelector('.info-note a').getAttribute('href'), noteLinks[i]);
+      assert.equal(work.querySelector('.article-content .note'), null);
+      assert.doesNotMatch(work.querySelector('.info-note').textContent, /\]\(https:/);
+    }
     assert.match(sidebar.querySelector('.social-icon-bangumi').getAttribute('style'), /\/icons\/bangumi\.svg/);
     assert.match(sidebar.querySelector('.social-icon-wikidot').getAttribute('style'), /\/icons\/scp-foundation\.png/);
     assert.equal(sidebar.querySelector('.social-links').previousElementSibling.className, 'site-stats');

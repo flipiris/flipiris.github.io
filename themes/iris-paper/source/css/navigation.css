@@ -199,12 +199,12 @@
   font-weight: 700;
 }
 
-:is(.nav-tree a, .toc-link, .hover-panel > summary, .post-tags a, .pagination a) {
+:is(.nav-tree a, .toc-link, .hover-panel > summary, .post-tags a, .pagination a, .site-tools .tool-button) {
   position: relative;
   isolation: isolate;
 }
 
-:is(.nav-tree a, .toc-link, .hover-panel > summary, .post-tags a, .pagination a)::after {
+:is(.nav-tree a, .toc-link, .hover-panel > summary, .post-tags a, .pagination a, .site-tools .tool-button)::after {
   position: absolute;
   z-index: -1;
   inset: var(--hover-inset);
@@ -216,17 +216,18 @@
   transition: opacity var(--motion-fast) ease;
 }
 
-:is(.nav-tree a, .toc-link, .hover-panel > summary, .post-tags a, .pagination a):focus-visible::after,
-.hover-panel:is([data-state="opening"], [data-state="open"]) > summary::after {
+:is(.nav-tree a, .toc-link, .hover-panel > summary, .post-tags a, .pagination a, .site-tools .tool-button):focus-visible::after,
+.hover-panel:is([data-state="opening"], [data-state="open"]) > summary::after,
+.site-tools .tool-button:is(:active, [aria-expanded="true"])::after {
   opacity: 1;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  :is(.nav-tree a, .toc-link, .hover-panel > summary, .post-tags a, .pagination a):hover {
+  :is(.nav-tree a, .toc-link, .hover-panel > summary, .post-tags a, .pagination a, .site-tools .tool-button):hover {
     color: rgb(var(--accent));
   }
 
-  :is(.nav-tree a, .toc-link, .hover-panel > summary, .post-tags a, .pagination a):hover::after {
+  :is(.nav-tree a, .toc-link, .hover-panel > summary, .post-tags a, .pagination a, .site-tools .tool-button):hover::after {
     opacity: 1;
   }
 
@@ -298,21 +299,19 @@
   cursor: default;
 }
 
-:is(.mobile-nav, .post-info-icon) {
+:is(.mobile-nav, .post-info > summary, .site-tools .tool-button) {
   color: rgb(var(--accent) / 52%);
   transition: color var(--motion-fast) ease;
 }
 
 .hover-panel:is([data-state="opening"], [data-state="open"]) > summary,
-.hover-panel:is([data-state="opening"], [data-state="open"]) .post-info-icon,
-.hover-panel > summary:focus-visible,
-.hover-panel > summary:focus-visible .post-info-icon {
+:is(.mobile-nav, .post-info > summary, .site-tools .tool-button):is(:focus-visible, :active),
+.site-tools .tool-button[aria-expanded="true"] {
   color: rgb(var(--accent));
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .hover-panel > summary:hover,
-  .hover-panel > summary:hover .post-info-icon {
+  :is(.mobile-nav, .post-info > summary, .site-tools .tool-button):hover {
     color: rgb(var(--accent));
   }
 }
@@ -340,28 +339,23 @@
   --nav-active: 52 55 60;
 }
 
-.post-info > summary {
-  color: rgb(var(--accent) / 52%);
-}
-
 .post-info > summary .post-info-icon {
   color: inherit;
-}
-
-.social-links svg {
-  display: block;
-  width: 14px;
-  height: 14px;
 }
 
 .social-links .social-icon {
   display: block;
   flex: none;
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   background-color: currentColor;
   -webkit-mask: var(--social-icon) center / contain no-repeat;
   mask: var(--social-icon) center / contain no-repeat;
+}
+
+.social-links :is(.social-icon-wikidot, .social-icon-bangumi) {
+  width: 18px;
+  height: 18px;
 }
 
 .social-links .social-icon-wikidot {

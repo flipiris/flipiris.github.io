@@ -26,11 +26,11 @@
   border-radius: var(--nav-radius);
   background: transparent;
   color: rgb(var(--accent));
-  transition: background-color var(--motion-fast) ease;
+  transition: color var(--motion-fast) ease;
 }
 
-.tool-button:hover,
-.tool-button:focus-visible {
+.search-heading .tool-button:hover,
+.search-heading .tool-button:focus-visible {
   background: rgb(var(--accent) / 9%);
 }
 

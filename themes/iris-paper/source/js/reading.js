@@ -119,7 +119,9 @@
     });
   }
 
-  setupReveal();
+  if (document.querySelector('.content-page.is-content-locked')) document.addEventListener('content:continue', setupReveal, {once: true});
+  else setupReveal();
+  document.addEventListener('content:continue', () => { measureOutline(); onScroll(); });
 
   const tabs = info ? Array.from(info.querySelectorAll('.info-tabs [role="tab"]')) : [];
   const pages = info ? info.querySelector('.info-pages') : null;

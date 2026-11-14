@@ -1,6 +1,6 @@
 <%- partial('_partial/content-page', {
   contentClass: typeof pageClass !== 'undefined' ? pageClass : '',
   contentTitle: typeof pageTitle !== 'undefined' ? pageTitle : page.title,
-  contentBody: typeof pageBody !== 'undefined' ? pageBody : '<div class="article-content">' + (page.content || '') + '</div>',
+  contentBody: typeof pageBody !== 'undefined' ? pageBody : '<div class="article-content">' + content_warning(page).body + '</div>',
   contentFooter: false
 }) %>

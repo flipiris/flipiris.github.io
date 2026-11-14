@@ -1,0 +1,68 @@
+.content-page.is-content-locked > .content-warning-body {
+  display: none;
+}
+
+.content-warning-body:focus {
+  outline: none;
+}
+
+body[data-canvas="document"] .content-warning-body {
+  height: 100%;
+}
+
+.content-page > .content-warning {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: block;
+  padding: var(--paper-padding);
+  overflow-y: auto;
+  border-radius: inherit;
+  background: rgb(var(--paper));
+  animation: none;
+}
+
+.content-warning[hidden] {
+  display: none;
+}
+
+.content-warning-card {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.content-warning-card h2 {
+  margin: 0 0 20px;
+  font-family: var(--serif);
+  font-size: 28px;
+  line-height: 1.5;
+}
+
+.content-warning-message {
+  line-height: 1.8;
+}
+
+.content-warning-message > :first-child {
+  margin-top: 0;
+}
+
+.content-warning-message > :last-child {
+  margin-bottom: 0;
+}
+
+.content-warning-message img {
+  max-width: 100%;
+  height: auto;
+}
+
+.content-warning-continue {
+  display: none;
+  margin-top: 28px;
+}
+
+.js .content-warning-continue {
+  display: inline-block;
+}

@@ -73,7 +73,7 @@ test('外观实验室保留原生 select，统一箭头并为边框与文字预�
   assert.equal((source.match(/<select\b/g) || []).length, 4);
 });
 
-test('新增社交图标通过单色遮罩继承链接颜色，悬停和键盘焦点与原有图标一致', () => {
+test('四个社交图标统一使用本地文件遮罩并继承链接颜色', () => {
   const css = readFileSync(join(__dirname, '../source/css/navigation.css'), 'utf8');
   assert.match(css, /\.social-links \.social-icon\s*\{[^}]*background-color: currentColor;[^}]*-webkit-mask: var\(--social-icon\)[^}]*mask: var\(--social-icon\)/);
   assert.match(css, /\.social-icon-wikidot\s*\{[^}]*mask-mode: luminance;/);
@@ -88,4 +88,29 @@ test('信息窗与进度条显式共用圆角，进度填充只由面板外轮�
     assert.match(css, new RegExp(`${escaped} \\{[^}]*border-radius: var\\(--nav-radius\\);`));
   }
   assert.match(css, /\.read-progress-rail > span\s*\{[^}]*border-radius: 0;/);
+});
+
+test('首页简介保持头像在左，窄屏缩小头像并取消 80% 限宽；顶栏签名与抽屉按可用空间响应', () => {
+  const home = readFileSync(join(__dirname, '../../../source/attachments/home/home.css'), 'utf8');
+  const compact = readFileSync(join(__dirname, '../source/css/compact.css'), 'utf8');
+  assert.match(home, /\.home-intro > \.home-profile\s*\{[^}]*max-width: 80%;/);
+  assert.match(home, /\.home-intro > \.home-profile\s*\{[^}]*align-items: center;/);
+  assert.match(home, /@container \(max-width: 480px\)\s*\{\s*\.home-intro > \.home-profile\s*\{[^}]*max-width: 100%;/);
+  assert.match(home, /\.home-profile > img\s*\{[^}]*width: clamp\(48px, 14cqi, 64px\);/);
+  assert.doesNotMatch(home, /flex-direction: column;/);
+  assert.match(compact, /container: top-identity \/ inline-size;/);
+  assert.match(compact, /@container top-identity \(min-width: 230px\)\s*\{\s*\.top-nav \.subtitle\s*\{\s*display: block;/);
+  assert.match(compact, /\.site-menu-body\s*\{[^}]*width: min\(320px, 75vw\);[^}]*height: calc\(100dvh - var\(--top-nav-height\)\);/);
+  assert.match(compact, /\.post-info-body\s*\{[^}]*max-height: calc\(75dvh - var\(--top-nav-height\)\);/);
+  assert.doesNotMatch(home, /75vh/);
+});
+
+test('顶栏工具和两个抽屉触发器共用淡色默认与强调色触发态', () => {
+  const nav = readFileSync(join(__dirname, '../source/css/navigation.css'), 'utf8');
+  const compact = readFileSync(join(__dirname, '../source/css/compact.css'), 'utf8');
+  const layout = readFileSync(join(__dirname, '../source/css/layout.css'), 'utf8');
+  assert.match(nav, /:is\(\.mobile-nav, \.post-info > summary, \.site-tools \.tool-button\)\s*\{[^}]*color: rgb\(var\(--accent\) \/ 52%\);/);
+  assert.match(nav, /\.site-tools \.tool-button\[aria-expanded="true"\]\s*\{\s*color: rgb\(var\(--accent\)\);/);
+  assert.doesNotMatch(compact, /color: rgb\(var\(--accent\) \/ 52%\)/);
+  assert.doesNotMatch(layout, /\[data-layout="canvas"\] :is\(\.mobile-nav/);
 });

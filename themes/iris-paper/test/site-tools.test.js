@@ -113,6 +113,7 @@ test('搜索惰性加载一次，匹配标题/标签/完整正文，多词同时
   assert.equal(calls, 0);
   f.search.click();
   assert.equal(f.dialog.open, true);
+  assert.equal(f.search.getAttribute('aria-expanded'), 'true');
   assert.equal(f.document.activeElement.id, 'search-input');
   f.input('河岸');
   await f.settle();
@@ -128,6 +129,7 @@ test('搜索惰性加载一次，匹配标题/标签/完整正文，多词同时
   assert.equal(f.results.querySelector('h3').textContent, data[2].title);
   f.document.querySelector('input').dispatchEvent(new f.window.KeyboardEvent('keydown', {key: 'Escape', bubbles: true, cancelable: true}));
   assert.equal(f.dialog.open, false);
+  assert.equal(f.search.getAttribute('aria-expanded'), 'false');
   assert.equal(f.document.activeElement, f.search);
   assert.equal(f.document.body.classList.contains('search-open'), false);
   f.search.click();
@@ -141,6 +143,7 @@ test('加载失败可重试，搜索用最新输入；快捷键可打开，关�
   f.document.dispatchEvent(new f.window.KeyboardEvent('keydown', {ctrlKey: true, key: 'k', cancelable: true}));
   await f.settle();
   assert.equal(f.dialog.open, true);
+  assert.equal(f.search.getAttribute('aria-expanded'), 'true');
   assert.match(f.status.textContent, /加载失败/);
   assert.equal(f.document.querySelector('#search-retry').hidden, false);
   f.input('月光');

@@ -176,26 +176,6 @@ body[data-layout="canvas"][data-canvas="document"] .site-footer small {
   color: rgb(var(--ink) / 80%);
 }
 
-[data-layout="canvas"] :is(.mobile-nav, .post-info summary) {
-  color: rgb(var(--ink) / 48%);
-}
-
-[data-layout="canvas"] .hover-panel:is([data-state="opening"], [data-state="open"]) > summary,
-[data-layout="canvas"] .hover-panel > summary:focus-visible,
-[data-layout="canvas"] .hover-panel > summary:hover {
-  color: rgb(var(--ink));
-}
-
-[data-layout="canvas"] .post-info-icon {
-  color: inherit;
-}
-
-[data-layout="canvas"] .hover-panel:is([data-state="opening"], [data-state="open"]) .post-info-icon,
-[data-layout="canvas"] .hover-panel > summary:focus-visible .post-info-icon,
-[data-layout="canvas"] .hover-panel > summary:hover .post-info-icon {
-  color: inherit;
-}
-
 [data-layout="canvas"] :is(.top-nav, .site-menu-body, .post-info-body) {
   -webkit-backdrop-filter: blur(28px) saturate(0%);
   backdrop-filter: blur(28px) saturate(0%);

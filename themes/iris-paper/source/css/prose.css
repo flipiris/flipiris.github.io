@@ -108,7 +108,8 @@ hr {
   border-top: 1px solid rgb(var(--line));
 }
 
-.article-content a {
+.article-content a,
+.content-warning a {
   color: rgb(var(--accent));
   text-decoration: underline;
   text-underline-offset: 3px;
