@@ -65,7 +65,7 @@ body.is-home {
   gap: 1em;
   max-width: 80%;
   padding: 1.5em;
-  margin: 1.5em auto;
+  margin: 0 auto 1.5em;
 }
 
 .home-profile > img {
@@ -111,10 +111,27 @@ body.is-home {
   margin-top: 28px;
 }
 
+.home-intro > .section-heading,
+.home-section > .section-heading {
+  margin: 0 0 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgb(var(--line));
+  color: rgb(var(--ink));
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.7;
+  letter-spacing: normal;
+}
+
+.home-page .section-more {
+  font-family: var(--UI-font);
+  font-weight: 400;
+}
+
 .friend-links {
   margin: 0;
   padding: 0;
-  border-top: 1px solid rgb(var(--line));
   list-style: none;
 }
 
@@ -123,7 +140,7 @@ body.is-home {
   align-items: baseline;
   flex-wrap: wrap;
   gap: 4px 16px;
-  padding-block: 16px;
+  padding-block: 0 16px;
 }
 
 .friend-name {
@@ -144,8 +161,6 @@ body.is-home {
 .home-overview {
   display: grid;
   gap: 20px;
-  padding-top: 16px;
-  border-top: 1px solid rgb(var(--line));
 }
 
 .home-overview > * {

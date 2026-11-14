@@ -22,7 +22,7 @@ test('真实构建：目录子分类、英文路径、两层分页、增强排�
     await fs.symlink(path.join(root, 'node_modules'), path.join(base, 'node_modules'));
     await fs.copyFile(path.join(root, 'package.json'), path.join(base, 'package.json'));
     await write('_config.yml', `title: Test\nauthor: Writer\nurl: https://example.org\ntheme: iris-paper\npermalink: :title/\ndefault_category: ''\nper_page: 3\npretty_urls:\n  trailing_index: false\n  trailing_html: false\ntheme_config:\n  taxonomy_per_page: 2\n  taxonomy_preview: 2\n  sections:\n    - {folder: notes, label: 笔记, icon: edit_note}\n    - {folder: reading, label: 阅读, icon: article, nav: false}\n    - {folder: works, label: 作品, icon: palette}\n`);
-    await write('source/_data/home.md', '![轻鸢](/photo.jpg "清晨的山")\n\n# 关于\n\n<blockquote class="home-profile">\n<img src="/avatar.png" alt="头像">\n<div>\n\n**首页介绍**。\n\n[链接](/about/)\n\n</div>\n</blockquote>');
+    await write('source/_data/home.md', '![轻鸢](/photo.jpg "清晨的山")\n\n<div class="section-heading">关于</div>\n\n<blockquote class="home-profile">\n<img src="/avatar.png" alt="头像">\n<div>\n\n**首页介绍**。\n\n[链接](/about/)\n\n</div>\n</blockquote>');
     const workNotes = [];
     for (const name of ['九尾猫漫游录', '入水愿', '调笑令']) {
       const source = await fs.readFile(path.join(root, `source/_posts/works/${name}.md`), 'utf8');
@@ -50,6 +50,12 @@ test('真实构建：目录子分类、英文路径、两层分页、增强排�
     assert.equal(categoryIndex.querySelector('.post-info'), null);
     const home = await document('');
     assert.equal(home.querySelector('.post-info'), null);
+    const headings = home.querySelectorAll('.home-intro > .section-heading, .home-section > .section-heading');
+    assert.equal(headings.length, 3);
+    for (const heading of headings) {
+      assert.equal(heading.tagName, 'DIV');
+      assert.equal(heading.querySelector('h1, h2, h3, h4, h5, h6'), null);
+    }
     assert.ok(home.querySelector('.site-layout > .site-rail + main article.content-page'));
     assert.equal(home.querySelector('.site-identity-hero').classList.contains('page-frame'), false);
     assert.equal(home.querySelector('.top-nav').textContent.trim(), '');

@@ -1,4 +1,4 @@
-# 关于我
+<div class="section-heading">关于我</div>
 
 <blockquote class="home-profile">
 <img src="/attachments/images/轻鸢-粉蓝白背景.PNG" alt="轻鸢头像">

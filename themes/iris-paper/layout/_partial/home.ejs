@@ -5,7 +5,7 @@
 </section>
 <% } %>
 <section class="home-section" aria-labelledby="overview-title">
-  <div class="section-heading"><h2 id="overview-title">全站概览</h2><a class="section-more" href="<%- url_for('/archives/') %>">浏览页面</a></div>
+  <div class="section-heading" id="overview-title">全站概览<a class="section-more" href="<%- url_for('/archives/') %>">浏览页面</a></div>
   <div class="home-overview">
     <section class="activity-section" aria-labelledby="activity-title">
       <div class="section-heading"><h3 id="activity-title">更新热力图</h3><span>近一年</span></div>
@@ -55,7 +55,7 @@
 </section>
 <% const friends = theme.friend_links || []; if (friends.length) { %>
 <section class="home-section home-friends" aria-labelledby="friends-title">
-  <div class="section-heading"><h2 id="friends-title">友链</h2></div>
+  <div class="section-heading" id="friends-title">友链</div>
   <ul class="friend-links">
     <% friends.forEach(function(friend) { %>
     <li><a href="<%= url_for(friend.url) %>" target="_blank" rel="noopener noreferrer"><span class="friend-name"><%= friend.name %></span><% if (friend.description) { %><span class="friend-description"><%= friend.description %></span><% } %></a></li>

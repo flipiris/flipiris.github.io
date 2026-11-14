@@ -73,6 +73,23 @@ test('首页专用样式集中在 home.css，只在首页加载，图片宽屏�
   }
 });
 
+test('首页主区块直接使用单层 div，共用排版与下划线，不重复内容区边框', () => {
+  const css = readFileSync(join(__dirname, '../../../source/attachments/home/home.css'), 'utf8');
+  const heading = css.match(/\.home-intro > \.section-heading,\s*\.home-section > \.section-heading\s*\{([^}]*)\}/)[1];
+  assert.match(heading, /margin: 0 0 16px;/);
+  assert.match(heading, /padding-bottom: 12px;/);
+  assert.match(heading, /border-bottom: 1px solid rgb\(var\(--line\)\);/);
+  assert.match(heading, /font-size: 22px;/);
+  for (const selector of ['friend-links', 'home-overview']) {
+    assert.doesNotMatch(css.match(new RegExp(`\\.${selector}\\s*\\{([^}]*)\\}`))[1], /border-top:/);
+  }
+  const home = readFileSync(join(__dirname, '../../../source/_data/home.md'), 'utf8');
+  const document = new JSDOM(home).window.document;
+  const title = document.querySelector('div.section-heading');
+  assert.equal(title.textContent, '关于我');
+  assert.equal(title.children.length, 0);
+});
+
 test('画布不给侧栏触发器加 backdrop-filter，避免固定抽屉被 40px 父级裁切', () => {
   const layout = readFileSync(join(__dirname, '../source/css/layout.css'), 'utf8');
   assert.doesNotMatch(layout, /:is\(\.top-nav, \.site-menu,/);
