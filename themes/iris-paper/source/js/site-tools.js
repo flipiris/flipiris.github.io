@@ -41,24 +41,20 @@
       return;
     }
     if (!documents) return;
-    const matches = documents.map(item => {
-      const title = normalize(item.title);
-      const tags = normalize(item.tags.join(' '));
-      const text = normalize(item.text);
-      const all = `${title} ${tags} ${text}`;
-      return {item, score: terms.every(term => all.includes(term))
+    const matches = documents.map(({item, title, tags, text, all}) => {
+      return {item, text, score: terms.every(term => all.includes(term))
         ? terms.reduce((score, term) => score + (title.includes(term) ? 10 : 0) + (tags.includes(term) ? 5 : 0) + (text.includes(term) ? 1 : 0), 0)
         : 0};
     }).filter(match => match.score).sort((a, b) => b.score - a.score || a.item.url.localeCompare(b.item.url));
     status.textContent = matches.length ? `找到 ${matches.length} 个页面` : '没有找到匹配的页面，试试其他关键词。';
-    for (const {item} of matches) {
+    for (const {item, text} of matches) {
       const li = document.createElement('li');
       const link = document.createElement('a');
       const title = document.createElement('h3');
       const excerpt = document.createElement('p');
       link.href = item.url;
       title.textContent = item.title;
-      const position = normalize(item.text).indexOf(terms[0]);
+      const position = text.indexOf(terms[0]);
       const start = Math.max(0, position - 36);
       excerpt.textContent = `${start ? '…' : ''}${item.text.slice(start, start + 160)}${item.text.length > start + 160 ? '…' : ''}`;
       link.append(title, excerpt);
@@ -76,7 +72,12 @@
       if (!response.ok) throw new Error('search-index');
       return response.json();
     }).then(data => {
-      documents = data;
+      documents = data.map(item => {
+        const title = normalize(item.title);
+        const tags = normalize(item.tags.join(' '));
+        const text = normalize(item.text);
+        return {item, title, tags, text, all: `${title} ${tags} ${text}`};
+      });
       render();
     }).catch(() => {
       status.textContent = '搜索索引加载失败，请重试。';

@@ -2,7 +2,7 @@
 <article class="content-page<%= contentClass ? ' ' + contentClass : '' %><%= warning.enabled ? ' is-content-locked' : '' %>">
   <% if (warning.enabled) { %>
     <%- partial('_partial/content-warning', {warning}) %>
-    <div id="content-warning-body" class="content-warning-body" tabindex="-1" inert aria-hidden="true">
+    <div id="content-warning-body" class="content-warning-body" tabindex="-1">
   <% } %>
   <% if (contentTitle !== false) { %><header class="page-header">
     <%- partial('_partial/page-title', {title: contentTitle}) %>

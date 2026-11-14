@@ -4,12 +4,12 @@ const headings = toc(parts.body, {list_number: false});
 const stats = page_stats(parts.body);
 const hasNote = !!parts.note;
 %>
-<details class="post-info hover-panel" open>
-  <summary aria-label="信息与大纲">
+<div class="post-info hover-panel">
+  <button type="button" id="post-info-toggle" class="post-info-toggle panel-toggle" aria-label="信息与大纲" aria-controls="post-info-content">
     <span class="post-info-icon"><%- partial('_partial/icon', {name: 'info'}) %></span>
-  </summary>
+  </button>
   <div class="read-progress read-progress-rail" aria-hidden="true"><span></span></div>
-  <div class="post-info-body panel-body">
+  <div id="post-info-content" class="post-info-body panel-body">
     <% if (hasNote) { %>
       <div class="info-tabs" role="tablist" aria-label="信息页">
         <button type="button" role="tab" id="info-tab-1" aria-controls="info-page-1" aria-selected="true"><%- partial('_partial/icon', {name: 'info'}) %><span>信息</span></button>
@@ -69,4 +69,4 @@ const hasNote = !!parts.note;
       <% } %>
     </nav>
   </div>
-</details>
+</div>

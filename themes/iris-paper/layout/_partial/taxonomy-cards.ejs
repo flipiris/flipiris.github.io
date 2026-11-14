@@ -9,7 +9,7 @@
       <li class="post-item"><time datetime="<%= date_xml(post.date) %>"><%= date(post.date, 'YYYY.MM.DD') %></time><a href="<%- url_for(post.path) %>"><%= post.title %></a></li>
       <% }); %>
     </ul>
-    <a class="taxonomy-more" href="<%- url_for(term.path) %>">查看<%= posts.length > limit ? '全部 ' + term.length + ' 篇' : termLabel %> →</a>
+    <a class="taxonomy-more" href="<%- url_for(term.path) %>">查看<%= posts.length > limit ? '全部 ' + term.length + ' 篇' : termLabel %></a>
   </section>
   <% }); %>
 </div>

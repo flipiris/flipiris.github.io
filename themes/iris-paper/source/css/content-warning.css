@@ -2,6 +2,14 @@
   display: none;
 }
 
+:root:not(.js) .content-page.is-content-locked > .content-warning-body:target {
+  display: block;
+}
+
+:root:not(.js) .content-page.is-content-locked:has(> .content-warning-body:target) > .content-warning {
+  display: none;
+}
+
 .content-warning-body:focus {
   outline: none;
 }
@@ -59,10 +67,6 @@ body[data-canvas="document"] .content-warning-body {
 }
 
 .content-warning-continue {
-  display: none;
-  margin-top: 28px;
-}
-
-.js .content-warning-continue {
   display: inline-block;
+  margin-top: 28px;
 }

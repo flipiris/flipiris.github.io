@@ -31,14 +31,34 @@ test('首页、归档、分类、标签、其他页面与最近更新复用 page
   assert.match(css, /\.page-header \.page-title::after\s*\{[^}]*display: inline-block;[^}]*vertical-align: bottom;/);
 });
 
-test('文学段落外边距保留作者原来的 0.75em，所有 main 使用 1000px 上限，page 宽度为 800px', () => {
+test('文学段落保留原来的外边距', () => {
   const presets = readFileSync(join(__dirname, '../source/css/presets.css'), 'utf8');
-  const base = readFileSync(join(__dirname, '../source/css/base.css'), 'utf8');
-  const layout = readFileSync(join(__dirname, '../source/css/layout.css'), 'utf8');
   assert.match(presets, /\[data-typography="literary"\] \.article-content p\s*\{\s*margin: 0\.75em;/);
-  assert.match(base, /--content-width: 1000px;/);
+});
+
+test('page 宽度保留 800px', () => {
+  const base = readFileSync(join(__dirname, '../source/css/base.css'), 'utf8');
   assert.match(base, /--page-width: 800px;/);
-  assert.match(layout, /#main-content\s*\{[^}]*max-width: 1000px;/);
+  assert.doesNotMatch(base, /--content-width:/);
+});
+
+test('main 宽度由框架网格控制，完整画布单独覆盖', () => {
+  const layout = readFileSync(join(__dirname, '../source/css/layout.css'), 'utf8');
+  assert.match(layout, /max-width: calc\(var\(--frame-width\) \+ 2 \* var\(--nav-width\)/);
+  assert.doesNotMatch(layout.match(/(?:^|\n)#main-content\s*\{([^}]*)\}/)[1], /max-width:/);
+  assert.match(layout, /body\[data-layout="canvas"\]\[data-canvas="document"\] #main-content\s*\{[^}]*max-width: none;/);
+});
+
+test('页面标题轻淡入而正文不延迟，逐段显现仅过渡透明度', () => {
+  const pages = readFileSync(join(__dirname, '../source/css/pages.css'), 'utf8');
+  const prose = readFileSync(join(__dirname, '../source/css/prose.css'), 'utf8');
+  const info = readFileSync(join(__dirname, '../source/css/info.css'), 'utf8');
+  assert.match(pages, /\.page-header\s*\{\s*animation: page-enter var\(--motion-fast\) var\(--ease-out\);/);
+  assert.doesNotMatch(pages, /body\[data-layout="page"\] \.content-page > \*\s*,\s*\.page-header/);
+  assert.match(pages, /@keyframes page-enter\s*\{\s*from\s*\{\s*opacity: 0\.9;/);
+  assert.match(prose, /transition: opacity var\(--motion-reveal\) var\(--ease-out\);/);
+  assert.doesNotMatch(prose, /will-change: opacity, transform/);
+  assert.match(info, /\.info-page\s*\{\s*animation: page-enter var\(--motion-base\)/);
 });
 
 test('首页专用样式集中在 home.css，只在首页加载，图片宽屏靠右浮动', () => {
@@ -109,7 +129,7 @@ test('顶栏工具和两个抽屉触发器共用淡色默认与强调色触发�
   const nav = readFileSync(join(__dirname, '../source/css/navigation.css'), 'utf8');
   const compact = readFileSync(join(__dirname, '../source/css/compact.css'), 'utf8');
   const layout = readFileSync(join(__dirname, '../source/css/layout.css'), 'utf8');
-  assert.match(nav, /:is\(\.mobile-nav, \.post-info > summary, \.site-tools \.tool-button\)\s*\{[^}]*color: rgb\(var\(--accent\) \/ 52%\);/);
+  assert.match(nav, /:is\(\.mobile-nav, \.post-info > \.panel-toggle, \.site-tools \.tool-button\)\s*\{[^}]*color: rgb\(var\(--accent\) \/ 52%\);/);
   assert.match(nav, /\.site-tools \.tool-button\[aria-expanded="true"\]\s*\{\s*color: rgb\(var\(--accent\)\);/);
   assert.doesNotMatch(compact, /color: rgb\(var\(--accent\) \/ 52%\)/);
   assert.doesNotMatch(layout, /\[data-layout="canvas"\] :is\(\.mobile-nav/);

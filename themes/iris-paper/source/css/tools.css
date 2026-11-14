@@ -29,7 +29,12 @@
   transition: color var(--motion-fast) ease;
 }
 
-.search-heading .tool-button:hover,
+@media (hover: hover) and (pointer: fine) {
+  .search-heading .tool-button:hover {
+    background: rgb(var(--accent) / 9%);
+  }
+}
+
 .search-heading .tool-button:focus-visible {
   background: rgb(var(--accent) / 9%);
 }
@@ -142,27 +147,4 @@ body.search-open {
   color: rgb(var(--muted));
   font-size: 14px;
   line-height: 1.7;
-}
-
-:root[data-mode="light"]:has(body[data-palette="ink"]),
-:root[data-mode="light"] body[data-palette="ink"] {
-  color-scheme: light;
-  --bg: 247 246 242;
-  --paper: 255 254 250;
-  --ink: 52 56 62;
-  --muted: 106 109 117;
-  --accent: 138 80 105;
-  --brand: 114 30 52;
-  --heading-1: 114 30 52;
-  --heading-2: 128 80 30;
-  --heading-3: 112 61 132;
-  --strong: 39 82 153;
-  --emphasis: 28 103 76;
-  --secondary: 70 105 116;
-  --line: 226 223 220;
-  --nav-active: 230 237 243;
-  --header-bg: 244 201 203;
-  --code-bg: 238 239 239;
-  --shadow: 40 48 58;
-  --edge-light: rgb(255 255 255 / 55%);
 }

@@ -24,6 +24,10 @@ test('搜索正文解码实体与分段，去除完整 HTML 画布的脚本、�
   assert.equal(fixture().searchText('<html><head><title>内部标题</title><style>.hidden{}</style></head><body><p>甲 &amp; 乙</p><p>丙</p><script>danger()</script></body></html>'), '甲 & 乙 丙');
 });
 
+test('搜索保留代码和作者注释，排除模板与无脚本回退内容', () => {
+  assert.equal(fixture().searchText('<pre>code</pre><div class="note">作者注释</div><template>隐藏</template><noscript>回退</noscript>'), 'code 作者注释');
+});
+
 test('索引含公开文章与独立页，不含草稿、附件与生成索引，遵守子路径网址', () => {
   const {generate} = fixture();
   const result = generate({

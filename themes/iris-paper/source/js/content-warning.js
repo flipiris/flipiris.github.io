@@ -34,6 +34,8 @@
     if (target && body.contains(target)) target.scrollIntoView();
   }
 
+  lock();
+
   link.addEventListener('click', event => {
     event.preventDefault();
     if (revealing || !page.classList.contains('is-content-locked')) return;

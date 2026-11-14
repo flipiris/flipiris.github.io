@@ -137,6 +137,31 @@ test('搜索惰性加载一次，匹配标题/标签/完整正文，多词同时
   f.dispose();
 });
 
+test('索引只归一化一次，重复搜索保持权重顺序和摘要', async () => {
+  const data = [
+    {title: '全文', tags: [], text: `${'甲'.repeat(50)}ＡＢＣ`, url: '/text/'},
+    {title: '标签', tags: ['abc'], text: '其他', url: '/tag/'},
+    {title: 'ＡＢＣ', tags: [], text: '其他', url: '/title/'}
+  ];
+  const f = fixture({fetch: async () => ({ok: true, json: async () => data})});
+  let normalized = 0;
+  const original = f.window.String.prototype.normalize;
+  f.window.String.prototype.normalize = function(...args) { normalized++; return original.apply(this, args); };
+  try {
+    f.search.click();
+    await f.settle();
+    assert.equal(normalized, 10);
+    f.input('abc');
+    assert.deepEqual(Array.from(f.results.querySelectorAll('a'), a => a.getAttribute('href')), ['/title/', '/tag/', '/text/']);
+    assert.equal(f.results.lastElementChild.querySelector('p').textContent, `…${'甲'.repeat(36)}ＡＢＣ`);
+    f.input('ａｂｃ');
+    assert.equal(normalized, 12);
+  } finally {
+    f.window.String.prototype.normalize = original;
+    f.dispose();
+  }
+});
+
 test('加载失败可重试，搜索用最新输入；快捷键可打开，关闭时恢复焦点', async () => {
   let calls = 0;
   const f = fixture({fetch: async () => ++calls === 1 ? {ok: false} : {ok: true, json: async () => [{title: '夜行', tags: [], text: '月光', url: '/blog/night/'}]}});

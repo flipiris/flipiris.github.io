@@ -5,24 +5,31 @@ const assert = require('node:assert/strict');
 const {readFileSync} = require('node:fs');
 const {join} = require('node:path');
 const {runInNewContext} = require('node:vm');
+const {createRequire} = require('node:module');
 const {JSDOM} = require('jsdom');
 
 function helpers() {
   const registered = {};
   const filters = {};
   const warnings = [];
-  runInNewContext(readFileSync(join(__dirname, '../scripts/content-blocks.js'), 'utf8'), {
-    require,
-    module: {exports: {}},
-    hexo: {
-      log: {warn: message => warnings.push(message)},
-      extend: {
-        filter: {register(name, fn) { filters[name] = fn; }},
-        helper: {register: (name, fn) => { registered[name] = fn; }}
+  for (const name of ['content-notes', 'content-figures', 'home-content', 'page-style', 'page-layout', 'canvas']) {
+    const file = join(__dirname, '../scripts', name + '.js');
+    runInNewContext(readFileSync(file, 'utf8'), {
+      require: createRequire(file),
+      module: {exports: {}},
+      hexo: {
+        log: {warn: message => warnings.push(message)},
+        extend: {
+          filter: {register(name, fn) {
+            if (name === 'before_generate') (filters[name] ||= []).push(fn);
+            else filters[name] = fn;
+          }},
+          helper: {register: (name, fn) => { registered[name] = fn; }}
+        }
       }
-    }
-  });
-  return {registered, filters, warnings, regenerate: () => filters.before_generate()};
+    });
+  }
+  return {registered, filters, warnings, regenerate: () => filters.before_generate.forEach(fn => fn())};
 }
 
 test('没有注释块时正文原样返回，信息窗不出现第二页', () => {
@@ -96,10 +103,9 @@ test('配色与版式预设：合法值通过，未知值回退默认并只警�
 
 test('预设名称与 presets.css 一一对应', () => {
   const css = readFileSync(join(__dirname, '../source/css/presets.css'), 'utf8');
-  const source = readFileSync(join(__dirname, '../scripts/content-blocks.js'), 'utf8');
+  const source = readFileSync(join(__dirname, '../scripts/page-style.js'), 'utf8');
   const palettes = source.match(/PALETTES = \[([^\]]*)\]/)[1].match(/'(\w+)'/g).map(item => item.slice(1, -1));
   const typographies = source.match(/TYPOGRAPHIES = \[([^\]]*)\]/)[1].match(/'(\w+)'/g).map(item => item.slice(1, -1));
-  // rose 是 base.css 中的默认色卡，不需要覆盖；literary / poem 需要各自的规则。
   for (const name of palettes.filter(item => item !== 'rose')) assert.ok(css.includes(`data-palette="${name}"`), name);
   for (const name of typographies) assert.ok(css.includes(`data-typography="${name}"`), name);
 });

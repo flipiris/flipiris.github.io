@@ -33,7 +33,7 @@ test('警告块保留原始 HTML、嵌套与实体，多个块顺序合并并从
 });
 
 function browserFixture({reduced = true} = {}) {
-  const dom = new JSDOM('<!doctype html><html class="js" style="--motion-base:250ms;--motion-reveal:500ms;--ease-out:cubic-bezier(0.25, 1, 0.35, 1)"><body><nav><a href="/">首页</a></nav><article class="content-page is-content-locked"><section class="content-warning"><a class="content-warning-continue" href="#content-warning-body">继续阅读</a></section><div class="content-warning-body" tabindex="-1" inert aria-hidden="true"><h2 id="正文">正文</h2><a href="/next/">链接</a></div></article></body></html>', {url: 'https://example.org/story/#%E6%AD%A3%E6%96%87', runScripts: 'outside-only'});
+  const dom = new JSDOM('<!doctype html><html class="js" style="--motion-base:250ms;--motion-reveal:500ms;--ease-out:cubic-bezier(0.25, 1, 0.35, 1)"><body><nav><a href="/">首页</a></nav><article class="content-page is-content-locked"><section class="content-warning"><a class="content-warning-continue" href="#content-warning-body">继续阅读</a></section><div class="content-warning-body" tabindex="-1"><h2 id="正文">正文</h2><a href="/next/">链接</a></div></article></body></html>', {url: 'https://example.org/story/#%E6%AD%A3%E6%96%87', runScripts: 'outside-only'});
   const {window} = dom;
   const media = Object.assign(new window.EventTarget(), {matches: reduced});
   window.matchMedia = () => media;
@@ -168,6 +168,24 @@ test('警告内容只水平居中、顶部排列，继续阅读复用正文链�
   assert.doesNotMatch(action, /padding:|border:|background:|min-height:/);
 });
 
+test('无脚本模板不锁定正文交互，继续阅读锚点指向正文且提示可直接阅读', () => {
+  const ejs = require('ejs');
+  const render = (name, data) => ejs.render(readFileSync(path.join(__dirname, '../layout', name + '.ejs'), 'utf8'), data);
+  const html = render('_partial/content-page', {
+    page: {}, content_warning: () => ({enabled: true, message: ''}),
+    contentClass: '', contentTitle: false, contentBody: '<p>正文 <a href="/next/">下一页</a></p>', contentFooter: false,
+    partial: (name, data) => render(name, data)
+  });
+  const document = new JSDOM(html).window.document;
+  const body = document.getElementById('content-warning-body');
+  assert.equal(body.hasAttribute('inert'), false);
+  assert.equal(body.hasAttribute('aria-hidden'), false);
+  assert.equal(body.hidden, false);
+  assert.equal(body.querySelector('a').getAttribute('href'), '/next/');
+  assert.equal(document.querySelector('.content-warning-continue').getAttribute('href'), '#' + body.id);
+  assert.match(document.querySelector('noscript').textContent, /未启用 JavaScript 也可阅读/);
+});
+
 test('真实构建：三种布局、独立页、默认/自定义警告、注释、大纲及索引统计', async () => {
   const root = path.resolve(__dirname, '../../..');
   const base = await fs.mkdtemp(path.join(os.tmpdir(), 'iris-warning-'));
@@ -197,7 +215,11 @@ test('真实构建：三种布局、独立页、默认/自定义警告、注释�
     for (const layout of ['article', 'page', 'canvas']) {
       const doc = await document(layout);
       assert.ok(doc.querySelector('.content-page.is-content-locked > .content-warning'));
-      assert.ok(doc.querySelector('.content-warning-body[inert][aria-hidden="true"] .article-content'));
+      const warningBody = doc.querySelector('.content-warning-body');
+      assert.ok(warningBody.querySelector('.article-content'));
+      assert.equal(warningBody.hasAttribute('inert'), false);
+      assert.equal(warningBody.hasAttribute('aria-hidden'), false);
+      assert.equal(doc.querySelector('.content-warning-continue').hash, '#content-warning-body');
       assert.equal(doc.querySelector('.content-warning-message strong').textContent, '暴力描写');
       assert.equal(doc.querySelector('.article-content .content-warning'), null);
       assert.ok(doc.querySelector('script[src="/blog/js/content-warning.js"]'));
@@ -217,7 +239,7 @@ test('真实构建：三种布局、独立页、默认/自定义警告、注释�
     assert.equal(defaults.querySelector('.content-warning button'), null);
     assert.equal((await document('')).querySelector('.content-warning'), null);
     assert.equal((await document('tags/成人内容')).querySelector('.content-warning'), null);
-    assert.match(defaults.querySelector('.content-warning noscript').textContent, /启用 JavaScript/);
+    assert.match(defaults.querySelector('.content-warning noscript').textContent, /未启用 JavaScript 也可阅读/);
     const normal = await document('normal');
     assert.equal(normal.querySelector('.content-warning'), null);
     assert.equal(normal.querySelector('.content-warning-body'), null);

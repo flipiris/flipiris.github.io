@@ -9,8 +9,8 @@ const source = readFileSync(join(__dirname, '../source/js/navigation.js'), 'utf8
 
 function fixture({narrow = true, reduced = false, kind = 'post', canvas = false, canvasDocument = false} = {}) {
   const dom = new JSDOM(`<!doctype html><html style="--motion-base:240ms;--ease-out:linear"><body class="layout-${kind}" data-layout="${canvas ? 'canvas' : kind === 'page' ? 'page' : 'article'}"${canvasDocument ? ' data-canvas="document"' : ''}>
-    <details id="site-menu" class="hover-panel"><summary>目录</summary><div class="panel-body"><div id="site-tools-slot"><div class="site-tools"><button>搜索</button></div></div>菜单</div></details>
-    ${kind === 'page' ? '' : '<details class="post-info hover-panel" open><summary>信息</summary><div class="panel-body"><a href="#chapter">章节</a></div></details>'}
+    <div id="site-menu" class="hover-panel"><button class="panel-toggle">目录</button><div class="panel-body"><div id="site-tools-slot"><div class="site-tools"><button>搜索</button></div></div>菜单</div></div>
+    ${kind === 'page' ? '' : '<div class="post-info hover-panel"><button class="panel-toggle">信息</button><div class="panel-body"><a href="#chapter">章节</a></div></div>'}
     <nav class="top-nav"></nav><button class="menu-backdrop" hidden></button><main>正文</main>
   </body></html>`, {runScripts: 'outside-only'});
   const {window} = dom;
@@ -23,7 +23,7 @@ function fixture({narrow = true, reduced = false, kind = 'post', canvas = false,
     }
     return media.get(query);
   };
-  // 控制动画完成时刻，验证 details 不会在退场完成前被隐藏。
+  // 控制动画完成时刻，验证面板不会在退场完成前被隐藏。
   window.Element.prototype.animate = function(frames, options) {
     let resolve, reject;
     const animation = {
@@ -52,7 +52,7 @@ function fixture({narrow = true, reduced = false, kind = 'post', canvas = false,
     },
     runTimers() { for (const callback of timers.values()) callback(); timers.clear(); },
     backdrop: document.querySelector('.menu-backdrop'),
-    click: panel => panel.querySelector('summary').click(),
+    click: panel => panel.querySelector('.panel-toggle').click(),
     animation: panel => panel.querySelector('.panel-body').animations.at(-1),
     async settle(panel) {
       this.animation(panel).finish();
@@ -67,19 +67,49 @@ function fixture({narrow = true, reduced = false, kind = 'post', canvas = false,
   };
 }
 
+test('抽屉在窄屏同步可访问状态，宽屏移除折叠语义', async () => {
+  const f = fixture();
+  const body = f.info.querySelector('.panel-body');
+  const trigger = f.info.querySelector('.panel-toggle');
+  assert.equal(body.hidden, true);
+  assert.equal(body.hasAttribute('inert'), true);
+  assert.equal(body.getAttribute('aria-hidden'), 'true');
+  assert.equal(trigger.getAttribute('aria-expanded'), 'false');
+  f.click(f.info);
+  assert.equal(body.hidden, false);
+  assert.equal(body.hasAttribute('inert'), false);
+  assert.equal(body.hasAttribute('aria-hidden'), false);
+  await f.settle(f.info);
+  body.querySelector('a').focus();
+  f.click(f.info);
+  assert.equal(f.document.activeElement, trigger);
+  assert.equal(body.hidden, false);
+  assert.equal(body.hasAttribute('inert'), true);
+  assert.equal(body.getAttribute('aria-hidden'), 'true');
+  f.click(f.info);
+  await f.settle(f.info);
+  assert.equal(body.hidden, false);
+  assert.equal(body.hasAttribute('inert'), false);
+  f.resize(false);
+  assert.equal(trigger.hasAttribute('aria-expanded'), false);
+  assert.equal(body.hidden, false);
+  assert.equal(body.hasAttribute('inert'), false);
+  f.dispose();
+});
+
 test('宽屏侧栏静态常驻，信息窗不因点击、Esc 或外部点击收起', () => {
   const f = fixture({narrow: false});
-  assert.equal(f.menu.open, true);
-  assert.equal(f.info.open, true);
+  assert.equal(!f.menu.querySelector('.panel-body').hidden, true);
+  assert.equal(!f.info.querySelector('.panel-body').hidden, true);
   f.click(f.info);
   f.document.dispatchEvent(new f.window.KeyboardEvent('keydown', {key: 'Escape'}));
   f.document.querySelector('main').dispatchEvent(new f.window.MouseEvent('pointerdown', {bubbles: true}));
-  assert.equal(f.info.open, true);
+  assert.equal(!f.info.querySelector('.panel-body').hidden, true);
   assert.equal(f.backdrop.hidden, true);
   f.dispose();
 });
 
-test('两种窄屏抽屉反复开合，每次都创建新动画，退场后才关闭 details', async () => {
+test('两种窄屏抽屉反复开合，每次都创建新动画，退场后才隐藏面板', async () => {
   const f = fixture();
   for (const panel of [f.info, f.menu]) {
     for (let cycle = 0; cycle < 3; cycle++) {
@@ -89,9 +119,9 @@ test('两种窄屏抽屉反复开合，每次都创建新动画，退场后才�
       await f.settle(panel);
       f.click(panel);
       assert.equal(panel.dataset.state, 'closing');
-      assert.equal(panel.open, true);
+      assert.equal(!panel.querySelector('.panel-body').hidden, true);
       await f.settle(panel);
-      assert.equal(panel.open, false);
+      assert.equal(!panel.querySelector('.panel-body').hidden, false);
     }
     assert.equal(panel.querySelector('.panel-body').animations.length, 6);
   }
@@ -109,7 +139,7 @@ test('快速反向从当前画面继续，旧退场不会关闭重新打开的�
   assert.equal(f.animation(f.info).frames[0].opacity, '0.5');
   closing.finish();
   await f.settle(f.info);
-  assert.equal(f.info.open, true);
+  assert.equal(!f.info.querySelector('.panel-body').hidden, true);
   assert.equal(f.info.dataset.state, 'open');
   f.dispose();
 });
@@ -138,9 +168,9 @@ test('退场中切回宽屏立即恢复信息窗，且清除遮罩', async () =>
   f.resize(false);
   closing.finish();
   await Promise.resolve();
-  assert.equal(f.info.open, true);
+  assert.equal(!f.info.querySelector('.panel-body').hidden, true);
   assert.equal(f.info.dataset.state, 'wide');
-  assert.equal(f.menu.open, true);
+  assert.equal(!f.menu.querySelector('.panel-body').hidden, true);
   assert.equal(f.backdrop.hidden, true);
   f.dispose();
 });
@@ -150,7 +180,7 @@ test('减少动态效果时直接开合，不等待动画', () => {
   f.click(f.menu);
   assert.equal(f.menu.dataset.state, 'open');
   f.click(f.menu);
-  assert.equal(f.menu.open, false);
+  assert.equal(!f.menu.querySelector('.panel-body').hidden, false);
   assert.equal(f.backdrop.hidden, true);
   assert.equal(f.menu.querySelector('.panel-body').animations, undefined);
   f.dispose();
@@ -162,37 +192,37 @@ test('page 不包含信息窗口，窄屏仍可开合站点目录', async () => 
   assert.equal(f.info, null);
   f.click(f.menu);
   await f.settle(f.menu);
-  assert.equal(f.menu.open, true);
+  assert.equal(!f.menu.querySelector('.panel-body').hidden, true);
   f.click(f.menu);
   await f.settle(f.menu);
-  assert.equal(f.menu.open, false);
+  assert.equal(!f.menu.querySelector('.panel-body').hidden, false);
   f.dispose();
 });
 
 test('canvas 宽屏使用常驻侧栏，目录与信息同时可见', () => {
   const f = fixture({narrow: false, canvas: true});
-  assert.equal(f.menu.open, true);
-  assert.equal(f.info.open, true);
+  assert.equal(!f.menu.querySelector('.panel-body').hidden, true);
+  assert.equal(!f.info.querySelector('.panel-body').hidden, true);
   assert.equal(f.menu.dataset.state, 'wide');
   assert.equal(f.info.dataset.state, 'wide');
   f.click(f.info);
-  assert.equal(f.info.open, true);
+  assert.equal(!f.info.querySelector('.panel-body').hidden, true);
   f.dispose();
 });
 
 test('完整 HTML 画布宽屏也使用顶栏抽屉，目录与信息互斥', async () => {
   const f = fixture({narrow: false, canvas: true, canvasDocument: true});
-  assert.equal(f.menu.open, false);
-  assert.equal(f.info.open, false);
+  assert.equal(!f.menu.querySelector('.panel-body').hidden, false);
+  assert.equal(!f.info.querySelector('.panel-body').hidden, false);
   f.click(f.menu);
   await f.settle(f.menu);
-  assert.equal(f.menu.open, true);
+  assert.equal(!f.menu.querySelector('.panel-body').hidden, true);
   f.click(f.info);
   assert.equal(f.menu.dataset.state, 'closing');
   await f.settle(f.menu);
   await f.settle(f.info);
-  assert.equal(f.info.open, true);
-  assert.equal(f.menu.open, false);
+  assert.equal(!f.info.querySelector('.panel-body').hidden, true);
+  assert.equal(!f.menu.querySelector('.panel-body').hidden, false);
   f.dispose();
 });
 
@@ -200,32 +230,32 @@ test('鼠标悬停展开、移出延迟收起；点击固定展开后不会误�
   const f = fixture({narrow: true});
   f.pointer(f.menu, 'pointerenter');
   await f.settle(f.menu);
-  assert.equal(f.menu.open, true);
+  assert.equal(!f.menu.querySelector('.panel-body').hidden, true);
   f.pointer(f.menu, 'pointerleave');
   assert.equal(f.menu.dataset.state, 'open');
   f.runTimers();
   await f.settle(f.menu);
-  assert.equal(f.menu.open, false);
+  assert.equal(!f.menu.querySelector('.panel-body').hidden, false);
   f.pointer(f.menu, 'pointerenter');
   await f.settle(f.menu);
   f.click(f.menu);
   f.pointer(f.menu, 'pointerleave');
   f.runTimers();
   assert.equal(f.menu.dataset.state, 'open');
-  assert.equal(f.menu.querySelector('summary').getAttribute('aria-expanded'), 'true');
+  assert.equal(f.menu.querySelector('.panel-toggle').getAttribute('aria-expanded'), 'true');
   f.dispose();
 });
 
 test('触屏不模拟悬停，Esc 关闭后焦点回到开关', async () => {
   const f = fixture();
   f.pointer(f.menu, 'pointerenter', 'touch');
-  assert.equal(f.menu.open, false);
+  assert.equal(!f.menu.querySelector('.panel-body').hidden, false);
   f.click(f.menu);
   await f.settle(f.menu);
   f.document.dispatchEvent(new f.window.KeyboardEvent('keydown', {key: 'Escape'}));
   await f.settle(f.menu);
-  assert.equal(f.menu.open, false);
-  assert.equal(f.document.activeElement, f.menu.querySelector('summary'));
+  assert.equal(!f.menu.querySelector('.panel-body').hidden, false);
+  assert.equal(f.document.activeElement, f.menu.querySelector('.panel-toggle'));
   f.dispose();
 });
 
@@ -235,7 +265,7 @@ test('工具只有一组，随断点在菜单顶部与顶栏之间移动，完�
   assert.equal(tools.parentElement.id, 'site-tools-slot');
   f.resize(true);
   assert.equal(tools.parentElement.className, 'top-nav');
-  assert.equal(f.menu.open, false);
+  assert.equal(!f.menu.querySelector('.panel-body').hidden, false);
   f.resize(false);
   assert.equal(tools.parentElement.id, 'site-tools-slot');
   assert.equal(f.document.querySelectorAll('.site-tools').length, 1);
@@ -249,7 +279,7 @@ test('打开搜索会关闭窄屏抽屉及遮罩', () => {
   const f = fixture({reduced: true});
   f.click(f.menu);
   f.document.dispatchEvent(new f.window.Event('site:search'));
-  assert.equal(f.menu.open, false);
+  assert.equal(!f.menu.querySelector('.panel-body').hidden, false);
   assert.equal(f.backdrop.hidden, true);
   f.dispose();
 });

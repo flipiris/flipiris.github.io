@@ -1,17 +1,14 @@
 'use strict';
 
-const {parseDocument, DomUtils} = require('htmlparser2');
+const {htmlText} = require('./lib/html-text');
 const {url_for} = require('hexo-util');
 const {publishedDocuments} = require('./lib/documents');
 const {isWarning} = require('./lib/content-warning');
 
 function searchText(content = '') {
-  const document = parseDocument(content);
-  const excluded = DomUtils.findAll(node => ['head', 'script', 'style', 'template', 'noscript'].includes(node.name) || isWarning(node), document.children);
-  for (const node of excluded) DomUtils.removeElement(node);
-  const blocks = DomUtils.findAll(node => /^(?:p|div|h[1-6]|li|br|tr|td|th|section|article|blockquote|pre)$/.test(node.name), document.children);
-  for (const node of blocks) DomUtils.appendChild(node, {type: 'text', data: ' ', parent: null, prev: null, next: null});
-  return DomUtils.textContent(document).replace(/\s+/g, ' ').trim();
+  return htmlText(content, node =>
+    ['head', 'script', 'style', 'template', 'noscript'].includes(node.name) || isWarning(node)
+  ).replace(/\s+/g, ' ').trim();
 }
 
 hexo.extend.generator.register('search-index', function(locals) {

@@ -4,6 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const {readFileSync, readdirSync} = require('node:fs');
 const {join} = require('node:path');
+const {JSDOM} = require('jsdom');
 
 const cssRoot = join(__dirname, '../source/css');
 const base = readFileSync(join(cssRoot, 'base.css'), 'utf8');
@@ -43,6 +44,38 @@ for (const name of ['rose', 'tech', 'wanderers', 'ink', 'sepia']) {
     assert.doesNotMatch(presets, /--heading-[123]: var\(--(?:strong|emphasis)\)/);
   });
 }
+
+test('亮暗配色按选择器优先级覆盖，ink 日间复用默认色', () => {
+  const tools = readFileSync(join(cssRoot, 'tools.css'), 'utf8');
+  const dom = new JSDOM(`<style>${base}\n${presets}\n${tools}</style><body></body>`);
+  const {document} = dom.window;
+  const rules = Array.from(document.styleSheets[0].cssRules).filter(rule => rule.style && rule.style.getPropertyValue('--bg'));
+  function values(element) {
+    const result = {};
+    for (const [order, rule] of rules.entries()) {
+      for (const selector of rule.selectorText.split(',')) {
+        if (!element.matches(selector)) continue;
+        const specificity = (selector.match(/\[|:root/g) || []).length * 100 + (selector.match(/\bbody\b/g) || []).length;
+        for (const key of ['--bg', '--paper', '--ink', '--accent']) {
+          const value = rule.style.getPropertyValue(key).trim();
+          if (value && (!result[key] || specificity > result[key].specificity || (specificity === result[key].specificity && order >= result[key].order))) {
+            result[key] = {value, specificity, order};
+          }
+        }
+      }
+    }
+    return Object.fromEntries(Object.entries(result).map(([key, entry]) => [key, entry.value]));
+  }
+  for (const [palette, mode, expected] of [['ink', 'light', '247 246 242'], ['ink', '', '23 26 30'], ['ink', 'dark', '23 26 30'], ['tech', 'dark', '23 26 30'], ['sepia', 'dark', '23 26 30'], ['wanderers', 'dark', '23 26 30']]) {
+    document.body.dataset.palette = palette;
+    if (mode) document.documentElement.dataset.mode = mode;
+    else delete document.documentElement.dataset.mode;
+    assert.equal(values(document.documentElement)['--bg'], expected, `${palette}/${mode} root`);
+    assert.equal(values(document.body)['--bg'], expected, `${palette}/${mode} body`);
+  }
+  assert.equal((base + presets + tools).match(/--bg: 247 246 242;/g).length, 1);
+  dom.window.close();
+});
 
 test('既有作品样式与主题样式都展开声明，不使用单行压缩规则', () => {
   function styles(directory) {

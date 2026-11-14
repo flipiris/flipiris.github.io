@@ -2,6 +2,10 @@
 
 const {slugize} = require('hexo-util');
 const {recentlyUpdated, publishedDocuments} = require('./lib/documents');
+function postCollection(posts = []) {
+  return {length: posts.length, each: callback => posts.forEach(callback), toArray: () => posts};
+}
+
 function isMisc(page, labels) {
   const categories = page.categories && page.categories.toArray ? page.categories.toArray() : [];
   return !categories.some(category => labels.includes(category.name));
@@ -23,7 +27,7 @@ hexo.extend.generator.register('updates-index', function(locals) {
   return {
     path: 'updates/index.html',
     layout: 'updates',
-    data: {title: '最近更新', layout: 'updates', posts: {length: posts.length, each: callback => posts.forEach(callback)}, current: 1, total: 1}
+    data: {title: '最近更新', layout: 'updates', posts: postCollection(posts), current: 1, total: 1}
   };
 });
 
@@ -51,19 +55,22 @@ hexo.extend.helper.register('nav_sections', function() {
 });
 
 function taxonomyIndex(locals, type) {
+  const config = hexo.config;
+  const theme = hexo.theme.config || {};
+  const pagination = config.pagination_dir || 'page';
   const layout = type === 'categories' ? 'categories' : 'tags';
-  const directory = type === 'categories' ? hexo.config.category_dir : hexo.config.tag_dir;
+  const directory = type === 'categories' ? config.category_dir : config.tag_dir;
   const terms = locals && locals[type] ? locals[type].sort('name').toArray().filter(term => term.length) : [];
-  const size = Math.max(1, Number(hexo.theme.config.taxonomy_per_page) || 8);
+  const size = Math.max(1, Number(theme.taxonomy_per_page) || 8);
   const total = Math.max(1, Math.ceil(terms.length / size));
   return Array.from({length: total}, (_, index) => ({
-    path: `${directory}/${index ? `${hexo.config.pagination_dir || 'page'}/${index + 1}/` : ''}index.html`,
+    path: `${directory}/${index ? `${pagination}/${index + 1}/` : ''}index.html`,
     layout,
     data: {
       title: type === 'categories' ? '分类索引' : '标签索引', layout,
       terms: terms.slice(index * size, (index + 1) * size),
       base: `${directory}/`, current: index + 1, total,
-      current_url: `${directory}/${index ? `${hexo.config.pagination_dir || 'page'}/${index + 1}/` : ''}`
+      current_url: `${directory}/${index ? `${pagination}/${index + 1}/` : ''}`
     }
   }));
 }
@@ -71,13 +78,14 @@ hexo.extend.generator.register('category-index', function(locals) {
   return taxonomyIndex(locals, 'categories');
 });
 hexo.extend.generator.register('misc-index', function(locals) {
-  const misc = hexo.theme.config && hexo.theme.config.nav_misc;
+  const theme = hexo.theme.config || {};
+  const misc = theme.nav_misc;
   if (!misc) return;
-  const posts = miscPages(locals, hexo.theme.config);
+  const posts = miscPages(locals, theme);
   return {
     path: `${misc.path.replace(/^\/|\/$/g, '')}/index.html`,
     layout: 'misc',
-    data: {title: misc.label, layout: 'misc', posts: {length: posts.length, each: callback => posts.forEach(callback), toArray: () => posts}, current: 1, total: 1}
+    data: {title: misc.label, layout: 'misc', posts: postCollection(posts), current: 1, total: 1}
   };
 });
 
@@ -86,9 +94,10 @@ hexo.extend.generator.register('tag-index', function(locals) {
 });
 hexo.extend.generator.register('nav-category-pages', function(locals) {
   const config = hexo.config;
-  const wanted = (hexo.theme.config && hexo.theme.config.sections) || [];
+  const theme = hexo.theme.config || {};
+  const wanted = theme.sections || [];
   const existing = locals.categories;
-  const empty = {length: 0, each() {}, toArray: () => []};
+  const empty = postCollection();
   return wanted
     .filter(item => !(existing.findOne && existing.findOne({name: item.label})))
     .map(item => ({

@@ -6,6 +6,15 @@ const home = is_home();
 const hasInfo = layoutName !== 'page';
 const documentTitle = page.title || (is_category() ? page.category : is_tag() ? page.tag : is_archive() ? '页面一览' : config.title);
 const style = page_style(page);
+const warning = content_warning(page);
+const bodyAttributes = [
+  `class="${home ? 'is-home' : ''}"`,
+  `data-layout="${layoutName}"`,
+  `data-alignment="${page.alignment === 'balanced' ? 'balanced' : 'centered'}"`
+];
+if (canvas) bodyAttributes.push(`data-canvas="${canvasDocument ? 'document' : 'prose'}"`);
+if (style.palette) bodyAttributes.push(`data-palette="${style.palette}"`);
+if (style.typography) bodyAttributes.push(`data-typography="${style.typography}"`);
 const cssFiles = ['base', 'fonts', 'layout', 'navigation', 'pages', 'prose', 'info', 'presets', 'tools', 'content-warning'];
 %>
 <!DOCTYPE html>
@@ -39,11 +48,11 @@ const cssFiles = ['base', 'fonts', 'layout', 'navigation', 'pages', 'prose', 'in
   <% }); %>
   <script src="<%- url_for('/js/navigation.js') %>" defer></script>
   <script src="<%- url_for('/js/site-tools.js') %>" defer></script>
-  <% if (content_warning(page).enabled) { %><script src="<%- url_for('/js/content-warning.js') %>" defer></script><% } %>
+  <% if (warning.enabled) { %><script src="<%- url_for('/js/content-warning.js') %>" defer></script><% } %>
   <% if (hasInfo) { %><script src="<%- url_for('/js/reading.js') %>" defer></script><% } %>
 </head>
 
-<body class="<%= home ? 'is-home' : '' %>" data-layout="<%= layoutName %>" data-alignment="<%= page.alignment === 'balanced' ? 'balanced' : 'centered' %>"<% if (canvas) { %> data-canvas="<%= canvasDocument ? 'document' : 'prose' %>"<% } %><% if (style.palette) { %> data-palette="<%= style.palette %>"<% } %><% if (style.typography) { %> data-typography="<%= style.typography %>"<% } %>>
+<body <%- bodyAttributes.join(' ') %>>
   <a class="skip-link" href="#main-content">跳转到正文</a>
   <header class="site-header">
     <% if (home) { %><%- partial('_partial/site-identity', {hero: true}) %><% } %>
@@ -55,18 +64,18 @@ const cssFiles = ['base', 'fonts', 'layout', 'navigation', 'pages', 'prose', 'in
   <div class="site-layout">
     <aside class="site-rail">
       <% if (!home) { %><div class="rail-identity"><%- partial('_partial/site-identity', {hero: false}) %></div><% } %>
-      <details id="site-menu" class="site-menu hover-panel" open>
-        <summary id="mobile-nav" class="mobile-nav" aria-label="网站目录" aria-controls="site-menu-content"><%- partial('_partial/icon', {name: 'side_navigation'}) %></summary>
+      <div id="site-menu" class="site-menu hover-panel">
+        <button type="button" id="mobile-nav" class="mobile-nav panel-toggle" aria-label="网站目录" aria-controls="site-menu-content"><%- partial('_partial/icon', {name: 'side_navigation'}) %></button>
         <div id="site-menu-content" class="site-menu-body panel-body">
           <div id="site-tools-slot"><%- partial('_partial/site-tools') %></div>
           <nav aria-label="网站目录"><%- partial('_partial/navigation') %></nav>
           <%- partial('_partial/site-stats') %>
           <%- partial('_partial/social-links') %>
         </div>
-      </details>
+      </div>
     </aside>
     <main id="main-content" tabindex="-1"><%- body %></main>
-    <% if (hasInfo) { %><%- partial('_partial/post-info', {infoContent: content_warning(page).body}) %><% } %>
+    <% if (hasInfo) { %><%- partial('_partial/post-info', {infoContent: warning.body}) %><% } %>
     <footer class="site-footer"><small>© <%= date(new Date(), 'YYYY') %> <%= config.title %></small></footer>
   </div>
   <button class="menu-backdrop" type="button" aria-label="关闭目录" tabindex="-1" hidden></button>

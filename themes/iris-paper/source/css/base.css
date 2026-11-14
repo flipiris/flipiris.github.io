@@ -1,4 +1,6 @@
-:root {
+:root,
+:root[data-mode="light"]:has(body[data-palette="ink"]),
+:root[data-mode="light"] body[data-palette="ink"] {
   --bg: 247 246 242;
   --paper: 255 254 250;
   --ink: 52 56 62;
@@ -10,13 +12,20 @@
   --heading-3: 112 61 132;
   --strong: 39 82 153;
   --emphasis: 28 103 76;
-  --secondary: 70 105 116;
   --line: 226 223 220;
   --nav-active: 230 237 243;
   --header-bg: 244 201 203;
   --code-bg: 238 239 239;
   --shadow: 40 48 58;
+  --edge-light: rgb(255 255 255 / 55%);
+}
 
+:root[data-mode="light"]:has(body[data-palette="ink"]),
+:root[data-mode="light"] body[data-palette="ink"] {
+  color-scheme: light;
+}
+
+:root {
   --local-cjk: "Songti SC", "STSong", "Source Han Serif SC", "Noto Serif SC", "Songti TC", "SimSun", "PMingLiU";
   --UI-font: "Times New Roman", "ChillJinshuSongPro", var(--local-cjk), serif;
   --serif: "Times New Roman", "GenRyuMin2TW", var(--local-cjk), Georgia, serif;
@@ -35,7 +44,6 @@
   --top-nav-blur: calc(var(--nav-blur) + var(--space) * 3);
   --control-size: calc(var(--space) * 11);
 
-  --content-width: 1000px;
   --page-width: 800px;
   --reading-width: 700px;
   --paper-padding: clamp(24px, 2.5vw, 36px);
@@ -55,7 +63,6 @@
   --motion-base: 250ms;
   --motion-reveal: 500ms;
   --ease-out: cubic-bezier(0.25, 1, 0.35, 1);
-  --edge-light: rgb(255 255 255 / 55%);
   --glass-tint: rgb(var(--header-bg) / 15%);
 }
 

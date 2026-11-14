@@ -65,6 +65,11 @@ test('排除代码块、内联代码、行号、脚本和样式', () => {
   assert.equal(result.words, 2);
 });
 
+test('统计不套用搜索的 head、template 与 noscript 排除规则', () => {
+  const content = '<head><title>metadata </title></head><template><p>template</p></template><noscript><p>fallback</p></noscript><p>body</p><pre>code</pre><div class="note">note</div>';
+  assert.equal(helpers().page_stats(content).words, 4);
+});
+
 test('从所有内容中选取最新日期', () => {
   const date = new Date('2026-10-01T00:00:00Z');
   const updated = new Date('2026-11-10T00:00:00Z');

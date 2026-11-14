@@ -1,20 +1,15 @@
 'use strict';
 
-const {parseDocument, DomUtils} = require('htmlparser2');
+const {htmlText} = require('./lib/html-text');
 const moment = require('moment-timezone');
 const {publishedDocuments, standalonePages, updateTime} = require('./lib/documents');
 const {isWarning} = require('./lib/content-warning');
 function countWords(content) {
-  const document = parseDocument(content);
-  const excluded = DomUtils.findAll(node =>
+  const text = htmlText(content, node =>
     ['pre', 'code', 'script', 'style'].includes(node.name) || isWarning(node)
     || (node.name === 'figure' && /(?:^|\s)highlight(?:\s|$)/.test(node.attribs.class || ''))
-    || (node.name === 'div' && /(?:^|\s)note(?:\s|$)/.test(node.attribs.class || '')),
-  document.children);
-  for (const node of excluded) DomUtils.removeElement(node);
-  const blocks = DomUtils.findAll(node => /^(?:p|div|h[1-6]|li|br|tr|td|th|section|article|blockquote)$/.test(node.name), document.children);
-  for (const node of blocks) DomUtils.appendChild(node, {type: 'text', data: ' ', parent: null, prev: null, next: null});
-  const text = DomUtils.textContent(document);
+    || (node.name === 'div' && /(?:^|\s)note(?:\s|$)/.test(node.attribs.class || ''))
+  );
   let characters = 0;
   const words = text.replace(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/gu, () => {
     characters++;

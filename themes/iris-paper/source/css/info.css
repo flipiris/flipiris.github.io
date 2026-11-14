@@ -71,7 +71,7 @@
   font-family: var(--UI-font);
 }
 
-.post-info > summary {
+.post-info > .panel-toggle {
   display: none;
 }
 

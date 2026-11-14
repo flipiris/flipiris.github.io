@@ -30,7 +30,7 @@
   backdrop-filter: blur(var(--nav-blur)) saturate(140%);
 }
 
-.site-menu > summary {
+.site-menu > .panel-toggle {
   display: none;
 }
 
@@ -199,12 +199,12 @@
   font-weight: 700;
 }
 
-:is(.nav-tree a, .toc-link, .hover-panel > summary, .post-tags a, .pagination a, .site-tools .tool-button) {
+:is(.nav-tree a, .toc-link, .hover-panel > .panel-toggle, .post-tags a, .pagination a, .site-tools .tool-button) {
   position: relative;
   isolation: isolate;
 }
 
-:is(.nav-tree a, .toc-link, .hover-panel > summary, .post-tags a, .pagination a, .site-tools .tool-button)::after {
+:is(.nav-tree a, .toc-link, .hover-panel > .panel-toggle, .post-tags a, .pagination a, .site-tools .tool-button)::after {
   position: absolute;
   z-index: -1;
   inset: var(--hover-inset);
@@ -216,18 +216,18 @@
   transition: opacity var(--motion-fast) ease;
 }
 
-:is(.nav-tree a, .toc-link, .hover-panel > summary, .post-tags a, .pagination a, .site-tools .tool-button):focus-visible::after,
-.hover-panel:is([data-state="opening"], [data-state="open"]) > summary::after,
+:is(.nav-tree a, .toc-link, .hover-panel > .panel-toggle, .post-tags a, .pagination a, .site-tools .tool-button):focus-visible::after,
+.hover-panel:is([data-state="opening"], [data-state="open"]) > .panel-toggle::after,
 .site-tools .tool-button:is(:active, [aria-expanded="true"])::after {
   opacity: 1;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  :is(.nav-tree a, .toc-link, .hover-panel > summary, .post-tags a, .pagination a, .site-tools .tool-button):hover {
+  :is(.nav-tree a, .toc-link, .hover-panel > .panel-toggle, .post-tags a, .pagination a, .site-tools .tool-button):hover {
     color: rgb(var(--accent));
   }
 
-  :is(.nav-tree a, .toc-link, .hover-panel > summary, .post-tags a, .pagination a, .site-tools .tool-button):hover::after {
+  :is(.nav-tree a, .toc-link, .hover-panel > .panel-toggle, .post-tags a, .pagination a, .site-tools .tool-button):hover::after {
     opacity: 1;
   }
 
@@ -237,18 +237,15 @@
   }
 }
 
-.hover-panel > summary {
+.hover-panel > .panel-toggle {
   max-width: 100%;
   overflow: hidden;
+  border: 0;
+  background: transparent;
   cursor: pointer;
-  list-style: none;
 }
 
-.hover-panel > summary::-webkit-details-marker {
-  display: none;
-}
-
-.hover-panel > summary:focus-visible {
+.hover-panel > .panel-toggle:focus-visible {
   outline: 2px solid rgb(var(--accent));
   outline-offset: calc(-1 * var(--hover-inset) - 2px);
 }
@@ -299,19 +296,19 @@
   cursor: default;
 }
 
-:is(.mobile-nav, .post-info > summary, .site-tools .tool-button) {
+:is(.mobile-nav, .post-info > .panel-toggle, .site-tools .tool-button) {
   color: rgb(var(--accent) / 52%);
   transition: color var(--motion-fast) ease;
 }
 
-.hover-panel:is([data-state="opening"], [data-state="open"]) > summary,
-:is(.mobile-nav, .post-info > summary, .site-tools .tool-button):is(:focus-visible, :active),
+.hover-panel:is([data-state="opening"], [data-state="open"]) > .panel-toggle,
+:is(.mobile-nav, .post-info > .panel-toggle, .site-tools .tool-button):is(:focus-visible, :active),
 .site-tools .tool-button[aria-expanded="true"] {
   color: rgb(var(--accent));
 }
 
 @media (hover: hover) and (pointer: fine) {
-  :is(.mobile-nav, .post-info > summary, .site-tools .tool-button):hover {
+  :is(.mobile-nav, .post-info > .panel-toggle, .site-tools .tool-button):hover {
     color: rgb(var(--accent));
   }
 }
@@ -321,7 +318,6 @@
   --ink: 45 48 52;
   --accent: 45 48 52;
   --brand: 45 48 52;
-  --secondary: 90 94 100;
   --muted: 110 114 120;
   --line: 220 222 225;
   --nav-active: 232 234 237;
@@ -339,7 +335,7 @@
   --nav-active: 52 55 60;
 }
 
-.post-info > summary .post-info-icon {
+.post-info > .panel-toggle .post-info-icon {
   color: inherit;
 }
 

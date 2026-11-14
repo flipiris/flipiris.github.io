@@ -88,19 +88,16 @@
 
 @keyframes page-enter {
   from {
-    opacity: 0;
-    transform: translate3d(0, 6px, 0);
+    opacity: 0.9;
   }
 
   to {
     opacity: 1;
-    transform: none;
   }
 }
 
-body[data-layout="page"] .content-page > *,
 .page-header {
-  animation: page-enter var(--motion-base) var(--ease-out) backwards;
+  animation: page-enter var(--motion-fast) var(--ease-out);
 }
 
 .index-description {
@@ -164,6 +161,12 @@ body[data-layout="page"] .content-page > *,
 
 .taxonomy-card .post-item a {
   font-size: 15px;
+}
+
+.section-more::after,
+.taxonomy-more::after {
+  content: "→";
+  margin-inline-start: var(--space);
 }
 
 .taxonomy-more {

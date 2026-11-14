@@ -106,11 +106,37 @@ body[data-layout="page"][data-alignment="centered"] .site-layout {
   margin: 0;
 }
 
+:root:not(.js) .site-rail,
+:root:not(.js) .post-info {
+  order: 1;
+}
+
+:root:not(.js) .post-info {
+  position: static;
+}
+
+:root:not(.js) .site-menu-body,
+:root:not(.js) .post-info-body {
+  max-height: none;
+}
+
+:root:not(.js) body[data-canvas="document"] {
+  overflow: auto;
+}
+
+:root:not(.js) body[data-canvas="document"] .site-layout {
+  height: auto;
+}
+
+:root:not(.js) body[data-canvas="document"] #main-content {
+  min-height: calc(100dvh - var(--top-nav-height));
+}
+
 .rail-identity {
   display: none;
 }
 
-.site-menu {
+.js .site-menu {
   position: fixed;
   z-index: 4;
   top: calc((var(--top-nav-height) - var(--control-size)) / 2);
@@ -122,11 +148,15 @@ body[data-layout="page"][data-alignment="centered"] .site-layout {
   backdrop-filter: none;
 }
 
-.site-menu > summary {
+.js .site-menu > .panel-toggle {
   display: grid;
 }
 
-.site-menu-body {
+.js .panel-body[hidden] {
+  display: none;
+}
+
+.js .site-menu-body {
   position: fixed;
   top: var(--top-nav-height);
   left: 0;
@@ -164,7 +194,7 @@ body.nav-open {
   overflow: hidden;
 }
 
-.post-info {
+.js .post-info {
   position: fixed;
   z-index: 4;
   top: calc((var(--top-nav-height) - var(--control-size)) / 2);
@@ -179,7 +209,7 @@ body.nav-open {
   backdrop-filter: none;
 }
 
-.post-info summary {
+.js .post-info > .panel-toggle {
   display: grid;
   grid-template-columns: 1fr;
   place-items: center;
@@ -190,7 +220,7 @@ body.nav-open {
   border-radius: calc(var(--space) * 2);
 }
 
-.post-info-body {
+.js .post-info-body {
   position: fixed;
   top: var(--top-nav-height);
   right: 0;

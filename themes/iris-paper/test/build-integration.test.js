@@ -7,7 +7,6 @@ const path = require('node:path');
 const Hexo = require('hexo');
 const {JSDOM} = require('jsdom');
 
-// 用独立临时站点走真实 Hexo 处理器、分类关系、生成器和 EJS，不改作者内容。
 test('真实构建：目录子分类、英文路径、两层分页、增强排版与 HTML 画布', async () => {
   const root = path.resolve(__dirname, '../../..');
   const base = await fs.mkdtemp(path.join(os.tmpdir(), 'iris-build-'));
@@ -55,6 +54,8 @@ test('真实构建：目录子分类、英文路径、两层分页、增强排�
     assert.equal(home.querySelector('.site-identity-hero').classList.contains('page-frame'), false);
     assert.equal(home.querySelector('.top-nav').textContent.trim(), '');
     assert.ok(home.querySelector('#site-tools-slot .site-tools #search-toggle'));
+    assert.equal(home.querySelector('.section-more').textContent, '浏览页面');
+    for (const link of categoryIndex.querySelectorAll('.taxonomy-more')) assert.doesNotMatch(link.textContent, /→/);
     assert.ok(home.querySelector('#site-search[aria-labelledby="search-title"]'));
     assert.equal(home.querySelectorAll('.site-tools').length, 1);
     assert.equal(home.querySelectorAll('.nav-primary').length, 1);
@@ -151,6 +152,21 @@ test('真实构建：目录子分类、英文路径、两层分页、增强排�
     assert.ok(canvas.querySelector('.post-info'));
     assert.ok(canvas.querySelector('.site-footer'));
     assert.equal(canvas.querySelector('link[href="/css/compact.css"]').getAttribute('media'), null);
+    for (const doc of [home, about, canonical, canonicalCanvas, canvas]) {
+      for (const panel of doc.querySelectorAll('.hover-panel')) {
+        assert.equal(panel.tagName, 'DIV');
+        assert.equal(panel.hasAttribute('open'), false);
+        assert.equal(panel.querySelector('summary'), null);
+        const trigger = panel.querySelector('.panel-toggle');
+        assert.equal(trigger.tagName, 'BUTTON');
+        assert.equal(trigger.type, 'button');
+        assert.equal(trigger.hasAttribute('aria-expanded'), false);
+        const content = doc.getElementById(trigger.getAttribute('aria-controls'));
+        assert.equal(content, panel.querySelector('.panel-body'));
+        assert.equal(content.hidden, false);
+        assert.equal(content.hasAttribute('inert'), false);
+      }
+    }
     const first = hexo.model('Post').findOne({source: '_posts/notes/reading/book-0.md'});
     assert.deepEqual(first.categories.toArray().map(item => item.name), ['笔记', '阅读']);
     const explicit = hexo.model('Post').findOne({source: '_posts/notes/explicit.md'});

@@ -76,6 +76,9 @@ test('标签索引页与未创建文章的导航分类都会生成页面', () =>
   const pages = generators['nav-category-pages']({categories: {findOne: query => query.name === '作品' ? {} : null}});
   assert.equal(pages.length, 1);
   assert.equal(pages[0].data.category, '随笔');
+  assert.equal(pages[0].data.posts.length, 0);
+  assert.deepEqual(Array.from(pages[0].data.posts.toArray()), []);
+  pages[0].data.posts.each(() => assert.fail('空集合不应调用回调'));
   assert.match(pages[0].path, /index\.html$/);
 });
 
@@ -117,6 +120,8 @@ test('最近更新索引输出所有内容，缺少修改日期则取发布日�
   assert.equal(result.path, 'updates/index.html');
   assert.equal(result.layout, 'updates');
   assert.deepEqual(titles, ['独立页', '前', '后']);
+  assert.deepEqual(Array.from(result.data.posts.toArray(), page => page.title), titles);
+  assert.equal(result.data.posts.length, titles.length);
 });
 
 test('分类和标签索引按卡片分页，不丢失分类，分页地址稳定', () => {

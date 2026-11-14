@@ -10,7 +10,7 @@
   let backdropAnimation;
   const panels = Array.from(document.querySelectorAll('.hover-panel'), panel => ({
     panel,
-    summary: panel.querySelector('summary'),
+    trigger: panel.querySelector('.panel-toggle'),
     body: panel.querySelector('.panel-body'),
     sidebar: panel.id === 'site-menu',
     targetOpen: false,
@@ -64,13 +64,17 @@
     }
     record.animation = undefined;
     record.targetOpen = opening;
-    record.summary.setAttribute('aria-expanded', String(opening));
+    record.trigger.setAttribute('aria-expanded', String(opening));
     record.panel.dataset.state = opening ? 'opening' : 'closing';
-    record.panel.open = true;
+    record.body.hidden = false;
+    if (!opening && record.body.contains(document.activeElement)) record.trigger.focus({preventScroll: true});
+    record.body.toggleAttribute('inert', !opening);
+    if (opening) record.body.removeAttribute('aria-hidden');
+    else record.body.setAttribute('aria-hidden', 'true');
     if (record.sidebar) shade(opening);
 
     const finish = () => {
-      record.panel.open = opening;
+      record.body.hidden = !opening;
       record.panel.dataset.state = opening ? 'open' : 'closed';
     };
     if (reducedMotion.matches) {
@@ -91,7 +95,7 @@
     if (!isCompact()) return;
     clearTimeout(record.closeTimer);
     record.mode = '';
-    if (restoreFocus) record.summary.focus({preventScroll: true});
+    if (restoreFocus) record.trigger.focus({preventScroll: true});
     if (record.panel.dataset.state === 'closed' || record.panel.dataset.state === 'closing') return;
     transition(record, false);
   }
@@ -107,7 +111,7 @@
   }
 
   panels.forEach(record => {
-    record.summary.addEventListener('click', event => {
+    record.trigger.addEventListener('click', event => {
       event.preventDefault();
       if (!isCompact()) return;
       if (record.targetOpen && record.mode === 'hover') {
@@ -167,8 +171,15 @@
       record.mode = '';
       record.targetOpen = false;
       record.panel.dataset.state = isCompact() ? 'closed' : 'wide';
-      record.panel.open = !isCompact();
-      record.summary.setAttribute('aria-expanded', String(record.panel.open));
+      record.body.hidden = isCompact();
+      record.body.toggleAttribute('inert', isCompact());
+      if (isCompact()) {
+        record.body.setAttribute('aria-hidden', 'true');
+        record.trigger.setAttribute('aria-expanded', 'false');
+      } else {
+        record.body.removeAttribute('aria-hidden');
+        record.trigger.removeAttribute('aria-expanded');
+      }
     });
     shade(false, true);
   }

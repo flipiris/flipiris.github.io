@@ -2,7 +2,6 @@
   text-indent: 0;
 }
 
-/* Keep the grain behind the content and let each palette supply its paper colour. */
 body:is([data-typography="literary"], [data-typography="poem"]) .content-page {
   background-image: url("../images/paper-grain.svg");
   background-size: 240px 240px;
@@ -99,7 +98,6 @@ body[data-palette="tech"] {
   --ink: 36 43 52;
   --muted: 101 109 120;
   --accent: 37 91 165;
-  --secondary: 28 113 111;
   --line: 220 225 230;
   --nav-active: 231 238 247;
   --header-bg: 223 230 239;
@@ -120,7 +118,6 @@ body[data-palette="wanderers"] {
   --ink: 43 57 46;
   --muted: 96 103 86;
   --accent: 57 94 66;
-  --secondary: 126 91 31;
   --line: 211 211 185;
   --nav-active: 229 232 211;
   --header-bg: 183 187 138;
@@ -130,7 +127,7 @@ body[data-palette="wanderers"] {
 
 :root:has(body[data-palette="ink"]),
 body[data-palette="ink"],
-:root[data-mode="dark"],
+:root[data-mode="dark"]:root,
 :root[data-mode="dark"] body {
   color-scheme: dark;
   --brand: 228 216 197;
@@ -144,7 +141,6 @@ body[data-palette="ink"],
   --ink: 225 225 218;
   --muted: 155 161 169;
   --accent: 175 164 218;
-  --secondary: 127 188 177;
   --line: 58 64 71;
   --nav-active: 48 52 65;
   --header-bg: 64 66 92;
